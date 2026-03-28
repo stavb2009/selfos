@@ -734,69 +734,155 @@
   <div class="tab" id="tab-plan">
     <div class="section-head">
       <h2 style="color:var(--accent)">Plan</h2>
-      <p>4-Day Hypertrophy & Cut · Upper/Lower Split</p>
+      <p>Training programmes</p>
     </div>
 
-    <!-- Week overview -->
-    <div class="card">
-      <div class="card-label">Weekly Schedule</div>
-      <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center;font-size:0.6rem">
-        <div style="color:var(--muted);padding:4px">Mon</div>
-        <div style="color:var(--muted);padding:4px">Tue</div>
-        <div style="color:var(--muted);padding:4px">Wed</div>
-        <div style="color:var(--muted);padding:4px">Thu</div>
-        <div style="color:var(--muted);padding:4px">Fri</div>
-        <div style="color:var(--muted);padding:4px">Sat</div>
-        <div style="color:var(--muted);padding:4px">Sun</div>
-        <div style="background:#4fc3f7;color:#000;border-radius:3px;padding:6px 2px;font-weight:700;font-size:0.55rem;cursor:pointer" onclick="showPlanDay(0)">Lower A</div>
-        <div style="background:#4fc3f7;color:#000;border-radius:3px;padding:6px 2px;font-weight:700;font-size:0.55rem;cursor:pointer" onclick="showPlanDay(1)">Upper A</div>
-        <div style="background:var(--surface2);color:var(--muted);border-radius:3px;padding:6px 2px;font-size:0.55rem">Rest 🚶</div>
-        <div style="background:#c8f135;color:#000;border-radius:3px;padding:6px 2px;font-weight:700;font-size:0.55rem;cursor:pointer" onclick="showPlanDay(2)">Lower B</div>
-        <div style="background:#c8f135;color:#000;border-radius:3px;padding:6px 2px;font-weight:700;font-size:0.55rem;cursor:pointer" onclick="showPlanDay(3)">Upper B</div>
-        <div style="background:#c084fc;color:#000;border-radius:3px;padding:6px 2px;font-weight:700;font-size:0.55rem;cursor:pointer" onclick="showPlanDay(4)">Aesthetics</div>
-        <div style="background:var(--surface2);color:var(--muted);border-radius:3px;padding:6px 2px;font-size:0.55rem">Rest 💤</div>
+    <!-- Plan sub-tab switcher -->
+    <div style="display:flex;gap:6px;margin-bottom:20px">
+      <button onclick="switchPlanTab('a')" id="planTabBtnA" style="flex:1;padding:10px;font-family:var(--font-mono);font-size:0.65rem;letter-spacing:1px;text-transform:uppercase;cursor:pointer;border-radius:3px;border:1px solid var(--accent);background:rgba(200,241,53,0.1);color:var(--accent);font-weight:700;transition:all 0.15s">Plan A · Hypertrophy & Cut</button>
+      <button onclick="switchPlanTab('b')" id="planTabBtnB" style="flex:1;padding:10px;font-family:var(--font-mono);font-size:0.65rem;letter-spacing:1px;text-transform:uppercase;cursor:pointer;border-radius:3px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);transition:all 0.15s">Plan B · Arms Focused</button>
+    </div>
+
+    <!-- ===== PLAN A ===== -->
+    <div id="planSubA">
+      <!-- Week overview -->
+      <div class="card">
+        <div class="card-label">Weekly Schedule</div>
+        <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center;font-size:0.6rem">
+          <div style="color:var(--muted);padding:4px">Mon</div>
+          <div style="color:var(--muted);padding:4px">Tue</div>
+          <div style="color:var(--muted);padding:4px">Wed</div>
+          <div style="color:var(--muted);padding:4px">Thu</div>
+          <div style="color:var(--muted);padding:4px">Fri</div>
+          <div style="color:var(--muted);padding:4px">Sat</div>
+          <div style="color:var(--muted);padding:4px">Sun</div>
+          <div style="background:#4fc3f7;color:#000;border-radius:3px;padding:6px 2px;font-weight:700;font-size:0.55rem;cursor:pointer" onclick="showPlanDay(0)">Lower A</div>
+          <div style="background:#4fc3f7;color:#000;border-radius:3px;padding:6px 2px;font-weight:700;font-size:0.55rem;cursor:pointer" onclick="showPlanDay(1)">Upper A</div>
+          <div style="background:var(--surface2);color:var(--muted);border-radius:3px;padding:6px 2px;font-size:0.55rem">Rest 🚶</div>
+          <div style="background:#c8f135;color:#000;border-radius:3px;padding:6px 2px;font-weight:700;font-size:0.55rem;cursor:pointer" onclick="showPlanDay(2)">Lower B</div>
+          <div style="background:#c8f135;color:#000;border-radius:3px;padding:6px 2px;font-weight:700;font-size:0.55rem;cursor:pointer" onclick="showPlanDay(3)">Upper B</div>
+          <div style="background:#c084fc;color:#000;border-radius:3px;padding:6px 2px;font-weight:700;font-size:0.55rem;cursor:pointer" onclick="showPlanDay(4)">Aesthetics</div>
+          <div style="background:var(--surface2);color:var(--muted);border-radius:3px;padding:6px 2px;font-size:0.55rem">Rest 💤</div>
+        </div>
+        <div style="font-size:0.6rem;color:var(--muted);margin-top:10px;letter-spacing:0.5px">Tap a day to see exercises ↓</div>
       </div>
-      <div style="font-size:0.6rem;color:var(--muted);margin-top:10px;letter-spacing:0.5px">Tap a day to see exercises ↓</div>
-    </div>
 
-    <!-- Day selector buttons -->
-    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">
-      <button onclick="showPlanDay(0)" class="plan-day-btn" id="planBtn0" style="background:rgba(79,195,247,0.15);border:1px solid #4fc3f7;color:#4fc3f7;font-family:var(--font-mono);font-size:0.6rem;padding:6px 10px;cursor:pointer;border-radius:2px;letter-spacing:1px">D1 Lower A</button>
-      <button onclick="showPlanDay(1)" class="plan-day-btn" id="planBtn1" style="background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-family:var(--font-mono);font-size:0.6rem;padding:6px 10px;cursor:pointer;border-radius:2px;letter-spacing:1px">D2 Upper A</button>
-      <button onclick="showPlanDay(2)" class="plan-day-btn" id="planBtn2" style="background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-family:var(--font-mono);font-size:0.6rem;padding:6px 10px;cursor:pointer;border-radius:2px;letter-spacing:1px">D4 Lower B</button>
-      <button onclick="showPlanDay(3)" class="plan-day-btn" id="planBtn3" style="background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-family:var(--font-mono);font-size:0.6rem;padding:6px 10px;cursor:pointer;border-radius:2px;letter-spacing:1px">D5 Upper B</button>
-      <button onclick="showPlanDay(4)" class="plan-day-btn" id="planBtn4" style="background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-family:var(--font-mono);font-size:0.6rem;padding:6px 10px;cursor:pointer;border-radius:2px;letter-spacing:1px">D6 Aesthetics</button>
-    </div>
-
-    <!-- Exercise table -->
-    <div id="planDayContent"></div>
-
-    <!-- 1RM Calculator -->
-    <div class="card" style="margin-top:20px">
-      <div class="card-label">🧮 1RM & Load Calculator</div>
-      <div style="font-size:0.65rem;color:var(--muted);margin-bottom:12px">Enter weight + reps from any set to estimate your 1 rep max</div>
-      <div style="display:flex;gap:8px;margin-bottom:12px">
-        <div style="flex:1">
-          <label>Weight (kg)</label>
-          <input type="number" id="rmWeight" placeholder="80">
-        </div>
-        <div style="flex:1">
-          <label>Reps</label>
-          <input type="number" id="rmReps" placeholder="8">
-        </div>
-        <div style="display:flex;align-items:flex-end">
-          <button onclick="calcRM()" class="btn" style="white-space:nowrap">Calc</button>
-        </div>
+      <!-- Day selector buttons -->
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">
+        <button onclick="showPlanDay(0)" class="plan-day-btn" id="planBtn0" style="background:rgba(79,195,247,0.15);border:1px solid #4fc3f7;color:#4fc3f7;font-family:var(--font-mono);font-size:0.6rem;padding:6px 10px;cursor:pointer;border-radius:2px;letter-spacing:1px">D1 Lower A</button>
+        <button onclick="showPlanDay(1)" class="plan-day-btn" id="planBtn1" style="background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-family:var(--font-mono);font-size:0.6rem;padding:6px 10px;cursor:pointer;border-radius:2px;letter-spacing:1px">D2 Upper A</button>
+        <button onclick="showPlanDay(2)" class="plan-day-btn" id="planBtn2" style="background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-family:var(--font-mono);font-size:0.6rem;padding:6px 10px;cursor:pointer;border-radius:2px;letter-spacing:1px">D4 Lower B</button>
+        <button onclick="showPlanDay(3)" class="plan-day-btn" id="planBtn3" style="background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-family:var(--font-mono);font-size:0.6rem;padding:6px 10px;cursor:pointer;border-radius:2px;letter-spacing:1px">D5 Upper B</button>
+        <button onclick="showPlanDay(4)" class="plan-day-btn" id="planBtn4" style="background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-family:var(--font-mono);font-size:0.6rem;padding:6px 10px;cursor:pointer;border-radius:2px;letter-spacing:1px">D6 Aesthetics</button>
       </div>
-      <div id="rmResult" style="display:none">
-        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px">
-          <div class="stat-chip"><div class="val" style="color:var(--accent3)" id="val1rm">—</div><div class="lbl">Est. 1RM</div></div>
-          <div class="stat-chip"><div class="val" id="valStr">—</div><div class="lbl">Strength · 5 reps (87%)</div></div>
-          <div class="stat-chip"><div class="val" style="color:var(--accent)" id="valHyp">—</div><div class="lbl">Hypertrophy · 8–10 reps (75%)</div></div>
-          <div class="stat-chip"><div class="val" style="color:#c084fc" id="valVol">—</div><div class="lbl">Volume · 12+ reps (65%)</div></div>
+
+      <!-- Exercise table -->
+      <div id="planDayContent"></div>
+
+      <!-- 1RM Calculator -->
+      <div class="card" style="margin-top:20px">
+        <div class="card-label">🧮 1RM & Load Calculator</div>
+        <div style="font-size:0.65rem;color:var(--muted);margin-bottom:12px">Enter weight + reps from any set to estimate your 1 rep max</div>
+        <div style="display:flex;gap:8px;margin-bottom:12px">
+          <div style="flex:1"><label>Weight (kg)</label><input type="number" id="rmWeight" placeholder="80"></div>
+          <div style="flex:1"><label>Reps</label><input type="number" id="rmReps" placeholder="8"></div>
+          <div style="display:flex;align-items:flex-end"><button onclick="calcRM()" class="btn" style="white-space:nowrap">Calc</button></div>
+        </div>
+        <div id="rmResult" style="display:none">
+          <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px">
+            <div class="stat-chip"><div class="val" style="color:var(--accent3)" id="val1rm">—</div><div class="lbl">Est. 1RM</div></div>
+            <div class="stat-chip"><div class="val" id="valStr">—</div><div class="lbl">Strength · 5 reps (87%)</div></div>
+            <div class="stat-chip"><div class="val" style="color:var(--accent)" id="valHyp">—</div><div class="lbl">Hypertrophy · 8–10 reps (75%)</div></div>
+            <div class="stat-chip"><div class="val" style="color:#c084fc" id="valVol">—</div><div class="lbl">Volume · 12+ reps (65%)</div></div>
+          </div>
         </div>
       </div>
     </div>
+
+    <!-- ===== PLAN B ===== -->
+    <div id="planSubB" style="display:none">
+
+      <!-- Week overview -->
+      <div class="card">
+        <div class="card-label">Weekly Schedule</div>
+        <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center;font-size:0.6rem">
+          <div style="color:var(--muted);padding:4px">Mon</div>
+          <div style="color:var(--muted);padding:4px">Tue</div>
+          <div style="color:var(--muted);padding:4px">Wed</div>
+          <div style="color:var(--muted);padding:4px">Thu</div>
+          <div style="color:var(--muted);padding:4px">Fri</div>
+          <div style="color:var(--muted);padding:4px">Sat</div>
+          <div style="color:var(--muted);padding:4px">Sun</div>
+          <div style="background:#4fc3f7;color:#000;border-radius:3px;padding:6px 2px;font-weight:700;font-size:0.55rem;cursor:pointer" onclick="showPlanBDay(0)">Upper A</div>
+          <div style="background:var(--surface2);color:var(--muted);border-radius:3px;padding:6px 2px;font-size:0.55rem">Rest 🚶</div>
+          <div style="background:#c8f135;color:#000;border-radius:3px;padding:6px 2px;font-weight:700;font-size:0.55rem;cursor:pointer" onclick="showPlanBDay(1)">Lower A</div>
+          <div style="background:var(--surface2);color:var(--muted);border-radius:3px;padding:6px 2px;font-size:0.55rem">Rest 🚶</div>
+          <div style="background:#ff9f43;color:#000;border-radius:3px;padding:6px 2px;font-weight:700;font-size:0.55rem;cursor:pointer" onclick="showPlanBDay(2)">Upper B</div>
+          <div style="background:var(--surface2);color:var(--muted);border-radius:3px;padding:6px 2px;font-size:0.55rem">Rest 🚶</div>
+          <div style="background:#c084fc;color:#000;border-radius:3px;padding:6px 2px;font-weight:700;font-size:0.55rem;cursor:pointer" onclick="showPlanBDay(3)">Lower B</div>
+        </div>
+        <div style="font-size:0.6rem;color:var(--muted);margin-top:10px;letter-spacing:0.5px">Tap a day to see exercises ↓</div>
+      </div>
+
+      <!-- Day selector buttons -->
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">
+        <button onclick="showPlanBDay(0)" class="plan-b-btn" id="planBBtn0" style="background:rgba(79,195,247,0.15);border:1px solid #4fc3f7;color:#4fc3f7;font-family:var(--font-mono);font-size:0.6rem;padding:6px 10px;cursor:pointer;border-radius:2px;letter-spacing:1px">D1 Upper A</button>
+        <button onclick="showPlanBDay(1)" class="plan-b-btn" id="planBBtn1" style="background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-family:var(--font-mono);font-size:0.6rem;padding:6px 10px;cursor:pointer;border-radius:2px;letter-spacing:1px">D3 Lower A</button>
+        <button onclick="showPlanBDay(2)" class="plan-b-btn" id="planBBtn2" style="background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-family:var(--font-mono);font-size:0.6rem;padding:6px 10px;cursor:pointer;border-radius:2px;letter-spacing:1px">D5 Upper B</button>
+        <button onclick="showPlanBDay(3)" class="plan-b-btn" id="planBBtn3" style="background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-family:var(--font-mono);font-size:0.6rem;padding:6px 10px;cursor:pointer;border-radius:2px;letter-spacing:1px">D7 Lower B</button>
+      </div>
+
+      <!-- Exercise table -->
+      <div id="planBDayContent"></div>
+
+      <!-- Weekly Volume -->
+      <div class="card" style="margin-top:20px">
+        <div style="font-family:var(--font-display);font-size:1rem;font-weight:800;color:var(--accent2);margin-bottom:4px">📊 Total Weekly Volume</div>
+        <div style="font-size:0.65rem;color:var(--muted);margin-bottom:14px;letter-spacing:0.5px">Moderate volume — recovery-friendly</div>
+        <div style="overflow-x:auto">
+          <table style="width:100%;border-collapse:collapse;font-size:0.7rem">
+            <thead><tr style="border-bottom:1px solid var(--border)">
+              <th style="text-align:left;padding:6px 8px;color:var(--muted);font-size:0.58rem;letter-spacing:1px;text-transform:uppercase;font-weight:400">Muscle</th>
+              <th style="text-align:left;padding:6px 8px;color:var(--muted);font-size:0.58rem;letter-spacing:1px;text-transform:uppercase;font-weight:400;white-space:nowrap">Sets/week</th>
+            </tr></thead>
+            <tbody>
+              <tr style="border-bottom:1px solid var(--border)"><td style="padding:8px">Chest</td><td style="padding:8px;color:var(--accent2);font-weight:700">10–12</td></tr>
+              <tr style="border-bottom:1px solid var(--border);background:rgba(255,255,255,0.02)"><td style="padding:8px">Back</td><td style="padding:8px;color:var(--accent2);font-weight:700">12–14</td></tr>
+              <tr style="border-bottom:1px solid var(--border)"><td style="padding:8px">Quads</td><td style="padding:8px;color:var(--accent2);font-weight:700">10–12</td></tr>
+              <tr style="border-bottom:1px solid var(--border);background:rgba(255,255,255,0.02)"><td style="padding:8px">Hamstrings / Glutes</td><td style="padding:8px;color:var(--accent2);font-weight:700">9–11</td></tr>
+              <tr style="border-bottom:1px solid var(--border)"><td style="padding:8px">Shoulders</td><td style="padding:8px;color:var(--accent2);font-weight:700">6–8</td></tr>
+              <tr style="border-bottom:1px solid var(--border);background:rgba(255,255,255,0.02)"><td style="padding:8px">Biceps</td><td style="padding:8px;color:var(--accent2);font-weight:700">6–8</td></tr>
+              <tr style="border-bottom:1px solid var(--border)"><td style="padding:8px">Triceps</td><td style="padding:8px;color:var(--accent2);font-weight:700">6–8</td></tr>
+              <tr style="border-bottom:1px solid var(--border);background:rgba(255,255,255,0.02)"><td style="padding:8px">Calves</td><td style="padding:8px;color:var(--accent2);font-weight:700">6</td></tr>
+              <tr style="border-bottom:1px solid var(--border)"><td style="padding:8px">Abs</td><td style="padding:8px;color:var(--accent2);font-weight:700">4</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Progression -->
+      <div class="card">
+        <div style="font-family:var(--font-display);font-size:1rem;font-weight:800;color:#c084fc;margin-bottom:14px">📈 Progression — Weeks 1–6</div>
+        <div style="overflow-x:auto">
+          <table style="width:100%;border-collapse:collapse;font-size:0.7rem">
+            <thead><tr style="border-bottom:1px solid var(--border)">
+              <th style="text-align:left;padding:6px 8px;color:var(--muted);font-size:0.58rem;letter-spacing:1px;text-transform:uppercase;font-weight:400">Week</th>
+              <th style="text-align:left;padding:6px 8px;color:var(--muted);font-size:0.58rem;letter-spacing:1px;text-transform:uppercase;font-weight:400">RIR</th>
+              <th style="text-align:left;padding:6px 8px;color:var(--muted);font-size:0.58rem;letter-spacing:1px;text-transform:uppercase;font-weight:400">Goal</th>
+            </tr></thead>
+            <tbody>
+              <tr style="border-bottom:1px solid var(--border)"><td style="padding:8px;color:#4fc3f7;font-weight:700">Week 1</td><td style="padding:8px">3–4</td><td style="padding:8px;color:var(--muted)">Easy / base</td></tr>
+              <tr style="border-bottom:1px solid var(--border);background:rgba(255,255,255,0.02)"><td style="padding:8px;color:#5dd;font-weight:700">Week 2</td><td style="padding:8px">2–3</td><td style="padding:8px;color:var(--muted)">Moderate</td></tr>
+              <tr style="border-bottom:1px solid var(--border)"><td style="padding:8px;color:#c8f135;font-weight:700">Week 3</td><td style="padding:8px">1–2</td><td style="padding:8px;color:var(--muted)">Stimulus</td></tr>
+              <tr style="border-bottom:1px solid var(--border);background:rgba(255,255,255,0.02)"><td style="padding:8px;color:#ff9f43;font-weight:700">Week 4</td><td style="padding:8px">1–2</td><td style="padding:8px;color:var(--muted)">Maintain</td></tr>
+              <tr style="border-bottom:1px solid var(--border)"><td style="padding:8px;color:#ff6030;font-weight:700">Week 5</td><td style="padding:8px">0–1</td><td style="padding:8px;color:var(--muted)">Push</td></tr>
+              <tr style="border-bottom:1px solid var(--border);background:rgba(255,255,255,0.02)"><td style="padding:8px;color:#ff4f4f;font-weight:700">Week 6</td><td style="padding:8px">0</td><td style="padding:8px;color:var(--muted)">Peak</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div><!-- end planSubB -->
   </div>
 
   <!-- ===== TWEETER ===== -->
@@ -1474,21 +1560,35 @@ function openWeightLightbox(id) {
 
 // ======================= WORKOUT =======================
 const WO_TYPES = [
-  { key: 'heavy-upper', label: 'Heavy Upper', color: '#ff6b6b' },
-  { key: 'light-upper', label: 'Light Upper', color: '#ffb3b3' },
-  { key: 'heavy-lower', label: 'Heavy Lower', color: '#4fc3f7' },
-  { key: 'light-lower', label: 'Light Lower', color: '#a8dcf0' },
-  { key: 'arms',        label: 'Arms',        color: '#c8f135' },
-  { key: 'running',     label: 'Running',     color: '#ff9f43' },
-  { key: 'custom',      label: 'Custom',      color: '#d4a0ff' },
+  // Plan A
+  { key: 'heavy-upper', label: 'Heavy Upper', color: '#ff6b6b',  group: 'A' },
+  { key: 'light-upper', label: 'Light Upper', color: '#ffb3b3',  group: 'A' },
+  { key: 'heavy-lower', label: 'Heavy Lower', color: '#4fc3f7',  group: 'A' },
+  { key: 'light-lower', label: 'Light Lower', color: '#a8dcf0',  group: 'A' },
+  { key: 'arms',        label: 'Arms',        color: '#c8f135',  group: 'A' },
+  { key: 'running',     label: 'Running',     color: '#ff9f43',  group: 'A' },
+  // Plan B
+  { key: 'b-upper-a',  label: 'B · Upper A', color: '#4fc3f7',  group: 'B' },
+  { key: 'b-lower-a',  label: 'B · Lower A', color: '#c8f135',  group: 'B' },
+  { key: 'b-upper-b',  label: 'B · Upper B', color: '#ff9f43',  group: 'B' },
+  { key: 'b-lower-b',  label: 'B · Lower B', color: '#c084fc',  group: 'B' },
+  // Custom
+  { key: 'custom',      label: 'Custom',      color: '#d4a0ff',  group: 'A' },
 ];
 let selectedWoType = null;
 
 function initWoTypeGrid() {
   const grid = document.getElementById('woTypeGrid');
-  grid.innerHTML = WO_TYPES.map(t => `
-    <button class="wo-type-btn" id="wobtn-${t.key}" onclick="selectWoType('${t.key}')">${t.label}</button>
-  `).join('');
+  const planA = WO_TYPES.filter(t => t.group === 'A' && t.key !== 'custom');
+  const planB = WO_TYPES.filter(t => t.group === 'B');
+  const custom = WO_TYPES.filter(t => t.key === 'custom');
+  grid.innerHTML =
+    `<div style="grid-column:1/-1;font-size:0.55rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;padding:2px 0 4px">Plan A</div>` +
+    planA.map(t => `<button class="wo-type-btn" id="wobtn-${t.key}" onclick="selectWoType('${t.key}')">${t.label}</button>`).join('') +
+    `<div style="grid-column:1/-1;font-size:0.55rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;padding:6px 0 4px">Plan B</div>` +
+    planB.map(t => `<button class="wo-type-btn" id="wobtn-${t.key}" onclick="selectWoType('${t.key}')">${t.label}</button>`).join('') +
+    `<div style="grid-column:1/-1;font-size:0.55rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;padding:6px 0 4px">Other</div>` +
+    custom.map(t => `<button class="wo-type-btn" id="wobtn-${t.key}" onclick="selectWoType('${t.key}')">${t.label}</button>`).join('');
 }
 
 function selectWoType(key) {
@@ -1645,9 +1745,16 @@ function openWoModal(dateStr) {
   document.getElementById('woDayModalCustomWrap').style.display = 'none';
   document.getElementById('woDayModalSaveBtn').style.display = 'none';
 
-  document.getElementById('woDayModalTypes').innerHTML = WO_TYPES.map(t => `
-    <button class="wo-modal-type-btn" style="background:${t.color}" onclick="selectWoModalType('${t.key}',this)">${t.label}</button>
-  `).join('');
+  const planA = WO_TYPES.filter(t => t.group === 'A' && t.key !== 'custom');
+  const planB = WO_TYPES.filter(t => t.group === 'B');
+  const custom = WO_TYPES.filter(t => t.key === 'custom');
+  document.getElementById('woDayModalTypes').innerHTML =
+    `<div style="grid-column:1/-1;font-size:0.55rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;padding:0 0 2px">Plan A</div>` +
+    planA.map(t => `<button class="wo-modal-type-btn" style="background:${t.color}" onclick="selectWoModalType('${t.key}',this)">${t.label}</button>`).join('') +
+    `<div style="grid-column:1/-1;font-size:0.55rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;padding:8px 0 2px">Plan B</div>` +
+    planB.map(t => `<button class="wo-modal-type-btn" style="background:${t.color}" onclick="selectWoModalType('${t.key}',this)">${t.label}</button>`).join('') +
+    `<div style="grid-column:1/-1;font-size:0.55rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;padding:8px 0 2px">Other</div>` +
+    custom.map(t => `<button class="wo-modal-type-btn" style="background:${t.color}" onclick="selectWoModalType('${t.key}',this)">${t.label}</button>`).join('');
 
   document.getElementById('woDayModal').classList.add('open');
 }
@@ -2749,7 +2856,126 @@ const PLAN_DAYS = [
   },
 ];
 
-let activePlanDay = 0;
+// ======================= PLAN SUB-TABS =======================
+function switchPlanTab(tab) {
+  const isA = tab === 'a';
+  document.getElementById('planSubA').style.display = isA ? 'block' : 'none';
+  document.getElementById('planSubB').style.display = isA ? 'none' : 'block';
+  const btnA = document.getElementById('planTabBtnA');
+  const btnB = document.getElementById('planTabBtnB');
+  btnA.style.background = isA ? 'rgba(200,241,53,0.1)' : 'var(--surface2)';
+  btnA.style.borderColor = isA ? 'var(--accent)' : 'var(--border)';
+  btnA.style.color = isA ? 'var(--accent)' : 'var(--muted)';
+  btnA.style.fontWeight = isA ? '700' : '400';
+  btnB.style.background = isA ? 'var(--surface2)' : 'rgba(200,241,53,0.1)';
+  btnB.style.borderColor = isA ? 'var(--border)' : 'var(--accent)';
+  btnB.style.color = isA ? 'var(--muted)' : 'var(--accent)';
+  btnB.style.fontWeight = isA ? '400' : '700';
+}
+
+// ======================= PLAN B DAYS =======================
+const PLAN_B_DAYS = [
+  {
+    title: 'Day 1 — Upper A: Strength',
+    color: '#4fc3f7',
+    sub: 'Chest, Back, Shoulders, Arms · Strength focus',
+    target: '16–18 sets/week',
+    exercises: [
+      { name: 'Machine Press ★', sets: '3', reps: '5–8', muscle: 'Chest (Upper)', notes: 'Primary strength movement. Drive explosively, control the descent. Keep elbows tucked slightly.' },
+      { name: 'Barbell Row ★',           sets: '3', reps: '6–8', muscle: 'Back (Thickness)', notes: 'Overhand grip. Torso 45°. Pull to lower chest. Heavy.' },
+      { name: 'Neutral Grip Pulldown',   sets: '2', reps: '6–10', muscle: 'Back (Lats)', notes: 'V-bar or neutral grip. Drive elbows down and back.' },
+      { name: 'Cable Lateral Raise',     sets: '2', reps: '12–15', muscle: 'Shoulders (Medial)', notes: 'Lead with elbow. Constant tension via cable.' },
+      { name: 'Reverse Pec Deck',        sets: '2', reps: '12–15', muscle: 'Rear Delts', notes: 'Arms slightly bent. Squeeze rear delts hard at end range.' },
+      { name: 'Biceps Curl',             sets: '2', reps: '10–12', muscle: 'Biceps', notes: 'Full ROM. Supinate at top. No swinging.' },
+      { name: 'Triceps Overhead',        sets: '2', reps: '10–12', muscle: 'Triceps (Long Head)', notes: 'Cable or DB. Keep elbows tucked near ears. Deep stretch.' },
+    ]
+  },
+  {
+    title: 'Day 3 — Lower A: Strength',
+    color: '#c8f135',
+    sub: 'Quads, Hamstrings, Glutes, Calves · Strength focus',
+    target: '13–14 sets/week',
+    exercises: [
+      { name: 'Barbell Squat ★', sets: '3–4', reps: '5–8', muscle: 'Quads, Glutes', notes: 'Primary strength movement. Focus on depth and bracing.' },
+      { name: 'Barbell RDL ★',   sets: '3',   reps: '6–8', muscle: 'Hamstrings, Glutes', notes: 'Push hips back. Feel the hamstring stretch at the bottom.' },
+      { name: 'Leg Press',        sets: '2',   reps: '8–10', muscle: 'Quads, Glutes', notes: 'Medium stance. No lockout — constant tension.' },
+      { name: 'Standing Calf Raise', sets: '3', reps: '12–15', muscle: 'Calves (Gastro)', notes: '2-second pause at the bottom stretch.' },
+      { name: 'Abs',              sets: '2',   reps: '15–20', muscle: 'Core', notes: 'Cable crunch or plank variation.' },
+    ]
+  },
+  {
+    title: 'Day 5 — Upper B: Hypertrophy',
+    color: '#ff9f43',
+    sub: 'Chest, Back, Shoulders, Arms · Volume focus',
+    target: '16–18 sets/week',
+    exercises: [
+      { name: 'Barbell Incline Press ★', sets: '3', reps: '8–10', muscle: 'Chest (Upper)', notes: 'Back-off weight from Day 1. Focus on feel and contraction.' },
+      { name: 'Seated Cable Row ★',      sets: '3', reps: '8–12', muscle: 'Back (Mid)', notes: 'Neutral grip. Drive elbows back. Squeeze hard at end.' },
+      { name: 'Cable Pullover',           sets: '2', reps: '12–15', muscle: 'Back (Lats)', notes: 'Straight arms. Maximise the stretch at the top.' },
+      { name: 'Face Pull',               sets: '2', reps: '15–20', muscle: 'Rear Delts, Upper Back', notes: 'Pull to forehead. Rotate hands back for external rotation.' },
+      { name: 'DB Overhead Press',       sets: '2', reps: '8–10', muscle: 'Shoulders', notes: 'Seated or standing. Control the descent.' },
+      { name: 'Biceps',                  sets: '2–3', reps: '10–15', muscle: 'Biceps', notes: 'Cable or DB curl variation. Squeeze and slow eccentric.' },
+      { name: 'Triceps',                 sets: '2–3', reps: '10–15', muscle: 'Triceps', notes: 'Pushdown or overhead extension. Full ROM.' },
+    ]
+  },
+  {
+    title: 'Day 7 — Lower B: Hypertrophy',
+    color: '#c084fc',
+    sub: 'Quads, Hamstrings, Glutes, Calves · Volume focus',
+    target: '14–16 sets/week',
+    exercises: [
+      { name: 'Bulgarian Split Squat ★', sets: '2–3', reps: '8–12', muscle: 'Quads, Glutes', notes: 'Lean forward for glutes, upright for quads. Control the descent.' },
+      { name: 'Leg Curl ★',             sets: '3',   reps: '10–12', muscle: 'Hamstrings', notes: 'Seated or lying. Optional rest-pause on final set.' },
+      { name: 'Leg Extension',           sets: '2',   reps: '12–15', muscle: 'Quads', notes: 'Isolates quads. Rest-pause technique on final set.' },
+      { name: 'Hip Thrust',              sets: '2–3', reps: '8–12', muscle: 'Glutes', notes: 'Machine or barbell. 1-second hold at the top.' },
+      { name: 'Seated Calf Raise',       sets: '3',   reps: '12–15', muscle: 'Calves (Soleus)', notes: 'Targets soleus. Do not bounce at the bottom.' },
+      { name: 'Abs',                     sets: '2',   reps: '15–20', muscle: 'Core', notes: 'Cable crunch or hanging leg raise.' },
+    ]
+  },
+];
+
+let activePlanBDay = 0;
+
+function showPlanBDay(idx) {
+  activePlanBDay = idx;
+  const day = PLAN_B_DAYS[idx];
+
+  document.querySelectorAll('.plan-b-btn').forEach((btn, i) => {
+    btn.style.background = i === idx ? day.color + '22' : 'var(--surface2)';
+    btn.style.borderColor = i === idx ? day.color : 'var(--border)';
+    btn.style.color = i === idx ? day.color : 'var(--muted)';
+  });
+
+  document.getElementById('planBDayContent').innerHTML = `
+    <div class="card" style="border-color:${day.color}22">
+      <div style="font-family:var(--font-display);font-size:1rem;font-weight:800;color:${day.color};margin-bottom:4px">${day.title}</div>
+      <div style="font-size:0.65rem;color:var(--muted);margin-bottom:2px">${day.sub}</div>
+      <div style="font-size:0.6rem;color:${day.color};margin-bottom:14px;letter-spacing:0.5px">Target: ${day.target}</div>
+      <div style="overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:0.7rem">
+          <thead>
+            <tr style="border-bottom:1px solid var(--border)">
+              <th style="text-align:left;padding:6px 8px;color:var(--muted);font-size:0.58rem;letter-spacing:1px;text-transform:uppercase;font-weight:400;min-width:160px">Exercise</th>
+              <th style="text-align:left;padding:6px 8px;color:var(--muted);font-size:0.58rem;letter-spacing:1px;text-transform:uppercase;font-weight:400;white-space:nowrap">Sets/week</th>
+              <th style="text-align:left;padding:6px 8px;color:var(--muted);font-size:0.58rem;letter-spacing:1px;text-transform:uppercase;font-weight:400;white-space:nowrap">Reps</th>
+              <th style="text-align:left;padding:6px 8px;color:var(--muted);font-size:0.58rem;letter-spacing:1px;text-transform:uppercase;font-weight:400;white-space:nowrap">Muscle</th>
+              <th style="text-align:left;padding:6px 8px;color:var(--muted);font-size:0.58rem;letter-spacing:1px;text-transform:uppercase;font-weight:400;min-width:160px">Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${day.exercises.map((ex, i) => `
+              <tr style="border-bottom:1px solid var(--border);background:${i%2===0?'transparent':'rgba(255,255,255,0.02)'}">
+                <td style="padding:8px;color:${ex.name.includes('★') ? day.color : 'var(--text)'};font-weight:${ex.name.includes('★') ? '700' : '400'}">${ex.name}</td>
+                <td style="padding:8px;color:${day.color};font-weight:700;white-space:nowrap">${ex.sets}</td>
+                <td style="padding:8px;color:var(--muted);white-space:nowrap">${ex.reps}</td>
+                <td style="padding:8px;color:var(--accent);font-size:0.65rem;white-space:nowrap">${ex.muscle}</td>
+                <td style="padding:8px;color:var(--muted);font-size:0.65rem">${ex.notes}</td>
+              </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>`;
+}
 
 function showPlanDay(idx) {
   activePlanDay = idx;
@@ -3037,6 +3263,7 @@ setDefaultDates();
 initWoTypeGrid();
 initResearchTypeGrid();
 showPlanDay(0);
+showPlanBDay(0);
 renderWeight();
 renderWorkout();
 renderAlcohol();
