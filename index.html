@@ -352,53 +352,14 @@
   ::-webkit-scrollbar { width: 4px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-
-  /* SYNC STATUS */
-  .sync-dot {
-    width: 6px; height: 6px; border-radius: 50%;
-    display: inline-block; margin-right: 4px;
-    transition: background 0.3s;
-  }
-  .sync-dot.synced  { background: var(--accent); }
-  .sync-dot.syncing { background: var(--accent4); animation: pulse 1s infinite; }
-  .sync-dot.error   { background: var(--accent2); }
-  .sync-dot.offline { background: var(--muted); }
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
-
-  /* SUPABASE SETUP MODAL */
-  .sb-modal-overlay {
-    display:none; position:fixed; inset:0; z-index:4000;
-    background:rgba(0,0,0,0.88); align-items:center; justify-content:center; padding:20px;
-  }
-  .sb-modal-overlay.open { display:flex; }
-  .sb-modal {
-    background:var(--surface); border:1px solid var(--border);
-    border-radius:6px; padding:24px; width:100%; max-width:420px;
-    animation:fadeUp 0.2s ease;
-  }
-  .sb-modal h3 { font-family:var(--font-display); font-size:1.1rem; font-weight:800; margin-bottom:4px; }
-  .sb-modal p  { font-size:0.65rem; color:var(--muted); letter-spacing:0.5px; margin-bottom:16px; line-height:1.6; }
-  .sb-step {
-    background:var(--surface2); border:1px solid var(--border); border-radius:3px;
-    padding:10px 12px; margin-bottom:8px; font-size:0.65rem; color:var(--muted);
-    line-height:1.6;
-  }
-  .sb-step strong { color:var(--text); }
-  .sb-step code {
-    background:#000; color:var(--accent); padding:1px 5px; border-radius:2px;
-    font-family:var(--font-mono); font-size:0.65rem;
-  }
 </style>
 </head>
 <body>
 
 <header>
   <div class="logo">SELF<span>OS</span></div>
-  <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:flex-end">
+  <div style="display:flex;align-items:center;gap:8px">
     <div class="date-display" id="headerDate"></div>
-    <button onclick="showSyncModal()" id="syncStatusBtn" title="Cloud sync status" style="background:none;border:1px solid var(--border);color:var(--muted);font-family:var(--font-mono);font-size:0.55rem;padding:4px 8px;cursor:pointer;border-radius:2px;letter-spacing:1px;display:flex;align-items:center">
-      <span class="sync-dot offline" id="syncDot"></span><span id="syncLabel">Sync</span>
-    </button>
     <button onclick="exportData()" style="background:none;border:1px solid var(--border);color:var(--muted);font-family:var(--font-mono);font-size:0.55rem;padding:4px 8px;cursor:pointer;border-radius:2px;letter-spacing:1px" title="Export all data">⬇ Export</button>
     <button onclick="showImportModal()" style="background:none;border:1px solid var(--border);color:var(--muted);font-family:var(--font-mono);font-size:0.55rem;padding:4px 8px;cursor:pointer;border-radius:2px;letter-spacing:1px" title="Import data">⬆ Import</button>
     <button onclick="showQRModal()" style="background:none;border:1px solid var(--accent);color:var(--accent);font-family:var(--font-mono);font-size:0.55rem;padding:4px 8px;cursor:pointer;border-radius:2px;letter-spacing:1px" title="Share via QR">⬡ QR</button>
@@ -734,155 +695,69 @@
   <div class="tab" id="tab-plan">
     <div class="section-head">
       <h2 style="color:var(--accent)">Plan</h2>
-      <p>Training programmes</p>
+      <p>3-Day Cut · Full Body / Upper / Lower + Running</p>
     </div>
 
-    <!-- Plan sub-tab switcher -->
-    <div style="display:flex;gap:6px;margin-bottom:20px">
-      <button onclick="switchPlanTab('a')" id="planTabBtnA" style="flex:1;padding:10px;font-family:var(--font-mono);font-size:0.65rem;letter-spacing:1px;text-transform:uppercase;cursor:pointer;border-radius:3px;border:1px solid var(--accent);background:rgba(200,241,53,0.1);color:var(--accent);font-weight:700;transition:all 0.15s">Plan A · Hypertrophy & Cut</button>
-      <button onclick="switchPlanTab('b')" id="planTabBtnB" style="flex:1;padding:10px;font-family:var(--font-mono);font-size:0.65rem;letter-spacing:1px;text-transform:uppercase;cursor:pointer;border-radius:3px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);transition:all 0.15s">Plan B · Arms Focused</button>
+    <!-- Week overview -->
+    <div class="card">
+      <div class="card-label">Weekly Schedule</div>
+      <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center;font-size:0.6rem">
+        <div style="color:var(--muted);padding:4px">Mon</div>
+        <div style="color:var(--muted);padding:4px">Tue</div>
+        <div style="color:var(--muted);padding:4px">Wed</div>
+        <div style="color:var(--muted);padding:4px">Thu</div>
+        <div style="color:var(--muted);padding:4px">Fri</div>
+        <div style="color:var(--muted);padding:4px">Sat</div>
+        <div style="color:var(--muted);padding:4px">Sun</div>
+        <div style="background:#c084fc;color:#000;border-radius:3px;padding:6px 2px;font-weight:700;font-size:0.55rem;cursor:pointer" onclick="showPlanDay(0)">Full Body</div>
+        <div style="background:#ff9f43;color:#000;border-radius:3px;padding:6px 2px;font-weight:700;font-size:0.55rem;cursor:pointer" onclick="showPlanDay(3)">Run 1</div>
+        <div style="background:#ff6b6b;color:#000;border-radius:3px;padding:6px 2px;font-weight:700;font-size:0.55rem;cursor:pointer" onclick="showPlanDay(1)">Upper</div>
+        <div style="background:#ff9f43;color:#000;border-radius:3px;padding:6px 2px;font-weight:700;font-size:0.55rem;cursor:pointer" onclick="showPlanDay(4)">Run 2</div>
+        <div style="background:#4fc3f7;color:#000;border-radius:3px;padding:6px 2px;font-weight:700;font-size:0.55rem;cursor:pointer" onclick="showPlanDay(2)">Lower</div>
+        <div style="background:var(--surface2);color:var(--muted);border-radius:3px;padding:6px 2px;font-size:0.55rem">Rest 🚶</div>
+        <div style="background:var(--surface2);color:var(--muted);border-radius:3px;padding:6px 2px;font-size:0.55rem">Rest 💤</div>
+      </div>
+      <div style="font-size:0.6rem;color:var(--muted);margin-top:10px;letter-spacing:0.5px">Tap a day to see exercises ↓</div>
     </div>
 
-    <!-- ===== PLAN A ===== -->
-    <div id="planSubA">
-      <!-- Week overview -->
-      <div class="card">
-        <div class="card-label">Weekly Schedule</div>
-        <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center;font-size:0.6rem">
-          <div style="color:var(--muted);padding:4px">Mon</div>
-          <div style="color:var(--muted);padding:4px">Tue</div>
-          <div style="color:var(--muted);padding:4px">Wed</div>
-          <div style="color:var(--muted);padding:4px">Thu</div>
-          <div style="color:var(--muted);padding:4px">Fri</div>
-          <div style="color:var(--muted);padding:4px">Sat</div>
-          <div style="color:var(--muted);padding:4px">Sun</div>
-          <div style="background:#4fc3f7;color:#000;border-radius:3px;padding:6px 2px;font-weight:700;font-size:0.55rem;cursor:pointer" onclick="showPlanDay(0)">Lower A</div>
-          <div style="background:#4fc3f7;color:#000;border-radius:3px;padding:6px 2px;font-weight:700;font-size:0.55rem;cursor:pointer" onclick="showPlanDay(1)">Upper A</div>
-          <div style="background:var(--surface2);color:var(--muted);border-radius:3px;padding:6px 2px;font-size:0.55rem">Rest 🚶</div>
-          <div style="background:#c8f135;color:#000;border-radius:3px;padding:6px 2px;font-weight:700;font-size:0.55rem;cursor:pointer" onclick="showPlanDay(2)">Lower B</div>
-          <div style="background:#c8f135;color:#000;border-radius:3px;padding:6px 2px;font-weight:700;font-size:0.55rem;cursor:pointer" onclick="showPlanDay(3)">Upper B</div>
-          <div style="background:#c084fc;color:#000;border-radius:3px;padding:6px 2px;font-weight:700;font-size:0.55rem;cursor:pointer" onclick="showPlanDay(4)">Aesthetics</div>
-          <div style="background:var(--surface2);color:var(--muted);border-radius:3px;padding:6px 2px;font-size:0.55rem">Rest 💤</div>
+    <!-- Day selector buttons -->
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">
+      <button onclick="showPlanDay(0)" class="plan-day-btn" id="planBtn0" style="background:rgba(192,132,252,0.15);border:1px solid #c084fc;color:#c084fc;font-family:var(--font-mono);font-size:0.6rem;padding:6px 10px;cursor:pointer;border-radius:2px;letter-spacing:1px">D1 Full Body</button>
+      <button onclick="showPlanDay(1)" class="plan-day-btn" id="planBtn1" style="background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-family:var(--font-mono);font-size:0.6rem;padding:6px 10px;cursor:pointer;border-radius:2px;letter-spacing:1px">D2 Upper</button>
+      <button onclick="showPlanDay(2)" class="plan-day-btn" id="planBtn2" style="background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-family:var(--font-mono);font-size:0.6rem;padding:6px 10px;cursor:pointer;border-radius:2px;letter-spacing:1px">D3 Lower</button>
+      <button onclick="showPlanDay(3)" class="plan-day-btn" id="planBtn3" style="background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-family:var(--font-mono);font-size:0.6rem;padding:6px 10px;cursor:pointer;border-radius:2px;letter-spacing:1px">Run 1</button>
+      <button onclick="showPlanDay(4)" class="plan-day-btn" id="planBtn4" style="background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-family:var(--font-mono);font-size:0.6rem;padding:6px 10px;cursor:pointer;border-radius:2px;letter-spacing:1px">Run 2</button>
+    </div>
+
+    <!-- Exercise table -->
+    <div id="planDayContent"></div>
+
+    <!-- 1RM Calculator -->
+    <div class="card" style="margin-top:20px">
+      <div class="card-label">🧮 1RM & Load Calculator</div>
+      <div style="font-size:0.65rem;color:var(--muted);margin-bottom:12px">Enter weight + reps from any set to estimate your 1 rep max</div>
+      <div style="display:flex;gap:8px;margin-bottom:12px">
+        <div style="flex:1">
+          <label>Weight (kg)</label>
+          <input type="number" id="rmWeight" placeholder="80">
         </div>
-        <div style="font-size:0.6rem;color:var(--muted);margin-top:10px;letter-spacing:0.5px">Tap a day to see exercises ↓</div>
-      </div>
-
-      <!-- Day selector buttons -->
-      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">
-        <button onclick="showPlanDay(0)" class="plan-day-btn" id="planBtn0" style="background:rgba(79,195,247,0.15);border:1px solid #4fc3f7;color:#4fc3f7;font-family:var(--font-mono);font-size:0.6rem;padding:6px 10px;cursor:pointer;border-radius:2px;letter-spacing:1px">D1 Lower A</button>
-        <button onclick="showPlanDay(1)" class="plan-day-btn" id="planBtn1" style="background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-family:var(--font-mono);font-size:0.6rem;padding:6px 10px;cursor:pointer;border-radius:2px;letter-spacing:1px">D2 Upper A</button>
-        <button onclick="showPlanDay(2)" class="plan-day-btn" id="planBtn2" style="background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-family:var(--font-mono);font-size:0.6rem;padding:6px 10px;cursor:pointer;border-radius:2px;letter-spacing:1px">D4 Lower B</button>
-        <button onclick="showPlanDay(3)" class="plan-day-btn" id="planBtn3" style="background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-family:var(--font-mono);font-size:0.6rem;padding:6px 10px;cursor:pointer;border-radius:2px;letter-spacing:1px">D5 Upper B</button>
-        <button onclick="showPlanDay(4)" class="plan-day-btn" id="planBtn4" style="background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-family:var(--font-mono);font-size:0.6rem;padding:6px 10px;cursor:pointer;border-radius:2px;letter-spacing:1px">D6 Aesthetics</button>
-      </div>
-
-      <!-- Exercise table -->
-      <div id="planDayContent"></div>
-
-      <!-- 1RM Calculator -->
-      <div class="card" style="margin-top:20px">
-        <div class="card-label">🧮 1RM & Load Calculator</div>
-        <div style="font-size:0.65rem;color:var(--muted);margin-bottom:12px">Enter weight + reps from any set to estimate your 1 rep max</div>
-        <div style="display:flex;gap:8px;margin-bottom:12px">
-          <div style="flex:1"><label>Weight (kg)</label><input type="number" id="rmWeight" placeholder="80"></div>
-          <div style="flex:1"><label>Reps</label><input type="number" id="rmReps" placeholder="8"></div>
-          <div style="display:flex;align-items:flex-end"><button onclick="calcRM()" class="btn" style="white-space:nowrap">Calc</button></div>
+        <div style="flex:1">
+          <label>Reps</label>
+          <input type="number" id="rmReps" placeholder="8">
         </div>
-        <div id="rmResult" style="display:none">
-          <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px">
-            <div class="stat-chip"><div class="val" style="color:var(--accent3)" id="val1rm">—</div><div class="lbl">Est. 1RM</div></div>
-            <div class="stat-chip"><div class="val" id="valStr">—</div><div class="lbl">Strength · 5 reps (87%)</div></div>
-            <div class="stat-chip"><div class="val" style="color:var(--accent)" id="valHyp">—</div><div class="lbl">Hypertrophy · 8–10 reps (75%)</div></div>
-            <div class="stat-chip"><div class="val" style="color:#c084fc" id="valVol">—</div><div class="lbl">Volume · 12+ reps (65%)</div></div>
-          </div>
+        <div style="display:flex;align-items:flex-end">
+          <button onclick="calcRM()" class="btn" style="white-space:nowrap">Calc</button>
+        </div>
+      </div>
+      <div id="rmResult" style="display:none">
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px">
+          <div class="stat-chip"><div class="val" style="color:var(--accent3)" id="val1rm">—</div><div class="lbl">Est. 1RM</div></div>
+          <div class="stat-chip"><div class="val" id="valStr">—</div><div class="lbl">Strength · 5 reps (87%)</div></div>
+          <div class="stat-chip"><div class="val" style="color:var(--accent)" id="valHyp">—</div><div class="lbl">Hypertrophy · 8–10 reps (75%)</div></div>
+          <div class="stat-chip"><div class="val" style="color:#c084fc" id="valVol">—</div><div class="lbl">Volume · 12+ reps (65%)</div></div>
         </div>
       </div>
     </div>
-
-    <!-- ===== PLAN B ===== -->
-    <div id="planSubB" style="display:none">
-
-      <!-- Week overview -->
-      <div class="card">
-        <div class="card-label">Weekly Schedule</div>
-        <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center;font-size:0.6rem">
-          <div style="color:var(--muted);padding:4px">Mon</div>
-          <div style="color:var(--muted);padding:4px">Tue</div>
-          <div style="color:var(--muted);padding:4px">Wed</div>
-          <div style="color:var(--muted);padding:4px">Thu</div>
-          <div style="color:var(--muted);padding:4px">Fri</div>
-          <div style="color:var(--muted);padding:4px">Sat</div>
-          <div style="color:var(--muted);padding:4px">Sun</div>
-          <div style="background:#4fc3f7;color:#000;border-radius:3px;padding:6px 2px;font-weight:700;font-size:0.55rem;cursor:pointer" onclick="showPlanBDay(0)">Upper A</div>
-          <div style="background:var(--surface2);color:var(--muted);border-radius:3px;padding:6px 2px;font-size:0.55rem">Rest 🚶</div>
-          <div style="background:#c8f135;color:#000;border-radius:3px;padding:6px 2px;font-weight:700;font-size:0.55rem;cursor:pointer" onclick="showPlanBDay(1)">Lower A</div>
-          <div style="background:var(--surface2);color:var(--muted);border-radius:3px;padding:6px 2px;font-size:0.55rem">Rest 🚶</div>
-          <div style="background:#ff9f43;color:#000;border-radius:3px;padding:6px 2px;font-weight:700;font-size:0.55rem;cursor:pointer" onclick="showPlanBDay(2)">Upper B</div>
-          <div style="background:var(--surface2);color:var(--muted);border-radius:3px;padding:6px 2px;font-size:0.55rem">Rest 🚶</div>
-          <div style="background:#c084fc;color:#000;border-radius:3px;padding:6px 2px;font-weight:700;font-size:0.55rem;cursor:pointer" onclick="showPlanBDay(3)">Lower B</div>
-        </div>
-        <div style="font-size:0.6rem;color:var(--muted);margin-top:10px;letter-spacing:0.5px">Tap a day to see exercises ↓</div>
-      </div>
-
-      <!-- Day selector buttons -->
-      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">
-        <button onclick="showPlanBDay(0)" class="plan-b-btn" id="planBBtn0" style="background:rgba(79,195,247,0.15);border:1px solid #4fc3f7;color:#4fc3f7;font-family:var(--font-mono);font-size:0.6rem;padding:6px 10px;cursor:pointer;border-radius:2px;letter-spacing:1px">D1 Upper A</button>
-        <button onclick="showPlanBDay(1)" class="plan-b-btn" id="planBBtn1" style="background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-family:var(--font-mono);font-size:0.6rem;padding:6px 10px;cursor:pointer;border-radius:2px;letter-spacing:1px">D3 Lower A</button>
-        <button onclick="showPlanBDay(2)" class="plan-b-btn" id="planBBtn2" style="background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-family:var(--font-mono);font-size:0.6rem;padding:6px 10px;cursor:pointer;border-radius:2px;letter-spacing:1px">D5 Upper B</button>
-        <button onclick="showPlanBDay(3)" class="plan-b-btn" id="planBBtn3" style="background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-family:var(--font-mono);font-size:0.6rem;padding:6px 10px;cursor:pointer;border-radius:2px;letter-spacing:1px">D7 Lower B</button>
-      </div>
-
-      <!-- Exercise table -->
-      <div id="planBDayContent"></div>
-
-      <!-- Weekly Volume -->
-      <div class="card" style="margin-top:20px">
-        <div style="font-family:var(--font-display);font-size:1rem;font-weight:800;color:var(--accent2);margin-bottom:4px">📊 Total Weekly Volume</div>
-        <div style="font-size:0.65rem;color:var(--muted);margin-bottom:14px;letter-spacing:0.5px">Moderate volume — recovery-friendly</div>
-        <div style="overflow-x:auto">
-          <table style="width:100%;border-collapse:collapse;font-size:0.7rem">
-            <thead><tr style="border-bottom:1px solid var(--border)">
-              <th style="text-align:left;padding:6px 8px;color:var(--muted);font-size:0.58rem;letter-spacing:1px;text-transform:uppercase;font-weight:400">Muscle</th>
-              <th style="text-align:left;padding:6px 8px;color:var(--muted);font-size:0.58rem;letter-spacing:1px;text-transform:uppercase;font-weight:400;white-space:nowrap">Sets/week</th>
-            </tr></thead>
-            <tbody>
-              <tr style="border-bottom:1px solid var(--border)"><td style="padding:8px">Chest</td><td style="padding:8px;color:var(--accent2);font-weight:700">10–12</td></tr>
-              <tr style="border-bottom:1px solid var(--border);background:rgba(255,255,255,0.02)"><td style="padding:8px">Back</td><td style="padding:8px;color:var(--accent2);font-weight:700">12–14</td></tr>
-              <tr style="border-bottom:1px solid var(--border)"><td style="padding:8px">Quads</td><td style="padding:8px;color:var(--accent2);font-weight:700">10–12</td></tr>
-              <tr style="border-bottom:1px solid var(--border);background:rgba(255,255,255,0.02)"><td style="padding:8px">Hamstrings / Glutes</td><td style="padding:8px;color:var(--accent2);font-weight:700">9–11</td></tr>
-              <tr style="border-bottom:1px solid var(--border)"><td style="padding:8px">Shoulders</td><td style="padding:8px;color:var(--accent2);font-weight:700">6–8</td></tr>
-              <tr style="border-bottom:1px solid var(--border);background:rgba(255,255,255,0.02)"><td style="padding:8px">Biceps</td><td style="padding:8px;color:var(--accent2);font-weight:700">6–8</td></tr>
-              <tr style="border-bottom:1px solid var(--border)"><td style="padding:8px">Triceps</td><td style="padding:8px;color:var(--accent2);font-weight:700">6–8</td></tr>
-              <tr style="border-bottom:1px solid var(--border);background:rgba(255,255,255,0.02)"><td style="padding:8px">Calves</td><td style="padding:8px;color:var(--accent2);font-weight:700">6</td></tr>
-              <tr style="border-bottom:1px solid var(--border)"><td style="padding:8px">Abs</td><td style="padding:8px;color:var(--accent2);font-weight:700">4</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- Progression -->
-      <div class="card">
-        <div style="font-family:var(--font-display);font-size:1rem;font-weight:800;color:#c084fc;margin-bottom:14px">📈 Progression — Weeks 1–6</div>
-        <div style="overflow-x:auto">
-          <table style="width:100%;border-collapse:collapse;font-size:0.7rem">
-            <thead><tr style="border-bottom:1px solid var(--border)">
-              <th style="text-align:left;padding:6px 8px;color:var(--muted);font-size:0.58rem;letter-spacing:1px;text-transform:uppercase;font-weight:400">Week</th>
-              <th style="text-align:left;padding:6px 8px;color:var(--muted);font-size:0.58rem;letter-spacing:1px;text-transform:uppercase;font-weight:400">RIR</th>
-              <th style="text-align:left;padding:6px 8px;color:var(--muted);font-size:0.58rem;letter-spacing:1px;text-transform:uppercase;font-weight:400">Goal</th>
-            </tr></thead>
-            <tbody>
-              <tr style="border-bottom:1px solid var(--border)"><td style="padding:8px;color:#4fc3f7;font-weight:700">Week 1</td><td style="padding:8px">3–4</td><td style="padding:8px;color:var(--muted)">Easy / base</td></tr>
-              <tr style="border-bottom:1px solid var(--border);background:rgba(255,255,255,0.02)"><td style="padding:8px;color:#5dd;font-weight:700">Week 2</td><td style="padding:8px">2–3</td><td style="padding:8px;color:var(--muted)">Moderate</td></tr>
-              <tr style="border-bottom:1px solid var(--border)"><td style="padding:8px;color:#c8f135;font-weight:700">Week 3</td><td style="padding:8px">1–2</td><td style="padding:8px;color:var(--muted)">Stimulus</td></tr>
-              <tr style="border-bottom:1px solid var(--border);background:rgba(255,255,255,0.02)"><td style="padding:8px;color:#ff9f43;font-weight:700">Week 4</td><td style="padding:8px">1–2</td><td style="padding:8px;color:var(--muted)">Maintain</td></tr>
-              <tr style="border-bottom:1px solid var(--border)"><td style="padding:8px;color:#ff6030;font-weight:700">Week 5</td><td style="padding:8px">0–1</td><td style="padding:8px;color:var(--muted)">Push</td></tr>
-              <tr style="border-bottom:1px solid var(--border);background:rgba(255,255,255,0.02)"><td style="padding:8px;color:#ff4f4f;font-weight:700">Week 6</td><td style="padding:8px">0</td><td style="padding:8px;color:var(--muted)">Peak</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-    </div><!-- end planSubB -->
   </div>
 
   <!-- ===== TWEETER ===== -->
@@ -1015,34 +890,6 @@
     <div class="wo-modal-footer">
       <button class="wo-modal-cancel" onclick="closeWoModal()">Cancel</button>
       <button id="woDayModalSaveBtn" class="btn" style="display:none;font-size:0.7rem">Save</button>
-    </div>
-  </div>
-</div>
-
-<!-- Supabase Sync Modal -->
-<div class="sb-modal-overlay" id="sbModal">
-  <div class="sb-modal">
-    <h3 id="sbModalTitle">☁ Cloud Sync</h3>
-    <p id="sbModalBody">Your data syncs automatically across devices. Each device uses a <strong>User ID</strong> as its identity. To share data between devices, use the same User ID on both.</p>
-
-    <div style="margin-bottom:10px">
-      <label style="font-size:0.6rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;display:block;margin-bottom:5px">Your User ID <span style="color:var(--accent);cursor:pointer;font-size:0.55rem" onclick="copyUserId()">(tap to copy)</span></label>
-      <div style="display:flex;gap:6px">
-        <input id="sbUserId" type="text" placeholder="auto-generated" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--accent);font-family:var(--font-mono);font-size:0.7rem;padding:8px 10px;border-radius:2px;outline:none">
-        <button onclick="regenerateUserId()" title="Generate new ID" style="background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-family:var(--font-mono);font-size:0.65rem;padding:8px 10px;cursor:pointer;border-radius:2px">↺</button>
-      </div>
-      <div style="font-size:0.58rem;color:var(--muted);margin-top:6px;letter-spacing:0.3px;line-height:1.6">
-        <strong style="color:var(--text)">New device?</strong> Paste your User ID from another device, then tap "Load from cloud" to pull your data down.<br>
-        <strong style="color:var(--accent2)">↺ regenerates a fresh ID</strong> — only do this if you want to start a new sync identity.
-      </div>
-    </div>
-
-    <div id="sbError" style="color:var(--accent2);font-size:0.65rem;margin-bottom:10px;min-height:16px;letter-spacing:0.5px"></div>
-
-    <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
-      <button onclick="closeSyncModal()" style="background:none;border:1px solid var(--border);color:var(--muted);font-family:var(--font-mono);font-size:0.65rem;padding:8px 14px;cursor:pointer;border-radius:2px">Close</button>
-      <button onclick="loadFromCloud()" id="sbLoadBtn" style="background:none;border:1px solid var(--accent3);color:var(--accent3);font-family:var(--font-mono);font-size:0.65rem;padding:8px 14px;cursor:pointer;border-radius:2px">⬇ Load from cloud</button>
-      <button onclick="saveUserId()" style="background:var(--accent);color:#000;border:none;font-family:var(--font-mono);font-size:0.65rem;font-weight:700;padding:8px 14px;cursor:pointer;border-radius:2px">✓ Save ID</button>
     </div>
   </div>
 </div>
@@ -1560,35 +1407,20 @@ function openWeightLightbox(id) {
 
 // ======================= WORKOUT =======================
 const WO_TYPES = [
-  // Plan A
-  { key: 'heavy-upper', label: 'Heavy Upper', color: '#ff6b6b',  group: 'A' },
-  { key: 'light-upper', label: 'Light Upper', color: '#ffb3b3',  group: 'A' },
-  { key: 'heavy-lower', label: 'Heavy Lower', color: '#4fc3f7',  group: 'A' },
-  { key: 'light-lower', label: 'Light Lower', color: '#a8dcf0',  group: 'A' },
-  { key: 'arms',        label: 'Arms',        color: '#c8f135',  group: 'A' },
-  { key: 'running',     label: 'Running',     color: '#ff9f43',  group: 'A' },
-  // Plan B
-  { key: 'b-upper-a',  label: 'B · Upper A', color: '#4fc3f7',  group: 'B' },
-  { key: 'b-lower-a',  label: 'B · Lower A', color: '#c8f135',  group: 'B' },
-  { key: 'b-upper-b',  label: 'B · Upper B', color: '#ff9f43',  group: 'B' },
-  { key: 'b-lower-b',  label: 'B · Lower B', color: '#c084fc',  group: 'B' },
-  // Custom
-  { key: 'custom',      label: 'Custom',      color: '#d4a0ff',  group: 'A' },
+  { key: 'fullbody', label: 'Full Body', color: '#c084fc' },
+  { key: 'upper',    label: 'Upper',     color: '#ff6b6b' },
+  { key: 'lower',    label: 'Lower',     color: '#4fc3f7' },
+  { key: 'arms',     label: 'Arms',      color: '#c8f135' },
+  { key: 'run',      label: 'Run',       color: '#ff9f43' },
+  { key: 'other',    label: 'Other',     color: '#888888' },
 ];
 let selectedWoType = null;
 
 function initWoTypeGrid() {
   const grid = document.getElementById('woTypeGrid');
-  const planA = WO_TYPES.filter(t => t.group === 'A' && t.key !== 'custom');
-  const planB = WO_TYPES.filter(t => t.group === 'B');
-  const custom = WO_TYPES.filter(t => t.key === 'custom');
-  grid.innerHTML =
-    `<div style="grid-column:1/-1;font-size:0.55rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;padding:2px 0 4px">Plan A</div>` +
-    planA.map(t => `<button class="wo-type-btn" id="wobtn-${t.key}" onclick="selectWoType('${t.key}')">${t.label}</button>`).join('') +
-    `<div style="grid-column:1/-1;font-size:0.55rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;padding:6px 0 4px">Plan B</div>` +
-    planB.map(t => `<button class="wo-type-btn" id="wobtn-${t.key}" onclick="selectWoType('${t.key}')">${t.label}</button>`).join('') +
-    `<div style="grid-column:1/-1;font-size:0.55rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;padding:6px 0 4px">Other</div>` +
-    custom.map(t => `<button class="wo-type-btn" id="wobtn-${t.key}" onclick="selectWoType('${t.key}')">${t.label}</button>`).join('');
+  grid.innerHTML = WO_TYPES.map(t => `
+    <button class="wo-type-btn" id="wobtn-${t.key}" onclick="selectWoType('${t.key}')">${t.label}</button>
+  `).join('');
 }
 
 function selectWoType(key) {
@@ -1605,7 +1437,7 @@ function selectWoType(key) {
       btn.style.borderColor = '';
     }
   });
-  document.getElementById('wo-custom-wrap').style.display = key === 'custom' ? 'block' : 'none';
+  document.getElementById('wo-custom-wrap').style.display = key === 'other' ? 'block' : 'none';
 }
 
 function renderWorkoutCalendar(data) {
@@ -1691,7 +1523,7 @@ function renderWorkout() {
       const wo = WO_TYPES.find(t => t.key === d.type);
       const color = wo ? wo.color : '#aaaaaa';
       const label = wo ? wo.label : (d.customName || d.type);
-      const displayLabel = (d.type === 'custom' && d.customName) ? 'Custom: ' + d.customName : label;
+      const displayLabel = (d.type === 'other' && d.customName) ? 'Other: ' + d.customName : label;
       return `<div class="log-item">
         <div class="log-main">
           <span class="log-tag" style="background:rgba(128,128,128,0.15);color:${color}">${displayLabel}</span>
@@ -1712,7 +1544,7 @@ function logWorkout() {
   data.push({
     id: genId(),
     type: selectedWoType,
-    customName: selectedWoType === 'custom' ? document.getElementById('wo-custom-name').value : '',
+    customName: selectedWoType === 'other' ? document.getElementById('wo-custom-name').value : '',
     date: d,
     notes: document.getElementById('wo-notes').value
   });
@@ -1745,22 +1577,15 @@ function openWoModal(dateStr) {
   document.getElementById('woDayModalCustomWrap').style.display = 'none';
   document.getElementById('woDayModalSaveBtn').style.display = 'none';
 
-  const planA = WO_TYPES.filter(t => t.group === 'A' && t.key !== 'custom');
-  const planB = WO_TYPES.filter(t => t.group === 'B');
-  const custom = WO_TYPES.filter(t => t.key === 'custom');
-  document.getElementById('woDayModalTypes').innerHTML =
-    `<div style="grid-column:1/-1;font-size:0.55rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;padding:0 0 2px">Plan A</div>` +
-    planA.map(t => `<button class="wo-modal-type-btn" style="background:${t.color}" onclick="selectWoModalType('${t.key}',this)">${t.label}</button>`).join('') +
-    `<div style="grid-column:1/-1;font-size:0.55rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;padding:8px 0 2px">Plan B</div>` +
-    planB.map(t => `<button class="wo-modal-type-btn" style="background:${t.color}" onclick="selectWoModalType('${t.key}',this)">${t.label}</button>`).join('') +
-    `<div style="grid-column:1/-1;font-size:0.55rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;padding:8px 0 2px">Other</div>` +
-    custom.map(t => `<button class="wo-modal-type-btn" style="background:${t.color}" onclick="selectWoModalType('${t.key}',this)">${t.label}</button>`).join('');
+  document.getElementById('woDayModalTypes').innerHTML = WO_TYPES.map(t => `
+    <button class="wo-modal-type-btn" style="background:${t.color}" onclick="selectWoModalType('${t.key}',this)">${t.label}</button>
+  `).join('');
 
   document.getElementById('woDayModal').classList.add('open');
 }
 
 function selectWoModalType(key, btn) {
-  if (key === 'custom') {
+  if (key === 'other') {
     document.getElementById('woDayModalCustomWrap').style.display = 'block';
     document.getElementById('woDayModalCustomName').focus();
   } else {
@@ -1782,8 +1607,8 @@ function closeWoModal() {
 
 function saveWoFromModal(typeKey) {
   if (!woDayModalDate) return;
-  const customName = typeKey === 'custom' ? document.getElementById('woDayModalCustomName').value : '';
-  if (typeKey === 'custom' && !customName) {
+  const customName = typeKey === 'other' ? document.getElementById('woDayModalCustomName').value : '';
+  if (typeKey === 'other' && !customName) {
     document.getElementById('woDayModalCustomWrap').style.display = 'block';
     document.getElementById('woDayModalCustomName').focus();
     return;
@@ -2780,202 +2605,73 @@ function renderChores() {
 // ======================= PLAN =======================
 const PLAN_DAYS = [
   {
-    title: 'Day 1 — Lower A: Quad & Glute Power',
-    color: '#4fc3f7',
-    sub: 'Requires: Barbells, Rack, Machines',
-    note: 'Rotation Rule: Week A: Squat → Leg Press (skip Leg Ext). Week B: Squat → Leg Extension (skip Leg Press).',
-    exercises: [
-      { name: 'Cable Crunch / Plank', sets: '3 × 15-20', muscle: 'Abs/Obliques', notes: 'Pre-activation. Do this first to wake up the core.' },
-      { name: 'Barbell Squat ★', sets: '4 sets: 5, 8, 10, 10', muscle: 'Quads, Glutes', notes: 'Heavy top set: 1×5. Then 3 back-off sets of 8-10. Focus on depth.' },
-      { name: 'Leg Press', sets: '3 × 10-12', muscle: 'Quads, Glutes', notes: 'Medium stance. Constant tension (no lockout). Rotate weekly.' },
-      { name: 'Barbell RDL ★', sets: '3 × 8-10', muscle: 'Hamstrings, Glutes', notes: 'Heavy hinge. Push hips back for deep hamstring stretch.' },
-      { name: 'Leg Extension', sets: '3 × 12-15', muscle: 'Quads', notes: 'Rest-Pause on final set. Isolation finisher. Rotate weekly.' },
-      { name: 'Standing Calf Raise', sets: '3 × 12-15', muscle: 'Calves (Gastro)', notes: '2-second pause at the bottom stretch.' },
-    ]
-  },
-  {
-    title: 'Day 2 — Upper A: Chest & Back Strength',
-    color: '#4fc3f7',
-    sub: 'Requires: Barbells, Bench, Cables',
-    exercises: [
-      { name: 'Machine Chest Press ★', sets: '3 × 8-10', muscle: 'Chest', notes: 'Machine focus for isolation. Keep elbows tucked slightly, drive explosively.', alt: 'Barbell Bench Press' },
-      { name: 'Barbell Bent-Over Row ★', sets: '2 × 6-8', muscle: 'Back (Thickness)', notes: 'Overhand grip. Torso 45°. Pull to lower chest. Heavy.', alt: 'T-Bar Row' },
-      { name: 'Barbell Row (Underhand)', sets: '1-2 × 10-12', muscle: 'Back (Lats)', notes: 'Supinated grip. Tuck elbows. Pull to waist. Focus on squeeze.', alt: 'Reverse Grip Machine Row' },
-      { name: 'Cable Lateral Raise', sets: '3 × 15-20', muscle: 'Shoulders (Medial)', notes: 'Set pulley to wrist height. Lead movement with elbow.', alt: 'DB / Machine Lateral Raise' },
-      { name: 'Reverse Pec Deck', sets: '2 × 12-15', muscle: 'Rear Delts', notes: 'High stability. Keep arms slightly bent and squeeze rear delts hard.', alt: 'Bent-Over DB Lateral Raise' },
-      { name: 'Lat Pulldown (Wide)', sets: '2 × 8-10', muscle: 'Back (Width)', notes: 'Palms away. Pull to upper chest. Control the negative.', alt: 'Wide Grip Pull-Ups' },
-      { name: 'Lat Pulldown (Narrow)', sets: '1-2 × 12-15', muscle: 'Back (Lats)', notes: 'Neutral/V-grip. Drive elbows down. Focus on deep stretch.', alt: 'Neutral Grip Pull-Ups' },
-      { name: 'Cable Fly', sets: '3 × 12-15', muscle: 'Chest (Pecs)', notes: 'Squeeze pecs hard at center. Constant tension.', alt: 'Pec Deck Machine' },
-    ]
-  },
-  {
-    title: 'Day 4 — Lower B: Balanced Leg Volume',
-    color: '#c8f135',
-    sub: 'Requires: Dumbbells, Machines (No Barbells needed)',
-    exercises: [
-      { name: 'Cable Crunch', sets: '3 × 15-20', muscle: 'Abs', notes: 'Round the back. Do not pull with arms/neck.' },
-      { name: 'Bulgarian Split Squat ★', sets: '2-3 × 10-12', muscle: 'Quads, Glutes', notes: 'Lean forward for glutes, upright for quads.' },
-      { name: 'Leg Curl', sets: '3 × 10-12', muscle: 'Hamstrings', notes: 'Seated or Lying. Optional: Rest-Pause technique on final set.' },
-      { name: 'Leg Extension', sets: '3 × 12-15', muscle: 'Quads', notes: 'Isolates quads to finish legs without extra glute fatigue.' },
-      { name: 'Hip Abduction', sets: '2 × 15-20', muscle: 'Glute Medius', notes: 'Lean forward slightly to target glutes over TFL. Controlled tempo.' },
-      { name: 'Hip Adduction', sets: '1-2 × 12-15', muscle: 'Adductors', notes: 'Optional/Light. Focus on the squeeze. Do not go heavy.' },
-      { name: 'Hip Thrust', sets: '3 × 8-12', muscle: 'Glutes', notes: 'Machine or DB. 1-second hold at the top is crucial.' },
-      { name: 'Seated Calf Raise', sets: '3 × 12-15', muscle: 'Calves (Soleus)', notes: 'Targets soleus. Do not bounce.' },
-    ]
-  },
-  {
-    title: 'Day 5 — Upper B: Shoulder & Arm Volume',
-    color: '#c8f135',
-    sub: 'Requires: Dumbbells, Machines (No Barbells needed)',
-    exercises: [
-      { name: 'Incline Dumbbell Press ★', sets: '3 × 8-10', muscle: 'Chest (Upper)', notes: 'Focus on stretching the pecs and driving up for upper chest volume.', alt: 'Incline Barbell Press' },
-      { name: 'Chest-Supported Row ★', sets: '3 × 8-12', muscle: 'Back (Mid/Lats)', notes: 'Machine or incline bench DB. Isolate upper back, save lower back.', alt: 'Single-Arm DB Row' },
-      { name: 'DB Overhead Press', sets: '3 × 8-10', muscle: 'Shoulders (Ant/Med)', notes: 'Primary shoulder power. Seated or standing.', alt: 'Arnold Press' },
-      { name: 'Chest Dips', sets: '2 × 8-12', muscle: 'Chest (Lower), Triceps', notes: 'Lean forward for chest emphasis. Use assist machine if needed.', alt: 'High-to-Low Cable / Decline' },
-      { name: 'Cable Pullover', sets: '3 × 12-15', muscle: 'Back (Lats)', notes: 'Straight arms. Focus on stretch at the top.', alt: 'Dumbbell Pullover' },
-      { name: 'Face Pull', sets: '3 × 15-20', muscle: 'Rear Delts, Upper Back', notes: 'Pull to forehead, rotate hands back. Rear delts health.', alt: 'Rear Delt Row' },
-      { name: 'Preacher Curl', sets: '2 × 10-12', muscle: 'Biceps (Short Head)', notes: 'Use machine or bench to eliminate momentum. Focus on peak contraction.', alt: 'Spider Curl / Concentration' },
-      { name: 'Tricep + Hammer Curl (SS)', sets: '3 × 12-15', muscle: 'Triceps / Biceps', notes: 'Superset rope tricep ext. with hammer curls for arm width.', alt: 'Skullcrushers / Cross-Body' },
-    ]
-  },
-  {
-    title: 'Day 6 — Aesthetics: Arms, Forearms & Rehab',
+    title: 'Day 1 — Full Body: Squat Focus',
     color: '#c084fc',
-    sub: 'Optional / Make-up Day · Target: Arm Size, Grip, Shoulder Health',
+    sub: 'Mon · Requires: Barbell, Rack, Machines',
+    note: 'Squat Rotation — Week A (Heavy): 160×5 + 125×8. Week B (Volume): 130–140×6–8 + 125×8. Don’t force a heavy top set if recovery is bad. Keep ~1–3 RIR; avoid failure on squat.',
     exercises: [
-      { name: 'Tate Press ★', sets: '3 × 10-12', muscle: 'Triceps (Medial)', notes: 'DBs on chest. Flared elbows. Press weights together inwards.', alt: 'Floor Press (DB)' },
-      { name: 'Incline Dumbbell Curl', sets: '3 × 10-12', muscle: 'Biceps (Stretch)', notes: 'Set bench to 45-60°. Arms hang behind torso. Maximizes stretch.', alt: 'Behind-Back Cable Curl' },
-      { name: 'Rope Overhead Ext. ★', sets: '3 × 12-15', muscle: 'Triceps (Long Head)', notes: 'Cable or DB. Keep elbows tucked near ears. Deep stretch.', alt: 'French Press (EZ Bar)' },
-      { name: 'Side-Lying Ext. Rotation', sets: '3 × 15-20', muscle: 'Rotator Cuff (Rehab)', notes: 'Shoulder health. Use very light weight (2-5lbs). Keep elbow pinned to side.', alt: 'Band Pull-Aparts' },
-      { name: 'Hammer Curl', sets: '3 × 10-12', muscle: 'Brachialis (Width)', notes: 'Cross-body style works best. Adds thickness to the arm.', alt: 'Neutral Grip Pull-ups' },
-      { name: 'Tricep Rope Pushdown', sets: '3 × 12-15', muscle: 'Triceps (Lateral)', notes: 'Flare elbows out slightly at bottom to target the "horseshoe".', alt: 'Single Arm Pushdown' },
-      { name: 'Reverse Grip EZ Curl ★', sets: '3 × 12-15', muscle: 'Forearms (Extensors)', notes: 'Overhand grip. Keep wrists straight. Squeeze tops of forearms.', alt: 'Zottman Curl' },
-      { name: 'Seated DB Wrist Curl ★', sets: '2 × 15-20', muscle: 'Forearms (Flexors)', notes: 'Rest forearms on bench. Roll DB down to fingertips, curl up.', alt: 'Behind-Back Barbell Wrist Curl' },
-      { name: 'Cable Woodchopper', sets: '3 × 15-20', muscle: 'Obliques (V-Taper)', notes: 'High-to-Low. Pivot back foot. Focus on rotation, not arm pulling.', alt: 'Russian Twist (Weighted)' },
+      { name: 'Barbell Squat ★', sets: '2 sets: 5, 8', muscle: 'Quads, Glutes', notes: 'Heavy top set + one back-off. e.g. 160×5, then 125×8. Avoid failure.' },
+      { name: 'Machine Chest Press', sets: '3 × 8-10', muscle: 'Chest', notes: 'Current 140×7×3 (machine max 155). Progress reps first — target 3×9–10 clean before adding load.' },
+      { name: 'Chest-Supported Row', sets: '3 × 8-12', muscle: 'Back (Mid/Lats)', notes: 'Saves lower-back fatigue vs barbell rows.' },
+      { name: 'Leg Curl', sets: '2 × 10-12', muscle: 'Hamstrings', notes: 'Enough hamstring work since RDL is on Day 3.' },
+      { name: 'Cable Lateral Raise', sets: '2-3 × 15-20', muscle: 'Shoulders (Medial)', notes: 'Controlled reps. Shoulder-friendly.' },
+      { name: 'Tricep Rope Ext. + Hammer Curl (SS)', sets: '2 × 12-15', muscle: 'Triceps / Biceps', notes: 'Superset to save time.' },
     ]
   },
-];
-
-// ======================= PLAN SUB-TABS =======================
-function switchPlanTab(tab) {
-  const isA = tab === 'a';
-  document.getElementById('planSubA').style.display = isA ? 'block' : 'none';
-  document.getElementById('planSubB').style.display = isA ? 'none' : 'block';
-  const btnA = document.getElementById('planTabBtnA');
-  const btnB = document.getElementById('planTabBtnB');
-  btnA.style.background = isA ? 'rgba(200,241,53,0.1)' : 'var(--surface2)';
-  btnA.style.borderColor = isA ? 'var(--accent)' : 'var(--border)';
-  btnA.style.color = isA ? 'var(--accent)' : 'var(--muted)';
-  btnA.style.fontWeight = isA ? '700' : '400';
-  btnB.style.background = isA ? 'var(--surface2)' : 'rgba(200,241,53,0.1)';
-  btnB.style.borderColor = isA ? 'var(--border)' : 'var(--accent)';
-  btnB.style.color = isA ? 'var(--muted)' : 'var(--accent)';
-  btnB.style.fontWeight = isA ? '400' : '700';
-}
-
-// ======================= PLAN B DAYS =======================
-const PLAN_B_DAYS = [
   {
-    title: 'Day 1 — Upper A: Strength',
+    title: 'Day 2 — Upper: Chest, Back, Arms, Forearms',
+    color: '#ff6b6b',
+    sub: 'Wed · Requires: Dumbbells, Cables, Machines',
+    exercises: [
+      { name: 'Incline Dumbbell Press ★', sets: '3 × 8-10', muscle: 'Chest (Upper)', notes: 'Main upper-chest press.' },
+      { name: 'Lat Pulldown (Wide)', sets: '3 × 8-10', muscle: 'Back (Width)', notes: 'Pull to upper chest. Control the negative.' },
+      { name: 'DB Overhead Press', sets: '2 × 8-10', muscle: 'Shoulders (Ant/Med)', notes: 'Seated preferred. Keep volume controlled.' },
+      { name: 'Reverse Pec Deck', sets: '3 × 12-15', muscle: 'Rear Delts', notes: 'Rear delts and shoulder balance.' },
+      { name: 'Standing Single-Arm Cable Curl', sets: '3 × 10-15 / arm', muscle: 'Biceps', notes: 'Replaces preacher curl. Elbow stable, no swinging, control the stretch, 1s squeeze at top.' },
+      { name: 'Tate Press', sets: '2-3 × 10-12', muscle: 'Triceps', notes: 'Triceps focus. Use controlled form.' },
+      { name: 'Reverse EZ / Cable Curl', sets: '2-3 × 12-15', muscle: 'Forearms, Brachialis', notes: 'Forearms and brachialis.' },
+      { name: 'Seated DB Wrist Curl', sets: '2 × 15-20', muscle: 'Forearms (Flexors)', notes: 'Optional if the workout is running too long.' },
+    ]
+  },
+  {
+    title: 'Day 3 — Lower: Posterior Chain Focus',
     color: '#4fc3f7',
-    sub: 'Chest, Back, Shoulders, Arms · Strength focus',
-    target: '16–18 sets/week',
+    sub: 'Fri · Requires: Barbell, Machines',
+    note: 'Bulgarian / Leg Press Rotation — Week A: Bulgarian Split Squat 2×8/leg with 2×32 kg DBs. Week B: Leg Press 2–3×10–12. Rest 90–150s between legs/rounds.',
     exercises: [
-      { name: 'Machine Press ★', sets: '3', reps: '5–8', muscle: 'Chest (Upper)', notes: 'Primary strength movement. Drive explosively, control the descent. Keep elbows tucked slightly.' },
-      { name: 'Barbell Row ★',           sets: '3', reps: '6–8', muscle: 'Back (Thickness)', notes: 'Overhand grip. Torso 45°. Pull to lower chest. Heavy.' },
-      { name: 'Neutral Grip Pulldown',   sets: '2', reps: '6–10', muscle: 'Back (Lats)', notes: 'V-bar or neutral grip. Drive elbows down and back.' },
-      { name: 'Cable Lateral Raise',     sets: '2', reps: '12–15', muscle: 'Shoulders (Medial)', notes: 'Lead with elbow. Constant tension via cable.' },
-      { name: 'Reverse Pec Deck',        sets: '2', reps: '12–15', muscle: 'Rear Delts', notes: 'Arms slightly bent. Squeeze rear delts hard at end range.' },
-      { name: 'Biceps Curl',             sets: '2', reps: '10–12', muscle: 'Biceps', notes: 'Full ROM. Supinate at top. No swinging.' },
-      { name: 'Triceps Overhead',        sets: '2', reps: '10–12', muscle: 'Triceps (Long Head)', notes: 'Cable or DB. Keep elbows tucked near ears. Deep stretch.' },
+      { name: 'Barbell RDL ★', sets: '2 sets: 7, 10', muscle: 'Hamstrings, Glutes', notes: 'e.g. 150×7 + ~130×10. Reduced from 150×7×3 to cut fatigue. Avoid failure.' },
+      { name: 'Bulgarian Split Squat', sets: '2-3 × 8-12', muscle: 'Quads, Glutes', notes: 'Alternate weekly with Leg Press (see note). Don’t max both every week. A major lift at your load.', alt: 'Leg Press' },
+      { name: 'Leg Extension', sets: '2-3 × 12-15', muscle: 'Quads', notes: 'Quad work without much systemic fatigue. Cut to 2 sets if recovery is poor.' },
+      { name: 'Seated Calf Raise', sets: '3 × 12-15', muscle: 'Calves (Soleus)', notes: '2-second stretch at the bottom.' },
+      { name: 'Cable Crunch', sets: '2-3 × 15-20', muscle: 'Abs', notes: 'Round the back; do not pull with arms/neck.' },
     ]
   },
   {
-    title: 'Day 3 — Lower A: Strength',
-    color: '#c8f135',
-    sub: 'Quads, Hamstrings, Glutes, Calves · Strength focus',
-    target: '13–14 sets/week',
-    exercises: [
-      { name: 'Barbell Squat ★', sets: '3–4', reps: '5–8', muscle: 'Quads, Glutes', notes: 'Primary strength movement. Focus on depth and bracing.' },
-      { name: 'Barbell RDL ★',   sets: '3',   reps: '6–8', muscle: 'Hamstrings, Glutes', notes: 'Push hips back. Feel the hamstring stretch at the bottom.' },
-      { name: 'Leg Press',        sets: '2',   reps: '8–10', muscle: 'Quads, Glutes', notes: 'Medium stance. No lockout — constant tension.' },
-      { name: 'Standing Calf Raise', sets: '3', reps: '12–15', muscle: 'Calves (Gastro)', notes: '2-second pause at the bottom stretch.' },
-      { name: 'Abs',              sets: '2',   reps: '15–20', muscle: 'Core', notes: 'Cable crunch or plank variation.' },
-    ]
-  },
-  {
-    title: 'Day 5 — Upper B: Hypertrophy',
+    title: 'Run 1 — Easy Run',
     color: '#ff9f43',
-    sub: 'Chest, Back, Shoulders, Arms · Volume focus',
-    target: '16–18 sets/week',
+    sub: 'Tue · Conditioning · conversational pace',
+    note: 'Effort: conversational pace — you should be able to talk throughout.',
     exercises: [
-      { name: 'Barbell Incline Press ★', sets: '3', reps: '8–10', muscle: 'Chest (Upper)', notes: 'Back-off weight from Day 1. Focus on feel and contraction.' },
-      { name: 'Seated Cable Row ★',      sets: '3', reps: '8–12', muscle: 'Back (Mid)', notes: 'Neutral grip. Drive elbows back. Squeeze hard at end.' },
-      { name: 'Cable Pullover',           sets: '2', reps: '12–15', muscle: 'Back (Lats)', notes: 'Straight arms. Maximise the stretch at the top.' },
-      { name: 'Face Pull',               sets: '2', reps: '15–20', muscle: 'Rear Delts, Upper Back', notes: 'Pull to forehead. Rotate hands back for external rotation.' },
-      { name: 'DB Overhead Press',       sets: '2', reps: '8–10', muscle: 'Shoulders', notes: 'Seated or standing. Control the descent.' },
-      { name: 'Biceps',                  sets: '2–3', reps: '10–15', muscle: 'Biceps', notes: 'Cable or DB curl variation. Squeeze and slow eccentric.' },
-      { name: 'Triceps',                 sets: '2–3', reps: '10–15', muscle: 'Triceps', notes: 'Pushdown or overhead extension. Full ROM.' },
+      { name: 'Warm-up walk/jog', sets: '5 min', muscle: 'Warm-up', notes: 'Ease in gradually.' },
+      { name: 'Easy run', sets: '20-30 min', muscle: 'Aerobic', notes: 'Conversational pace. Keep it relaxed.' },
+      { name: 'Cooldown', sets: '5 min', muscle: 'Recovery', notes: 'Walk it out.' },
     ]
   },
   {
-    title: 'Day 7 — Lower B: Hypertrophy',
-    color: '#c084fc',
-    sub: 'Quads, Hamstrings, Glutes, Calves · Volume focus',
-    target: '14–16 sets/week',
+    title: 'Run 2 — Easy or Moderate Run',
+    color: '#ff9f43',
+    sub: 'Thu · Conditioning · choose by recovery',
+    note: 'If Friday lower feels worse after Thursday running, swap this for a 20–30 min incline walk or very easy jog. Don’t go all-out — it should not feel like another leg workout.',
     exercises: [
-      { name: 'Bulgarian Split Squat ★', sets: '2–3', reps: '8–12', muscle: 'Quads, Glutes', notes: 'Lean forward for glutes, upright for quads. Control the descent.' },
-      { name: 'Leg Curl ★',             sets: '3',   reps: '10–12', muscle: 'Hamstrings', notes: 'Seated or lying. Optional rest-pause on final set.' },
-      { name: 'Leg Extension',           sets: '2',   reps: '12–15', muscle: 'Quads', notes: 'Isolates quads. Rest-pause technique on final set.' },
-      { name: 'Hip Thrust',              sets: '2–3', reps: '8–12', muscle: 'Glutes', notes: 'Machine or barbell. 1-second hold at the top.' },
-      { name: 'Seated Calf Raise',       sets: '3',   reps: '12–15', muscle: 'Calves (Soleus)', notes: 'Targets soleus. Do not bounce at the bottom.' },
-      { name: 'Abs',                     sets: '2',   reps: '15–20', muscle: 'Core', notes: 'Cable crunch or hanging leg raise.' },
+      { name: 'Warm-up', sets: '5-8 min', muscle: 'Warm-up', notes: 'Ease in gradually.' },
+      { name: 'Option A — Easy/moderate run', sets: '20-25 min', muscle: 'Recovery', notes: 'Safer recovery choice.' },
+      { name: 'Option B — Intervals', sets: '6 × (1 min fast / 2 min easy)', muscle: 'Intervals', notes: 'Light intervals. Not all-out.' },
+      { name: 'Cooldown', sets: '5 min', muscle: 'Recovery', notes: 'Walk it out.' },
     ]
   },
 ];
 
-let activePlanBDay = 0;
-
-function showPlanBDay(idx) {
-  activePlanBDay = idx;
-  const day = PLAN_B_DAYS[idx];
-
-  document.querySelectorAll('.plan-b-btn').forEach((btn, i) => {
-    btn.style.background = i === idx ? day.color + '22' : 'var(--surface2)';
-    btn.style.borderColor = i === idx ? day.color : 'var(--border)';
-    btn.style.color = i === idx ? day.color : 'var(--muted)';
-  });
-
-  document.getElementById('planBDayContent').innerHTML = `
-    <div class="card" style="border-color:${day.color}22">
-      <div style="font-family:var(--font-display);font-size:1rem;font-weight:800;color:${day.color};margin-bottom:4px">${day.title}</div>
-      <div style="font-size:0.65rem;color:var(--muted);margin-bottom:2px">${day.sub}</div>
-      <div style="font-size:0.6rem;color:${day.color};margin-bottom:14px;letter-spacing:0.5px">Target: ${day.target}</div>
-      <div style="overflow-x:auto">
-        <table style="width:100%;border-collapse:collapse;font-size:0.7rem">
-          <thead>
-            <tr style="border-bottom:1px solid var(--border)">
-              <th style="text-align:left;padding:6px 8px;color:var(--muted);font-size:0.58rem;letter-spacing:1px;text-transform:uppercase;font-weight:400;min-width:160px">Exercise</th>
-              <th style="text-align:left;padding:6px 8px;color:var(--muted);font-size:0.58rem;letter-spacing:1px;text-transform:uppercase;font-weight:400;white-space:nowrap">Sets/week</th>
-              <th style="text-align:left;padding:6px 8px;color:var(--muted);font-size:0.58rem;letter-spacing:1px;text-transform:uppercase;font-weight:400;white-space:nowrap">Reps</th>
-              <th style="text-align:left;padding:6px 8px;color:var(--muted);font-size:0.58rem;letter-spacing:1px;text-transform:uppercase;font-weight:400;white-space:nowrap">Muscle</th>
-              <th style="text-align:left;padding:6px 8px;color:var(--muted);font-size:0.58rem;letter-spacing:1px;text-transform:uppercase;font-weight:400;min-width:160px">Notes</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${day.exercises.map((ex, i) => `
-              <tr style="border-bottom:1px solid var(--border);background:${i%2===0?'transparent':'rgba(255,255,255,0.02)'}">
-                <td style="padding:8px;color:${ex.name.includes('★') ? day.color : 'var(--text)'};font-weight:${ex.name.includes('★') ? '700' : '400'}">${ex.name}</td>
-                <td style="padding:8px;color:${day.color};font-weight:700;white-space:nowrap">${ex.sets}</td>
-                <td style="padding:8px;color:var(--muted);white-space:nowrap">${ex.reps}</td>
-                <td style="padding:8px;color:var(--accent);font-size:0.65rem;white-space:nowrap">${ex.muscle}</td>
-                <td style="padding:8px;color:var(--muted);font-size:0.65rem">${ex.notes}</td>
-              </tr>`).join('')}
-          </tbody>
-        </table>
-      </div>
-    </div>`;
-}
+let activePlanDay = 0;
 
 function showPlanDay(idx) {
   activePlanDay = idx;
@@ -3036,220 +2732,6 @@ function calcRM() {
 }
 
 
-// ======================= SUPABASE SYNC =======================
-const SB_URL_KEY   = 'selfos_sb_url';
-const SB_KEY_KEY   = 'selfos_sb_key';
-const SB_UID_KEY   = 'selfos_sb_uid';
-const SYNC_KEYS    = ['weight','workout','alcohol','work','hobby','tweeter'];
-const SYNC_EXTRA   = ['selfos_photopin','selfos_chores'];
-
-// Hardcoded credentials — no setup needed
-const SB_URL_DEFAULT = 'https://dbwutepkaowmsolhaghu.supabase.co';
-const SB_KEY_DEFAULT = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRid3V0ZXBrYW93bXNvbGhhZ2h1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2MjY0MTIsImV4cCI6MjA5MDIwMjQxMn0.vacKNIw6JZ1FxyZe3KJomx9WrG-YAQFIpBNlK4GfaTo';
-
-let syncDebounce = null;
-let syncConnected = false;
-
-function getSbConfig() {
-  return {
-    url: localStorage.getItem(SB_URL_KEY) || SB_URL_DEFAULT,
-    key: localStorage.getItem(SB_KEY_KEY) || SB_KEY_DEFAULT,
-    uid: localStorage.getItem(SB_UID_KEY) || '',
-  };
-}
-
-function getOrCreateUserId() {
-  let uid = localStorage.getItem(SB_UID_KEY);
-  if (!uid) {
-    uid = 'u_' + Math.random().toString(36).slice(2,10) + Math.random().toString(36).slice(2,10);
-    localStorage.setItem(SB_UID_KEY, uid);
-  }
-  return uid;
-}
-
-function setSyncStatus(state, label) {
-  const dot = document.getElementById('syncDot');
-  const lbl = document.getElementById('syncLabel');
-  if (!dot || !lbl) return;
-  dot.className = 'sync-dot ' + state;
-  lbl.textContent = label || state;
-}
-
-// Build payload — everything except photos (too large)
-function buildSyncPayload() {
-  const out = {};
-  SYNC_KEYS.forEach(k => {
-    const raw = DB.get(k);
-    if (k === 'weight') {
-      out[k] = raw.map(e => { const c = {...e}; delete c.photo; return c; });
-    } else {
-      out[k] = raw;
-    }
-  });
-  SYNC_EXTRA.forEach(k => { out[k] = localStorage.getItem(k) || null; });
-  return out;
-}
-
-async function pushToCloud(silent) {
-  const { url, key, uid } = getSbConfig();
-  if (!url || !key || !uid) return;
-  setSyncStatus('syncing', 'Syncing…');
-  try {
-    const res = await fetch(`${url}/rest/v1/selfos_sync`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'apikey': key,
-        'Authorization': 'Bearer ' + key,
-        'Prefer': 'resolution=merge-duplicates',
-      },
-      body: JSON.stringify({ user_id: uid, data: buildSyncPayload(), updated_at: new Date().toISOString() }),
-    });
-    if (!res.ok) throw new Error(await res.text());
-    syncConnected = true;
-    setSyncStatus('synced', '✓ Synced');
-    if (!silent) showToast('Saved to cloud ✓');
-  } catch(e) {
-    setSyncStatus('error', 'Sync error');
-    if (!silent) showToast('Sync failed — check settings');
-    console.error('Sync push error:', e);
-  }
-}
-
-async function pullFromCloud() {
-  const { url, key, uid } = getSbConfig();
-  if (!url || !key || !uid) return null;
-  setSyncStatus('syncing', 'Loading…');
-  try {
-    const res = await fetch(`${url}/rest/v1/selfos_sync?user_id=eq.${encodeURIComponent(uid)}&select=data,updated_at`, {
-      headers: { 'apikey': key, 'Authorization': 'Bearer ' + key }
-    });
-    if (!res.ok) throw new Error(await res.text());
-    const rows = await res.json();
-    if (!rows.length) { setSyncStatus('synced', '✓ Connected'); return null; }
-    syncConnected = true;
-    setSyncStatus('synced', '✓ Synced');
-    return rows[0];
-  } catch(e) {
-    setSyncStatus('error', 'Sync error');
-    console.error('Sync pull error:', e);
-    return null;
-  }
-}
-
-function applyCloudData(data) {
-  if (!data) return;
-  SYNC_KEYS.forEach(k => { if (data[k] !== undefined) DB.set(k, data[k]); });
-  SYNC_EXTRA.forEach(k => { if (data[k] != null) localStorage.setItem(k, data[k]); });
-  renderWeight(); renderWorkout(); renderAlcohol(); renderWork(); renderTweeter(); renderToday(); renderChores();
-  applyPhotoLockState();
-}
-
-// Debounced auto-push — fires 1.5s after last DB change
-function scheduleSync() {
-  clearTimeout(syncDebounce);
-  const { url, key, uid } = getSbConfig();
-  if (!url || !key || !uid) return;
-  setSyncStatus('syncing', 'Pending…');
-  syncDebounce = setTimeout(() => pushToCloud(true), 1500);
-}
-
-// Patch DB.set to trigger auto-sync
-const _origSet = DB.set.bind(DB);
-DB.set = function(k, v) {
-  _origSet(k, v);
-  scheduleSync();
-};
-
-async function initSync() {
-  const uid = getOrCreateUserId();
-  const { url, key } = getSbConfig();
-
-  // Patch setChoreLog to trigger sync
-  const origSetChore = window.setChoreLog;
-  window.setChoreLog = function(log) {
-    origSetChore(log);
-    scheduleSync();
-  };
-
-  // Always have url+key now (hardcoded), just need a uid
-  if (!uid) {
-    setSyncStatus('offline', 'Sync off');
-    return;
-  }
-
-  setSyncStatus('syncing', 'Connecting…');
-  const row = await pullFromCloud();
-  if (row && row.data) {
-    applyCloudData(row.data);
-    showToast('Loaded from cloud ✓');
-  } else {
-    // No existing cloud data — push local data up
-    pushToCloud(true);
-  }
-}
-
-// ======================= SYNC MODAL =======================
-function showSyncModal() {
-  const uid = getOrCreateUserId();
-  document.getElementById('sbUserId').value = uid;
-  document.getElementById('sbError').textContent = '';
-  document.getElementById('sbModal').classList.add('open');
-}
-
-function closeSyncModal() {
-  document.getElementById('sbModal').classList.remove('open');
-}
-
-function copyUserId() {
-  const uid = document.getElementById('sbUserId').value;
-  navigator.clipboard.writeText(uid).then(() => showToast('User ID copied!'));
-}
-
-function regenerateUserId() {
-  if (!confirm('Generate a NEW User ID? This will de-link you from your existing cloud data.')) return;
-  const uid = 'u_' + Math.random().toString(36).slice(2,10) + Math.random().toString(36).slice(2,10);
-  localStorage.setItem(SB_UID_KEY, uid);
-  document.getElementById('sbUserId').value = uid;
-}
-
-function saveUserId() {
-  const uid = document.getElementById('sbUserId').value.trim();
-  const errEl = document.getElementById('sbError');
-  if (!uid) { errEl.textContent = 'Please enter a User ID.'; return; }
-  localStorage.setItem(SB_UID_KEY, uid);
-  errEl.textContent = '';
-  closeSyncModal();
-  showToast('User ID saved — syncing…');
-  pushToCloud(false);
-}
-
-async function loadFromCloud() {
-  const uid = document.getElementById('sbUserId').value.trim();
-  const errEl = document.getElementById('sbError');
-  if (!uid) { errEl.textContent = 'Please enter a User ID first.'; return; }
-  localStorage.setItem(SB_UID_KEY, uid);
-  const row = await pullFromCloud();
-  if (row && row.data) {
-    applyCloudData(row.data);
-    closeSyncModal();
-    showToast('Data loaded from cloud ✓');
-  } else {
-    errEl.textContent = 'No data found for this User ID, or connection failed.';
-  }
-}
-
-function disconnectSync() {
-  if (!confirm('Disconnect cloud sync? Your local data stays, but it will no longer auto-sync.')) return;
-  localStorage.removeItem(SB_URL_KEY);
-  localStorage.removeItem(SB_KEY_KEY);
-  syncConnected = false;
-  setSyncStatus('offline', 'Sync off');
-  closeSyncModal();
-  showToast('Sync disconnected.');
-}
-
-// ======================= INIT =======================
 function setDefaultDates() {
   const t = todayDMY();
   ['w-date','wo-date','al-date','wk-date','hb-date'].forEach(id => {
@@ -3263,7 +2745,6 @@ setDefaultDates();
 initWoTypeGrid();
 initResearchTypeGrid();
 showPlanDay(0);
-showPlanBDay(0);
 renderWeight();
 renderWorkout();
 renderAlcohol();
@@ -3273,7 +2754,6 @@ renderToday();
 renderChores();
 applyNavLockState();
 applyPhotoLockState();
-initSync();
 </script>
 </body>
 </html>
