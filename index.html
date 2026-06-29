@@ -695,7 +695,7 @@
   <div class="tab" id="tab-plan">
     <div class="section-head">
       <h2 style="color:var(--accent)">Plan</h2>
-      <p>3-Day Cut · Full Body / Upper / Lower + Running</p>
+      <p>3-Day Alternating Cut · A/B Weeks · Higher Volume</p>
     </div>
 
     <!-- Week overview -->
@@ -709,24 +709,25 @@
         <div style="color:var(--muted);padding:4px">Fri</div>
         <div style="color:var(--muted);padding:4px">Sat</div>
         <div style="color:var(--muted);padding:4px">Sun</div>
-        <div style="background:#c084fc;color:#000;border-radius:3px;padding:6px 2px;font-weight:700;font-size:0.55rem;cursor:pointer" onclick="showPlanDay(0)">Full Body</div>
-        <div style="background:#ff9f43;color:#000;border-radius:3px;padding:6px 2px;font-weight:700;font-size:0.55rem;cursor:pointer" onclick="showPlanDay(3)">Run 1</div>
-        <div style="background:#ff6b6b;color:#000;border-radius:3px;padding:6px 2px;font-weight:700;font-size:0.55rem;cursor:pointer" onclick="showPlanDay(1)">Upper</div>
-        <div style="background:#ff9f43;color:#000;border-radius:3px;padding:6px 2px;font-weight:700;font-size:0.55rem;cursor:pointer" onclick="showPlanDay(4)">Run 2</div>
-        <div style="background:#4fc3f7;color:#000;border-radius:3px;padding:6px 2px;font-weight:700;font-size:0.55rem;cursor:pointer" onclick="showPlanDay(2)">Lower</div>
+        <div style="background:#c084fc;color:#000;border-radius:3px;padding:6px 2px;font-weight:700;font-size:0.55rem;cursor:pointer" onclick="showPlanDay(0)">Day 1</div>
+        <div style="background:#ff9f43;color:#000;border-radius:3px;padding:6px 2px;font-weight:700;font-size:0.55rem;cursor:pointer" onclick="showPlanDay(5)">Run 1</div>
+        <div style="background:#ff6b6b;color:#000;border-radius:3px;padding:6px 2px;font-weight:700;font-size:0.55rem;cursor:pointer" onclick="showPlanDay(2)">Upper</div>
+        <div style="background:#ff9f43;color:#000;border-radius:3px;padding:6px 2px;font-weight:700;font-size:0.55rem;cursor:pointer" onclick="showPlanDay(6)">Run 2</div>
+        <div style="background:#4fc3f7;color:#000;border-radius:3px;padding:6px 2px;font-weight:700;font-size:0.55rem;cursor:pointer" onclick="showPlanDay(3)">Day 3</div>
         <div style="background:var(--surface2);color:var(--muted);border-radius:3px;padding:6px 2px;font-size:0.55rem">Rest 🚶</div>
         <div style="background:var(--surface2);color:var(--muted);border-radius:3px;padding:6px 2px;font-size:0.55rem">Rest 💤</div>
-      </div>
-      <div style="font-size:0.6rem;color:var(--muted);margin-top:10px;letter-spacing:0.5px">Tap a day to see exercises ↓</div>
+      <div style="font-size:0.6rem;color:var(--muted);margin-top:10px;letter-spacing:0.5px">Alternate weekly — <b style="color:#c084fc">Week A:</b> Day 1 Heavy + Day 3 Bulgarian · <b style="color:#80d4f7">Week B:</b> Day 1 Volume + Day 3 Leg Press. Tap a day to see exercises ↓</div>
     </div>
 
     <!-- Day selector buttons -->
     <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">
-      <button onclick="showPlanDay(0)" class="plan-day-btn" id="planBtn0" style="background:rgba(192,132,252,0.15);border:1px solid #c084fc;color:#c084fc;font-family:var(--font-mono);font-size:0.6rem;padding:6px 10px;cursor:pointer;border-radius:2px;letter-spacing:1px">D1 Full Body</button>
-      <button onclick="showPlanDay(1)" class="plan-day-btn" id="planBtn1" style="background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-family:var(--font-mono);font-size:0.6rem;padding:6px 10px;cursor:pointer;border-radius:2px;letter-spacing:1px">D2 Upper</button>
-      <button onclick="showPlanDay(2)" class="plan-day-btn" id="planBtn2" style="background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-family:var(--font-mono);font-size:0.6rem;padding:6px 10px;cursor:pointer;border-radius:2px;letter-spacing:1px">D3 Lower</button>
-      <button onclick="showPlanDay(3)" class="plan-day-btn" id="planBtn3" style="background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-family:var(--font-mono);font-size:0.6rem;padding:6px 10px;cursor:pointer;border-radius:2px;letter-spacing:1px">Run 1</button>
-      <button onclick="showPlanDay(4)" class="plan-day-btn" id="planBtn4" style="background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-family:var(--font-mono);font-size:0.6rem;padding:6px 10px;cursor:pointer;border-radius:2px;letter-spacing:1px">Run 2</button>
+      <button onclick="showPlanDay(0)" class="plan-day-btn" id="planBtn0" style="background:rgba(192,132,252,0.15);border:1px solid #c084fc;color:#c084fc;font-family:var(--font-mono);font-size:0.6rem;padding:6px 10px;cursor:pointer;border-radius:2px;letter-spacing:1px">D1 Heavy</button>
+      <button onclick="showPlanDay(1)" class="plan-day-btn" id="planBtn1" style="background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-family:var(--font-mono);font-size:0.6rem;padding:6px 10px;cursor:pointer;border-radius:2px;letter-spacing:1px">D1 Volume</button>
+      <button onclick="showPlanDay(2)" class="plan-day-btn" id="planBtn2" style="background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-family:var(--font-mono);font-size:0.6rem;padding:6px 10px;cursor:pointer;border-radius:2px;letter-spacing:1px">D2 Upper</button>
+      <button onclick="showPlanDay(3)" class="plan-day-btn" id="planBtn3" style="background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-family:var(--font-mono);font-size:0.6rem;padding:6px 10px;cursor:pointer;border-radius:2px;letter-spacing:1px">D3 Bulgarian</button>
+      <button onclick="showPlanDay(4)" class="plan-day-btn" id="planBtn4" style="background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-family:var(--font-mono);font-size:0.6rem;padding:6px 10px;cursor:pointer;border-radius:2px;letter-spacing:1px">D3 Leg Press</button>
+      <button onclick="showPlanDay(5)" class="plan-day-btn" id="planBtn5" style="background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-family:var(--font-mono);font-size:0.6rem;padding:6px 10px;cursor:pointer;border-radius:2px;letter-spacing:1px">Run 1</button>
+      <button onclick="showPlanDay(6)" class="plan-day-btn" id="planBtn6" style="background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-family:var(--font-mono);font-size:0.6rem;padding:6px 10px;cursor:pointer;border-radius:2px;letter-spacing:1px">Run 2</button>
     </div>
 
     <!-- Exercise table -->
@@ -2605,67 +2606,110 @@ function renderChores() {
 // ======================= PLAN =======================
 const PLAN_DAYS = [
   {
-    title: 'Day 1 — Full Body: Squat Focus',
+    title: 'Day 1 Opt 1 — Full Body: Heavy Squat',
     color: '#c084fc',
-    sub: 'Mon · Requires: Barbell, Rack, Machines',
-    note: 'Squat Rotation — Week A (Heavy): 160×5 + 125×8. Week B (Volume): 130–140×6–8 + 125×8. Don’t force a heavy top set if recovery is bad. Keep ~1–3 RIR; avoid failure on squat.',
+    sub: 'Mon · Week A · pair with Day 3 Bulgarian',
+    note: 'Heavy squat week. Keep 1–3 RIR; no grinding. Use in the same week as Day 3 Opt 1 (Bulgarian).',
     exercises: [
-      { name: 'Barbell Squat ★', sets: '2 sets: 5, 8', muscle: 'Quads, Glutes', notes: 'Heavy top set + one back-off. e.g. 160×5, then 125×8. Avoid failure.' },
-      { name: 'Machine Chest Press', sets: '3 × 8-10', muscle: 'Chest', notes: 'Current 140×7×3 (machine max 155). Progress reps first — target 3×9–10 clean before adding load.' },
-      { name: 'Chest-Supported Row', sets: '3 × 8-12', muscle: 'Back (Mid/Lats)', notes: 'Saves lower-back fatigue vs barbell rows.' },
-      { name: 'Leg Curl', sets: '2 × 10-12', muscle: 'Hamstrings', notes: 'Enough hamstring work since RDL is on Day 3.' },
-      { name: 'Cable Lateral Raise', sets: '2-3 × 15-20', muscle: 'Shoulders (Medial)', notes: 'Controlled reps. Shoulder-friendly.' },
-      { name: 'Tricep Rope Ext. + Hammer Curl (SS)', sets: '2 × 12-15', muscle: 'Triceps / Biceps', notes: 'Superset to save time.' },
+      { name: 'Barbell Squat ★', sets: '2 sets: 5, 8', muscle: 'Quads, Glutes', notes: 'Heavy top set + back-off. e.g. 160×5, then 125×8. No grinding.' },
+      { name: 'Machine Chest Press', sets: '3 × 8-10', muscle: 'Chest', notes: 'Current 140×7×3 (max 155). Progress by reps before load.' },
+      { name: 'Chest-Supported Row', sets: '3 × 8-12', muscle: 'Back (Mid/Lats)', notes: 'Saves lower-back fatigue.' },
+      { name: 'Neutral / Narrow Pulldown', sets: '2 × 10-12', muscle: 'Back (Lats)', notes: 'Extra lat volume without lower-back fatigue.' },
+      { name: 'Leg Curl', sets: '3 × 10-12', muscle: 'Hamstrings', notes: 'Seated or lying. Controlled reps.' },
+      { name: 'Cable Lateral Raise', sets: '4 × 15-20', muscle: 'Side Delts', notes: 'Side-delt priority. Controlled, no swinging.' },
+      { name: 'Standing / Seated Calf Raise', sets: '2 × 12-20', muscle: 'Calves', notes: '2-second stretch at the bottom.' },
+      { name: 'Rope Tricep Ext. + Hammer Curl (SS)', sets: '3 supersets × 12-15', muscle: 'Triceps / Biceps', notes: 'Minimal rest within; rest after each superset.' },
     ]
   },
   {
-    title: 'Day 2 — Upper: Chest, Back, Arms, Forearms',
+    title: 'Day 1 Opt 2 — Full Body: Volume Squat',
+    color: '#c084fc',
+    sub: 'Mon · Week B · pair with Day 3 Leg Press',
+    note: 'Easier/volume squat week. Leave more in the tank. Use in the same week as Day 3 Opt 2 (Leg Press).',
+    exercises: [
+      { name: 'Barbell Squat ★', sets: '2 sets: 6-8, 8', muscle: 'Quads, Glutes', notes: 'Easier than Opt 1. e.g. 130–140×6–8, then 125×8.' },
+      { name: 'Machine Chest Press', sets: '3 × 8-10', muscle: 'Chest', notes: 'Same progression as Opt 1.' },
+      { name: 'Chest-Supported Row', sets: '3 × 8-12', muscle: 'Back (Mid/Lats)', notes: 'Controlled reps.' },
+      { name: 'Neutral / Narrow Pulldown', sets: '2 × 10-12', muscle: 'Back (Lats)', notes: 'Extra lat volume.' },
+      { name: 'Leg Curl', sets: '3 × 10-12', muscle: 'Hamstrings', notes: 'Do not rush the eccentric.' },
+      { name: 'Cable Lateral Raise', sets: '4 × 15-20', muscle: 'Side Delts', notes: 'Main side-delt volume for the week.' },
+      { name: 'Standing / Seated Calf Raise', sets: '2 × 12-20', muscle: 'Calves', notes: 'Controlled stretch.' },
+      { name: 'Rope Tricep Ext. + Hammer Curl (SS)', sets: '3 supersets × 12-15', muscle: 'Triceps / Biceps', notes: 'Keep it strict.' },
+    ]
+  },
+  {
+    title: 'Day 2 — Upper: Chest, Back, Delts, Arms',
     color: '#ff6b6b',
-    sub: 'Wed · Requires: Dumbbells, Cables, Machines',
+    sub: 'Wed · Same every week',
     exercises: [
-      { name: 'Incline Dumbbell Press ★', sets: '3 × 8-10', muscle: 'Chest (Upper)', notes: 'Main upper-chest press.' },
-      { name: 'Lat Pulldown (Wide)', sets: '3 × 8-10', muscle: 'Back (Width)', notes: 'Pull to upper chest. Control the negative.' },
-      { name: 'DB Overhead Press', sets: '2 × 8-10', muscle: 'Shoulders (Ant/Med)', notes: 'Seated preferred. Keep volume controlled.' },
-      { name: 'Reverse Pec Deck', sets: '3 × 12-15', muscle: 'Rear Delts', notes: 'Rear delts and shoulder balance.' },
-      { name: 'Standing Single-Arm Cable Curl', sets: '3 × 10-15 / arm', muscle: 'Biceps', notes: 'Replaces preacher curl. Elbow stable, no swinging, control the stretch, 1s squeeze at top.' },
-      { name: 'Tate Press', sets: '2-3 × 10-12', muscle: 'Triceps', notes: 'Triceps focus. Use controlled form.' },
-      { name: 'Reverse EZ / Cable Curl', sets: '2-3 × 12-15', muscle: 'Forearms, Brachialis', notes: 'Forearms and brachialis.' },
-      { name: 'Seated DB Wrist Curl', sets: '2 × 15-20', muscle: 'Forearms (Flexors)', notes: 'Optional if the workout is running too long.' },
+      { name: 'Incline Dumbbell Press ★', sets: '3 × 8-10', muscle: 'Chest (Upper)', notes: 'Main upper-chest press. Controlled stretch.' },
+      { name: 'Wide Lat Pulldown', sets: '3 × 8-10', muscle: 'Back (Width)', notes: 'Pull to upper chest. Use narrow/neutral if shoulders or elbows dislike wide grip.' },
+      { name: 'Seated Cable / Machine Row', sets: '2 × 10-12', muscle: 'Back (Mid)', notes: 'Extra back volume. Keep torso stable.' },
+      { name: 'DB Overhead Press', sets: '2-3 × 8-10', muscle: 'Shoulders (Ant/Med)', notes: 'Start with 2 sets; move to 3 when stable.' },
+      { name: 'Face Pull', sets: '3 × 15-20', muscle: 'Rear Delts, Upper Back', notes: 'Pull toward forehead/upper face. Not an ego lift.' },
+      { name: 'Cable Lateral Raise', sets: '2 × 15-20', muscle: 'Side Delts', notes: 'Extra side-delt frequency.' },
+      { name: 'Cable Fly', sets: '3-4 × 12-15', muscle: 'Chest', notes: 'Default 3 sets; 4 if chest still feels underdosed.' },
+      { name: 'Standing Single-Arm Cable Curl', sets: '3 × 10-15 / arm', muscle: 'Biceps', notes: 'Strict reps, 1–2s squeeze.' },
+      { name: 'Tate Press', sets: '3 × 10-12', muscle: 'Triceps', notes: 'Triceps focus. Control the lowering.' },
+      { name: 'Reverse Curl', sets: '2 × 12-15', muscle: 'Forearms, Brachialis', notes: 'EZ-bar or cable.' },
+      { name: 'Seated DB Wrist Curl', sets: '2 × 15-20', muscle: 'Forearms (Flexors)', notes: 'Full controlled range.' },
     ]
   },
   {
-    title: 'Day 3 — Lower: Posterior Chain Focus',
+    title: 'Day 3 Opt 1 — Lower + Pump: Bulgarian Week',
     color: '#4fc3f7',
-    sub: 'Fri · Requires: Barbell, Machines',
-    note: 'Bulgarian / Leg Press Rotation — Week A: Bulgarian Split Squat 2×8/leg with 2×32 kg DBs. Week B: Leg Press 2–3×10–12. Rest 90–150s between legs/rounds.',
+    sub: 'Fri · Week A · pair with Day 1 Heavy',
+    note: 'Bulgarian week. Don’t grind RDL. Use in the same week as Day 1 Opt 1.',
     exercises: [
-      { name: 'Barbell RDL ★', sets: '2 sets: 7, 10', muscle: 'Hamstrings, Glutes', notes: 'e.g. 150×7 + ~130×10. Reduced from 150×7×3 to cut fatigue. Avoid failure.' },
-      { name: 'Bulgarian Split Squat', sets: '2-3 × 8-12', muscle: 'Quads, Glutes', notes: 'Alternate weekly with Leg Press (see note). Don’t max both every week. A major lift at your load.', alt: 'Leg Press' },
-      { name: 'Leg Extension', sets: '2-3 × 12-15', muscle: 'Quads', notes: 'Quad work without much systemic fatigue. Cut to 2 sets if recovery is poor.' },
-      { name: 'Seated Calf Raise', sets: '3 × 12-15', muscle: 'Calves (Soleus)', notes: '2-second stretch at the bottom.' },
-      { name: 'Cable Crunch', sets: '2-3 × 15-20', muscle: 'Abs', notes: 'Round the back; do not pull with arms/neck.' },
+      { name: 'Barbell RDL ★', sets: '2 sets: 7, 10', muscle: 'Hamstrings, Glutes', notes: 'e.g. 150×7, then ~130×10. Do not grind.' },
+      { name: 'Bulgarian Split Squat', sets: '2 × 8-10 / leg', muscle: 'Quads, Glutes', notes: 'Heavy movement. Rest 90–150 sec.' },
+      { name: 'Hip Thrust (optional)', sets: '1-2 × 10-12', muscle: 'Glutes', notes: 'Optional glute add-on. Keep 1–2 RIR.' },
+      { name: 'Leg Extension', sets: '3 × 12-15', muscle: 'Quads', notes: 'Quad volume with low systemic fatigue.' },
+      { name: 'Seated Calf Raise', sets: '4 × 12-15', muscle: 'Calves (Soleus)', notes: '2-second stretch at the bottom.' },
+      { name: 'Cable Crunch', sets: '4 × 15-20', muscle: 'Abs', notes: 'Round the back; do not pull with arms/neck.' },
+      { name: 'Cable Fly', sets: '3 × 12-15', muscle: 'Chest', notes: 'Extra chest pump, low fatigue.' },
+      { name: 'Cable Pullover / Narrow Pulldown', sets: '3 × 12-15', muscle: 'Back (Lats)', notes: 'Extra lat volume. Controlled stretch.' },
+      { name: 'Cable Lateral Raise', sets: '3 × 15-20', muscle: 'Side Delts', notes: 'Extra side-delt volume.' },
+      { name: 'Reverse Pec Deck / Rear-Delt Fly', sets: '2 × 15-20', muscle: 'Rear Delts, Upper Back', notes: 'Extra rear delt / upper-back volume.' },
+    ]
+  },
+  {
+    title: 'Day 3 Opt 2 — Lower + Pump: Leg Press Week',
+    color: '#4fc3f7',
+    sub: 'Fri · Week B · pair with Day 1 Volume',
+    note: 'Leg press week. Don’t grind RDL. Use in the same week as Day 1 Opt 2.',
+    exercises: [
+      { name: 'Barbell RDL ★', sets: '2 sets: 7, 10', muscle: 'Hamstrings, Glutes', notes: 'e.g. 150×7, then ~130×10. Do not grind.' },
+      { name: 'Leg Press', sets: '2-3 × 10-12', muscle: 'Quads, Glutes', notes: 'Main quad/glute work for this version.' },
+      { name: 'Hip Thrust (optional)', sets: '2 × 8-12', muscle: 'Glutes', notes: 'More appropriate here than Bulgarian week. Keep 1–2 RIR.' },
+      { name: 'Leg Extension', sets: '3 × 12-15', muscle: 'Quads', notes: 'Controlled reps.' },
+      { name: 'Seated Calf Raise', sets: '4 × 12-15', muscle: 'Calves (Soleus)', notes: '2-second stretch at the bottom.' },
+      { name: 'Cable Crunch', sets: '4 × 15-20', muscle: 'Abs', notes: 'Controlled reps.' },
+      { name: 'Cable Fly', sets: '3 × 12-15', muscle: 'Chest', notes: 'Extra chest pump.' },
+      { name: 'Cable Pullover / Narrow Pulldown', sets: '3 × 12-15', muscle: 'Back (Lats)', notes: 'Extra lat volume.' },
+      { name: 'Cable Lateral Raise', sets: '3 × 15-20', muscle: 'Side Delts', notes: 'Extra side-delt volume.' },
+      { name: 'Reverse Pec Deck / Rear-Delt Fly', sets: '2 × 15-20', muscle: 'Rear Delts, Upper Back', notes: 'Rear delt / upper-back volume.' },
     ]
   },
   {
     title: 'Run 1 — Easy Run',
     color: '#ff9f43',
     sub: 'Tue · Conditioning · conversational pace',
-    note: 'Effort: conversational pace — you should be able to talk throughout.',
+    note: 'Effort: conversational pace — you should be able to talk.',
     exercises: [
       { name: 'Warm-up walk/jog', sets: '5 min', muscle: 'Warm-up', notes: 'Ease in gradually.' },
-      { name: 'Easy run', sets: '20-30 min', muscle: 'Aerobic', notes: 'Conversational pace. Keep it relaxed.' },
+      { name: 'Easy run', sets: '20-30 min', muscle: 'Aerobic', notes: 'Conversational pace.' },
       { name: 'Cooldown', sets: '5 min', muscle: 'Recovery', notes: 'Walk it out.' },
     ]
   },
   {
-    title: 'Run 2 — Easy or Moderate Run',
+    title: 'Run 2 — Easy Run',
     color: '#ff9f43',
-    sub: 'Thu · Conditioning · choose by recovery',
-    note: 'If Friday lower feels worse after Thursday running, swap this for a 20–30 min incline walk or very easy jog. Don’t go all-out — it should not feel like another leg workout.',
+    sub: 'Thu · Conditioning · keep it easy',
+    note: 'Keep both runs easy. No hard intervals for now.',
     exercises: [
-      { name: 'Warm-up', sets: '5-8 min', muscle: 'Warm-up', notes: 'Ease in gradually.' },
-      { name: 'Option A — Easy/moderate run', sets: '20-25 min', muscle: 'Recovery', notes: 'Safer recovery choice.' },
-      { name: 'Option B — Intervals', sets: '6 × (1 min fast / 2 min easy)', muscle: 'Intervals', notes: 'Light intervals. Not all-out.' },
+      { name: 'Warm-up walk/jog', sets: '5 min', muscle: 'Warm-up', notes: 'Ease in gradually.' },
+      { name: 'Easy run', sets: '20-30 min', muscle: 'Aerobic', notes: 'Conversational pace.' },
       { name: 'Cooldown', sets: '5 min', muscle: 'Recovery', notes: 'Walk it out.' },
     ]
   },
