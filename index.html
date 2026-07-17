@@ -2611,13 +2611,13 @@ const PLAN_DAYS = [
     sub: 'Mon · Week A · pair with Day 3 Bulgarian',
     note: 'Heavy squat week. Keep 1–3 RIR; no grinding. Use in the same week as Day 3 Opt 1 (Bulgarian).',
     exercises: [
-      { name: 'Barbell Squat ★', sets: '2 sets: 5, 8', muscle: 'Quads, Glutes', notes: 'Heavy top set + back-off. e.g. 160×5, then 125×8. No grinding.' },
+      { name: 'Barbell Squat ★', sets: '2 sets: 3, 6-8', muscle: 'Quads, Glutes', notes: 'Heavy top set + back-off. e.g. 150×3, then 125–130×6–8. No grinding.' },
       { name: 'Machine Chest Press', sets: '3 × 8-10', muscle: 'Chest', notes: 'Current 140×7×3 (max 155). Progress by reps before load.' },
       { name: 'Chest-Supported Row', sets: '3 × 8-12', muscle: 'Back (Mid/Lats)', notes: 'Saves lower-back fatigue.' },
       { name: 'Neutral / Narrow Pulldown', sets: '2 × 10-12', muscle: 'Back (Lats)', notes: 'Extra lat volume without lower-back fatigue.' },
-      { name: 'Leg Curl', sets: '3 × 10-12', muscle: 'Hamstrings', notes: 'Seated or lying. Controlled reps.' },
-      { name: 'Cable Lateral Raise', sets: '4 × 15-20', muscle: 'Side Delts', notes: 'Side-delt priority. Controlled, no swinging.' },
-      { name: 'Standing / Seated Calf Raise', sets: '2 × 12-20', muscle: 'Calves', notes: '2-second stretch at the bottom.' },
+      { name: 'Leg Curl', sets: '3 × 10-12', muscle: 'Hamstrings', notes: 'Seated or lying. Controlled eccentric.' },
+      { name: 'DB Overhead Press', sets: '2 × 8-10', muscle: 'Shoulders (Front/Side)', notes: 'Moderate, not max effort.' },
+      { name: 'Standing / Seated Calf Raise', sets: '2 × 12-20', muscle: 'Calves', notes: 'Pause/stretch at the bottom.' },
       { name: 'Rope Tricep Ext. + Hammer Curl (SS)', sets: '3 supersets × 12-15', muscle: 'Triceps / Biceps', notes: 'Minimal rest within; rest after each superset.' },
     ]
   },
@@ -2627,12 +2627,12 @@ const PLAN_DAYS = [
     sub: 'Mon · Week B · pair with Day 3 Leg Press',
     note: 'Easier/volume squat week. Leave more in the tank. Use in the same week as Day 3 Opt 2 (Leg Press).',
     exercises: [
-      { name: 'Barbell Squat ★', sets: '2 sets: 6-8, 8', muscle: 'Quads, Glutes', notes: 'Easier than Opt 1. e.g. 130–140×6–8, then 125×8.' },
+      { name: 'Barbell Squat ★', sets: '2 sets: 6-8, 8', muscle: 'Quads, Glutes', notes: 'Easier than heavy week. e.g. 130–135×6–8, then 125×8. Keep reps clean.' },
       { name: 'Machine Chest Press', sets: '3 × 8-10', muscle: 'Chest', notes: 'Same progression as Opt 1.' },
       { name: 'Chest-Supported Row', sets: '3 × 8-12', muscle: 'Back (Mid/Lats)', notes: 'Controlled reps.' },
       { name: 'Neutral / Narrow Pulldown', sets: '2 × 10-12', muscle: 'Back (Lats)', notes: 'Extra lat volume.' },
-      { name: 'Leg Curl', sets: '3 × 10-12', muscle: 'Hamstrings', notes: 'Do not rush the eccentric.' },
-      { name: 'Cable Lateral Raise', sets: '4 × 15-20', muscle: 'Side Delts', notes: 'Main side-delt volume for the week.' },
+      { name: 'Leg Curl', sets: '3 × 10-12', muscle: 'Hamstrings', notes: 'Controlled eccentric.' },
+      { name: 'DB Overhead Press', sets: '2 × 8-10', muscle: 'Shoulders (Front/Side)', notes: 'Moderate. Do not chase failure.' },
       { name: 'Standing / Seated Calf Raise', sets: '2 × 12-20', muscle: 'Calves', notes: 'Controlled stretch.' },
       { name: 'Rope Tricep Ext. + Hammer Curl (SS)', sets: '3 supersets × 12-15', muscle: 'Triceps / Biceps', notes: 'Keep it strict.' },
     ]
@@ -2642,17 +2642,16 @@ const PLAN_DAYS = [
     color: '#ff6b6b',
     sub: 'Wed · Same every week',
     exercises: [
-      { name: 'Incline Dumbbell Press ★', sets: '3 × 8-10', muscle: 'Chest (Upper)', notes: 'Main upper-chest press. Controlled stretch.' },
-      { name: 'Wide Lat Pulldown', sets: '3 × 8-10', muscle: 'Back (Width)', notes: 'Pull to upper chest. Use narrow/neutral if shoulders or elbows dislike wide grip.' },
-      { name: 'Seated Cable / Machine Row', sets: '2 × 10-12', muscle: 'Back (Mid)', notes: 'Extra back volume. Keep torso stable.' },
-      { name: 'DB Overhead Press', sets: '2-3 × 8-10', muscle: 'Shoulders (Ant/Med)', notes: 'Start with 2 sets; move to 3 when stable.' },
-      { name: 'Face Pull', sets: '3 × 15-20', muscle: 'Rear Delts, Upper Back', notes: 'Pull toward forehead/upper face. Not an ego lift.' },
-      { name: 'Cable Lateral Raise', sets: '2 × 15-20', muscle: 'Side Delts', notes: 'Extra side-delt frequency.' },
-      { name: 'Cable Fly', sets: '3-4 × 12-15', muscle: 'Chest', notes: 'Default 3 sets; 4 if chest still feels underdosed.' },
-      { name: 'Standing Single-Arm Cable Curl', sets: '3 × 10-15 / arm', muscle: 'Biceps', notes: 'Strict reps, 1–2s squeeze.' },
-      { name: 'Tate Press', sets: '3 × 10-12', muscle: 'Triceps', notes: 'Triceps focus. Control the lowering.' },
-      { name: 'Reverse Curl', sets: '2 × 12-15', muscle: 'Forearms, Brachialis', notes: 'EZ-bar or cable.' },
-      { name: 'Seated DB Wrist Curl', sets: '2 × 15-20', muscle: 'Forearms (Flexors)', notes: 'Full controlled range.' },
+      { name: 'Incline Dumbbell Press ★', sets: '3 × 8-10', muscle: 'Chest (Upper)', notes: 'Main upper-chest press.' },
+      { name: 'Neutral / Wide Lat Pulldown', sets: '3 × 8-10', muscle: 'Back (Width)', notes: 'Use neutral if shoulders or elbows feel sensitive.' },
+      { name: 'Barbell Row', sets: '2 × 6-10', muscle: 'Back (Mid)', notes: 'Strict, no lower-back cheating.' },
+      { name: 'Cable Lateral Raise', sets: '3 × 15-20', muscle: 'Side Delts', notes: 'Only lateral-raise slot of the week.' },
+      { name: 'Face Pull', sets: '3 × 15-20', muscle: 'Rear Delts, Upper Back', notes: 'Rear delts / upper back / shoulder health.' },
+      { name: 'Cable Fly', sets: '3 × 12-15', muscle: 'Chest', notes: 'Low-fatigue chest volume.' },
+      { name: 'Standing Single-Arm Cable Curl', sets: '3 × 10-15 / arm', muscle: 'Biceps', notes: 'Strict reps. Squeeze at the top.' },
+      { name: 'Tate Press', sets: '3 × 10-12', muscle: 'Triceps', notes: 'Controlled lowering.' },
+      { name: 'Reverse Curl', sets: '2 × 12-15', muscle: 'Forearms, Brachialis', notes: 'Brachialis + forearms.' },
+      { name: 'Seated DB Wrist Curl', sets: '1-2 × 15-20', muscle: 'Forearms (Flexors)', notes: 'Optional if time or energy is low.' },
     ]
   },
   {
@@ -2669,8 +2668,7 @@ const PLAN_DAYS = [
       { name: 'Cable Crunch', sets: '4 × 15-20', muscle: 'Abs', notes: 'Round the back; do not pull with arms/neck.' },
       { name: 'Cable Fly', sets: '3 × 12-15', muscle: 'Chest', notes: 'Extra chest pump, low fatigue.' },
       { name: 'Cable Pullover / Narrow Pulldown', sets: '3 × 12-15', muscle: 'Back (Lats)', notes: 'Extra lat volume. Controlled stretch.' },
-      { name: 'Cable Lateral Raise', sets: '3 × 15-20', muscle: 'Side Delts', notes: 'Extra side-delt volume.' },
-      { name: 'Reverse Pec Deck / Rear-Delt Fly', sets: '2 × 15-20', muscle: 'Rear Delts, Upper Back', notes: 'Extra rear delt / upper-back volume.' },
+      { name: 'Reverse Pec Deck / Rear-Delt Fly', sets: '3 × 15-20', muscle: 'Rear Delts, Upper Back', notes: 'Replaces Day 3 lateral raise. Rear-delt focus.' },
     ]
   },
   {
@@ -2687,8 +2685,7 @@ const PLAN_DAYS = [
       { name: 'Cable Crunch', sets: '4 × 15-20', muscle: 'Abs', notes: 'Controlled reps.' },
       { name: 'Cable Fly', sets: '3 × 12-15', muscle: 'Chest', notes: 'Extra chest pump.' },
       { name: 'Cable Pullover / Narrow Pulldown', sets: '3 × 12-15', muscle: 'Back (Lats)', notes: 'Extra lat volume.' },
-      { name: 'Cable Lateral Raise', sets: '3 × 15-20', muscle: 'Side Delts', notes: 'Extra side-delt volume.' },
-      { name: 'Reverse Pec Deck / Rear-Delt Fly', sets: '2 × 15-20', muscle: 'Rear Delts, Upper Back', notes: 'Rear delt / upper-back volume.' },
+      { name: 'Reverse Pec Deck / Rear-Delt Fly', sets: '3 × 15-20', muscle: 'Rear Delts, Upper Back', notes: 'Rear-delt focus.' },
     ]
   },
   {
