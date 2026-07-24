@@ -1233,16 +1233,40 @@ let weightChartMode = 'weight';
 let wFilter = 'all';
 let pendingWeightPhoto = null; // base64
 
+// Downscale + JPEG-compress so photos fit in localStorage (~5MB total quota)
+function compressPhoto(dataUrl, cb) {
+  const img = new Image();
+  img.onload = () => {
+    const MAX = 900; // max long edge in px
+    let { width: w, height: h } = img;
+    if (Math.max(w, h) > MAX) {
+      const scale = MAX / Math.max(w, h);
+      w = Math.round(w * scale);
+      h = Math.round(h * scale);
+    }
+    const canvas = document.createElement('canvas');
+    canvas.width = w; canvas.height = h;
+    canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+    cb(canvas.toDataURL('image/jpeg', 0.72));
+  };
+  img.onerror = () => cb(dataUrl); // fall back to original if decode fails
+  img.src = dataUrl;
+}
+
+function setPendingWeightPhoto(dataUrl) {
+  compressPhoto(dataUrl, (compressed) => {
+    pendingWeightPhoto = compressed;
+    document.getElementById('wPhotoPreview').src = compressed;
+    document.getElementById('wPhotoPreviewWrap').style.display = 'block';
+    document.getElementById('wUploadLabel').textContent = '✓ Photo ready';
+  });
+}
+
 function previewWeightPhoto(event) {
   const file = event.target.files[0];
   if (!file) return;
   const reader = new FileReader();
-  reader.onload = (e) => {
-    pendingWeightPhoto = e.target.result;
-    document.getElementById('wPhotoPreview').src = pendingWeightPhoto;
-    document.getElementById('wPhotoPreviewWrap').style.display = 'block';
-    document.getElementById('wUploadLabel').textContent = '✓ Photo ready';
-  };
+  reader.onload = (e) => setPendingWeightPhoto(e.target.result);
   reader.readAsDataURL(file);
 }
 
@@ -1252,12 +1276,7 @@ function dropWeightPhoto(e) {
   const file = Array.from(e.dataTransfer.files).find(f => f.type.startsWith('image/'));
   if (!file) return;
   const reader = new FileReader();
-  reader.onload = (ev) => {
-    pendingWeightPhoto = ev.target.result;
-    document.getElementById('wPhotoPreview').src = pendingWeightPhoto;
-    document.getElementById('wPhotoPreviewWrap').style.display = 'block';
-    document.getElementById('wUploadLabel').textContent = '✓ Photo ready';
-  };
+  reader.onload = (ev) => setPendingWeightPhoto(ev.target.result);
   reader.readAsDataURL(file);
 }
 
@@ -1378,8 +1397,22 @@ function logWeight() {
   if (!w || !d) return alert('Please enter weight and date (dd/mm/yyyy).');
   const waist = parseFloat(document.getElementById('w-waist').value) || null;
   const data = DB.get('weight');
-  data.push({ id: genId(), weight: w, waist, date: d, note: document.getElementById('w-note').value, photo: pendingWeightPhoto });
-  DB.set('weight', data);
+  const entry = { id: genId(), weight: w, waist, date: d, note: document.getElementById('w-note').value, photo: pendingWeightPhoto };
+  data.push(entry);
+  try {
+    DB.set('weight', data);
+  } catch (err) {
+    // Storage full (usually the photo). Offer to save without it.
+    if (entry.photo && confirm('Storage is full — the photo can\'t be saved. Save this entry without the photo?\n\n(Tip: delete old photo entries to free space.)')) {
+      entry.photo = null;
+      try { DB.set('weight', data); }
+      catch (e2) { data.pop(); alert('Storage is completely full. Delete some old entries or photos first.'); return; }
+    } else {
+      data.pop();
+      alert('Could not save — storage is full. Delete some old entries or photos to free space.');
+      return;
+    }
+  }
   document.getElementById('w-weight').value = '';
   document.getElementById('w-waist').value = '';
   document.getElementById('w-note').value = '';
