@@ -1,0 +1,3492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<title>SELF OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+<!-- Local copies load first so the app works with no internet at all.
+     If a local file is missing, the CDN is used as a fallback (see recoverMissingLibs). -->
+<script src="chart.umd.min.js"></script>
+<script src="qrcode.min.js"></script>
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --surface: #111111;
+    --surface2: #1a1a1a;
+    --border: #2a2a2a;
+    --accent: #c8f135;
+    --accent2: #ff4f4f;
+    --accent3: #4fc3f7;
+    --accent4: #ff9f43;
+    --text: #f0f0f0;
+    --muted: #666;
+    --font-mono: 'Space Mono', monospace;
+    --font-display: 'Syne', sans-serif;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; background: var(--bg); color: var(--text); font-family: var(--font-mono); overflow-x: hidden; }
+
+  /* HEADER */
+  header {
+    position: sticky; top: 0; z-index: 100;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 20px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .logo { font-family: var(--font-display); font-weight: 800; font-size: 1.4rem; letter-spacing: -1px; }
+  .logo span { color: var(--accent); }
+  .date-display { font-size: 0.65rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+
+  /* NAV */
+  nav {
+    display: flex; gap: 2px;
+    background: var(--bg);
+    padding: 8px 12px;
+    overflow-x: auto;
+    border-bottom: 1px solid var(--border);
+    scrollbar-width: none;
+    position: sticky; top: 53px; z-index: 99;
+  }
+  nav::-webkit-scrollbar { display: none; }
+  .nav-btn {
+    flex-shrink: 0;
+    background: none; border: 1px solid transparent;
+    color: var(--muted); font-family: var(--font-mono);
+    font-size: 0.65rem; letter-spacing: 1px; text-transform: uppercase;
+    padding: 6px 12px; cursor: pointer; border-radius: 2px;
+    transition: all 0.15s;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .nav-btn.active { color: var(--accent); border-color: var(--accent); background: rgba(200,241,53,0.06); }
+  .nav-btn:hover:not(.active) { color: var(--text); border-color: var(--border); }
+  .nav-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+  /* MAIN */
+  main { padding: 20px; max-width: 700px; margin: 0 auto; }
+  .tab { display: none; animation: fadeUp 0.25s ease; }
+  .tab.active { display: block; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* SECTION HEADER */
+  .section-head { margin-bottom: 24px; }
+  .section-head h2 { font-family: var(--font-display); font-size: 2rem; font-weight: 800; letter-spacing: -1px; line-height: 1; }
+  .section-head p { color: var(--muted); font-size: 0.7rem; margin-top: 4px; letter-spacing: 1px; text-transform: uppercase; }
+
+  /* CARDS */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+  .card-label { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 2px; color: var(--muted); margin-bottom: 12px; }
+
+  /* INPUTS */
+  .form-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+  .form-group { flex: 1; min-width: 120px; }
+  label { display: block; font-size: 0.6rem; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 6px; }
+  input, textarea, select {
+    width: 100%; background: var(--surface2);
+    border: 1px solid var(--border); border-radius: 2px;
+    color: var(--text); font-family: var(--font-mono); font-size: 0.8rem;
+    padding: 8px 10px; outline: none;
+    transition: border-color 0.15s;
+  }
+  input:focus, textarea:focus, select:focus { border-color: var(--accent); }
+  textarea { resize: vertical; min-height: 60px; }
+  select option { background: var(--surface2); }
+
+  /* BUTTONS */
+  .btn {
+    background: var(--accent); color: #000;
+    border: none; border-radius: 2px;
+    font-family: var(--font-mono); font-size: 0.7rem;
+    font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+    padding: 9px 18px; cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn:hover { filter: brightness(1.1); transform: translateY(-1px); }
+  .btn:active { transform: translateY(0); }
+  .btn-ghost {
+    background: none; color: var(--accent2);
+    border: 1px solid var(--accent2);
+    font-family: var(--font-mono); font-size: 0.65rem;
+    letter-spacing: 1px; text-transform: uppercase;
+    padding: 5px 10px; cursor: pointer; border-radius: 2px;
+    transition: all 0.15s;
+  }
+  .btn-ghost:hover { background: rgba(255,79,79,0.1); }
+
+  /* STAT CHIPS */
+  .stat-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+  .stat-chip {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 2px; padding: 10px 16px;
+    flex: 1; min-width: 100px;
+  }
+  .stat-chip .val { font-family: var(--font-display); font-size: 1.5rem; font-weight: 800; }
+  .stat-chip .lbl { font-size: 0.58rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+
+  /* LOG LIST */
+  .log-list { display: flex; flex-direction: column; gap: 6px; max-height: 280px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
+  .log-item {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 2px; padding: 10px 14px;
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 0.75rem;
+    transition: border-color 0.15s;
+  }
+  .log-item:hover { border-color: var(--border); }
+  .log-item .log-main { flex: 1; }
+  .log-item .log-date { color: var(--muted); font-size: 0.6rem; margin-top: 2px; }
+  .log-item .log-tag {
+    font-size: 0.6rem; padding: 2px 8px; border-radius: 10px;
+    margin-left: 8px; font-weight: 700; letter-spacing: 0.5px;
+    flex-shrink: 0;
+  }
+
+  /* CHART */
+  .chart-wrap { position: relative; height: 200px; margin-top: 8px; }
+
+  /* WORKOUT CALENDAR */
+  .wo-calendar {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    margin-top: 8px;
+  }
+  .wo-cal-day-label {
+    font-size: 0.55rem; color: var(--muted); text-align: center;
+    padding: 2px 0; letter-spacing: 0.5px; text-transform: uppercase;
+  }
+  .wo-cal-day {
+    aspect-ratio: 1;
+    border-radius: 3px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    font-size: 0.55rem; color: var(--muted);
+    position: relative; cursor: default;
+    transition: transform 0.1s;
+    overflow: hidden;
+  }
+  .wo-cal-day.has-workout { color: #000; border-color: transparent; }
+  .wo-cal-day.today-marker { outline: 2px solid var(--accent); outline-offset: -2px; }
+  .wo-cal-day .day-num { font-weight: 700; font-size: 0.6rem; line-height: 1; z-index: 1; }
+  .wo-cal-day .day-abbr { font-size: 0.45rem; letter-spacing: 0.3px; z-index: 1; opacity: 0.8; margin-top: 1px; }
+  .wo-cal-day:hover { transform: scale(1.08); z-index: 2; }
+
+  /* WORKOUT LEGEND */
+  .wo-legend {
+    display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px;
+  }
+  .wo-legend-item {
+    display: flex; align-items: center; gap: 5px;
+    font-size: 0.58rem; color: var(--muted); letter-spacing: 0.3px;
+  }
+  .wo-legend-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+
+  /* WORKOUT TYPE BUTTONS */
+  .wo-type-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+  .wo-type-btn {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 3px; padding: 8px 6px; cursor: pointer;
+    font-family: var(--font-mono); font-size: 0.6rem;
+    letter-spacing: 0.5px; text-transform: uppercase;
+    color: var(--muted); text-align: center;
+    transition: all 0.15s; line-height: 1.3;
+  }
+  .wo-type-btn:hover { border-color: #666; color: var(--text); }
+  .wo-type-btn.selected { color: #000; border-color: transparent; font-weight: 700; }
+
+  /* PHOTO GRID */
+  .photo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px; margin-top: 12px; }
+  .photo-item {
+    position: relative; aspect-ratio: 1;
+    border: 1px solid var(--border); border-radius: 2px; overflow: hidden;
+    cursor: pointer;
+  }
+  .photo-item img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.2s; }
+  .photo-item:hover img { transform: scale(1.05); }
+  .photo-item .photo-date {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    background: rgba(0,0,0,0.7); font-size: 0.55rem;
+    padding: 3px 6px; color: var(--muted); text-align: center;
+  }
+  .photo-item .del-photo {
+    position: absolute; top: 4px; right: 4px;
+    background: rgba(255,79,79,0.85); border: none;
+    color: #fff; font-size: 0.6rem; width: 18px; height: 18px;
+    border-radius: 50%; cursor: pointer; display: none;
+    align-items: center; justify-content: center;
+    line-height: 1;
+  }
+  .photo-item:hover .del-photo { display: flex; }
+
+  /* UPLOAD ZONE */
+  .upload-zone {
+    border: 1px dashed var(--border); border-radius: 4px;
+    padding: 30px; text-align: center; cursor: pointer;
+    transition: all 0.15s; color: var(--muted);
+    font-size: 0.7rem; letter-spacing: 1px;
+  }
+  .upload-zone:hover, .upload-zone.drag-over { border-color: var(--accent); color: var(--accent); }
+  .upload-zone .icon { font-size: 2rem; margin-bottom: 8px; }
+
+  /* LIGHTBOX */
+  .lightbox {
+    display: none; position: fixed; inset: 0; z-index: 1000;
+    background: rgba(0,0,0,0.92); align-items: center; justify-content: center;
+  }
+  .lightbox.open { display: flex; }
+  .lightbox img { max-width: 90vw; max-height: 85vh; border-radius: 2px; }
+  .lightbox-close {
+    position: absolute; top: 20px; right: 20px;
+    background: none; border: 1px solid var(--border);
+    color: var(--text); font-family: var(--font-mono); font-size: 0.7rem;
+    padding: 6px 12px; cursor: pointer; border-radius: 2px;
+  }
+  .lightbox-info { position: absolute; bottom: 20px; color: var(--muted); font-size: 0.7rem; }
+
+  /* ACCENT COLORS PER SECTION */
+  .w-accent { color: var(--accent); }
+  .wo-accent { color: var(--accent3); }
+  .a-accent { color: var(--accent4); }
+  .l-accent { color: #d4a0ff; }
+  .ws-accent { color: var(--accent2); }
+
+  /* PROGRESS BAR */
+  .prog-bar { background: var(--surface2); border-radius: 1px; height: 4px; margin-top: 6px; overflow: hidden; }
+  .prog-fill { height: 100%; background: var(--accent); border-radius: 1px; transition: width 0.4s ease; }
+
+  /* EMPTY STATE */
+  .empty { text-align: center; padding: 30px; color: var(--muted); font-size: 0.7rem; letter-spacing: 1px; }
+
+  /* STREAK */
+  .streak-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(200,241,53,0.08); border: 1px solid rgba(200,241,53,0.2);
+    padding: 4px 10px; border-radius: 20px; font-size: 0.65rem; color: var(--accent);
+  }
+
+  /* WORKOUT DAY MODAL */
+  .wo-modal-overlay {
+    display: none; position: fixed; inset: 0; z-index: 500;
+    background: rgba(0,0,0,0.7); align-items: center; justify-content: center;
+    padding: 20px;
+  }
+  .wo-modal-overlay.open { display: flex; }
+  .wo-modal {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 6px; padding: 24px; width: 100%; max-width: 360px;
+    animation: fadeUp 0.2s ease;
+  }
+  .wo-modal-title { font-family: var(--font-display); font-size: 1.1rem; font-weight: 800; margin-bottom: 4px; }
+  .wo-modal-sub { font-size: 0.65rem; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 18px; }
+  .wo-modal-types { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+  .wo-modal-type-btn {
+    padding: 10px 8px; border-radius: 3px; border: none; cursor: pointer;
+    font-family: var(--font-mono); font-size: 0.65rem; font-weight: 700;
+    letter-spacing: 0.5px; text-transform: uppercase; color: #000;
+    transition: filter 0.15s, transform 0.1s;
+  }
+  .wo-modal-type-btn:hover { filter: brightness(1.1); transform: scale(1.03); }
+  .wo-modal-type-btn:active { transform: scale(0.97); }
+  .wo-modal-custom { margin-bottom: 14px; display: none; }
+  .wo-modal-notes { margin-bottom: 14px; }
+  .wo-modal-footer { display: flex; gap: 8px; justify-content: flex-end; }
+  .wo-modal-cancel {
+    background: none; border: 1px solid var(--border); color: var(--muted);
+    font-family: var(--font-mono); font-size: 0.65rem; letter-spacing: 1px;
+    text-transform: uppercase; padding: 8px 14px; cursor: pointer; border-radius: 2px;
+    transition: border-color 0.15s;
+  }
+  .wo-modal-cancel:hover { border-color: var(--muted); color: var(--text); }
+
+  /* PIN MODAL */
+  .pin-modal-overlay {
+    display: none; position: fixed; inset: 0; z-index: 600;
+    background: rgba(0,0,0,0.85); align-items: center; justify-content: center;
+  }
+  .pin-modal-overlay.open { display: flex; }
+  .pin-modal {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 6px; padding: 28px 24px; width: 100%; max-width: 300px;
+    text-align: center; animation: fadeUp 0.2s ease;
+  }
+  .pin-modal h3 { font-family: var(--font-display); font-size: 1.1rem; font-weight: 800; margin-bottom: 6px; }
+  .pin-modal p { font-size: 0.65rem; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 20px; }
+  .pin-dots { display: flex; gap: 10px; justify-content: center; margin-bottom: 20px; }
+  .pin-dot-indicator { width: 14px; height: 14px; border-radius: 50%; border: 1px solid var(--border); background: var(--surface2); transition: background 0.15s; }
+  .pin-dot-indicator.filled { background: var(--accent); border-color: var(--accent); }
+  .pin-pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .pin-key {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 4px; padding: 14px; font-family: var(--font-display);
+    font-size: 1.1rem; font-weight: 700; color: var(--text);
+    cursor: pointer; transition: background 0.1s, transform 0.1s;
+  }
+  .pin-key:hover { background: var(--border); }
+  .pin-key:active { transform: scale(0.94); }
+  .pin-key.del { font-size: 0.8rem; color: var(--muted); }
+  .pin-error { color: var(--accent2); font-size: 0.65rem; letter-spacing: 1px; margin-top: 10px; min-height: 16px; }
+  .pin-setup-note { font-size: 0.6rem; color: var(--muted); margin-top: 12px; letter-spacing: 0.5px; }
+
+  @media (max-width: 480px) {
+    main { padding: 12px; }
+    .section-head h2 { font-size: 1.5rem; }
+    .stat-chip .val { font-size: 1.2rem; }
+  }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">SELF<span>OS</span></div>
+  <div style="display:flex;align-items:center;gap:8px">
+    <div class="date-display" id="headerDate"></div>
+    <button onclick="exportData()" style="background:none;border:1px solid var(--border);color:var(--muted);font-family:var(--font-mono);font-size:0.55rem;padding:4px 8px;cursor:pointer;border-radius:2px;letter-spacing:1px" title="Export all data">⬇ Export</button>
+    <button onclick="showImportModal()" style="background:none;border:1px solid var(--border);color:var(--muted);font-family:var(--font-mono);font-size:0.55rem;padding:4px 8px;cursor:pointer;border-radius:2px;letter-spacing:1px" title="Import data">⬆ Import</button>
+    <button onclick="showQRModal()" style="background:none;border:1px solid var(--accent);color:var(--accent);font-family:var(--font-mono);font-size:0.55rem;padding:4px 8px;cursor:pointer;border-radius:2px;letter-spacing:1px" title="Share via QR">⬡ QR</button>
+  </div>
+</header>
+
+<nav>
+  <button class="nav-btn active" onclick="switchTab('today')" id="nav-today">
+    <span class="nav-dot" style="background:#fff"></span> Today
+  </button>
+  <button class="nav-btn" onclick="switchTab('workout')" id="nav-workout">
+    <span class="nav-dot" style="background:var(--accent3)"></span> Workout
+  </button>
+  <button class="nav-btn" onclick="switchTab('plan')" id="nav-plan">
+    <span class="nav-dot" style="background:#c8f135"></span> Plan
+  </button>
+  <button class="nav-btn" onclick="switchTab('work')" id="nav-work">
+    <span class="nav-dot" style="background:#7c9eff"></span> Work
+  </button>
+  <button class="nav-btn" onclick="switchTab('chores')" id="nav-chores">
+    <span class="nav-dot" style="background:#80cbc4"></span> Chores
+  </button>
+  <button class="nav-btn" onclick="switchTab('tasks')" id="nav-tasks">
+    <span class="nav-dot" style="background:#ffd54f"></span> Tasks
+  </button>
+  <button class="nav-btn" onclick="switchTab('weight')" id="nav-weight" style="display:none">
+    <span class="nav-dot" style="background:var(--accent)"></span> Weight
+  </button>
+  <button class="nav-btn" onclick="switchTab('alcohol')" id="nav-alcohol" style="display:none">
+    <span class="nav-dot" style="background:var(--accent4)"></span> Alcohol
+  </button>
+  <button class="nav-btn" onclick="switchTab('tweeter')" id="nav-tweeter" style="display:none">
+    <span class="nav-dot" style="background:#5ee7c8"></span> Tweeter
+  </button>
+  <button class="nav-btn" onclick="switchTab('tracking')" id="nav-tracking" style="display:none">
+    <span class="nav-dot" style="background:var(--accent2)"></span> Tracking
+  </button>
+  <button class="nav-btn" onclick="lockNav()" id="nav-lockbtn" style="display:none;color:var(--muted);font-size:0.6rem">
+    🔒 Lock
+  </button>
+  <button class="nav-btn" onclick="openNavPin()" id="nav-more">
+    <span style="font-size:0.8rem">···</span> More
+  </button>
+</nav>
+
+<main>
+
+  <!-- ===== TODAY ===== -->
+  <div class="tab active" id="tab-today">
+    <div class="section-head">
+      <h2 style="color:#fff">Today</h2>
+      <p id="todaySubtitle"></p>
+    </div>
+    <div id="backupBanner" style="display:none;background:rgba(255,159,67,0.1);border:1px solid var(--accent4);border-radius:4px;padding:10px 14px;margin-bottom:16px;font-size:0.65rem;color:var(--accent4);letter-spacing:0.5px;display:flex;align-items:center;justify-content:space-between">
+      <span>⚠ You haven't exported your data in 7+ days</span>
+      <button onclick="exportData();this.parentElement.style.display='none'" style="background:var(--accent4);color:#000;border:none;font-family:var(--font-mono);font-size:0.6rem;padding:4px 10px;cursor:pointer;border-radius:2px;font-weight:700">Export now</button>
+    </div>
+    <div id="dailyBrief"></div>
+    <div id="todayDashboard"></div>
+    <div id="choresDueToday"></div>
+  </div>
+
+  <!-- ===== WEIGHT ===== -->
+  <div class="tab" id="tab-weight">
+    <div class="section-head">
+      <h2 class="w-accent">Weight & Look</h2>
+      <p>Track your body measurements over time</p>
+    </div>
+    <div class="stat-row" id="weightStats"></div>
+    <div class="card">
+      <div class="card-label">Log entry</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Weight (kg)</label>
+          <input type="number" id="w-weight" step="0.1" placeholder="75.5">
+        </div>
+        <div class="form-group">
+          <label>Waist (cm) — optional</label>
+          <input type="number" id="w-waist" step="0.5" placeholder="82.0">
+        </div>
+        <div class="form-group">
+          <label>Date</label>
+          <input type="text" id="w-date" placeholder="dd/mm/yyyy" maxlength="10" oninput="autoDate(event)">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Note (optional)</label>
+          <input type="text" id="w-note" placeholder="After gym, morning weight…">
+        </div>
+      </div>
+      <div class="form-row" style="margin-bottom:0" id="wPhotoUploadSection">
+        <div class="form-group">
+          <label>Photo (optional) <span id="wPhotoLockStatus" style="color:var(--muted);font-size:0.6rem;cursor:pointer" onclick="togglePhotoLock()">🔒 locked — tap to unlock</span></label>
+          <div id="wPhotoLockedMsg" style="background:var(--surface2);border:1px solid var(--border);border-radius:3px;padding:14px;text-align:center;font-size:0.65rem;color:var(--muted);letter-spacing:1px">
+            Photos are PIN-protected
+          </div>
+          <div id="wPhotoUploadWrap" style="display:none">
+            <div class="upload-zone" id="wUploadZone" onclick="document.getElementById('wPhotoInput').click()" ondragover="dragOver(event,'wUploadZone')" ondragleave="dragLeave(event,'wUploadZone')" ondrop="dropWeightPhoto(event)" style="padding:16px">
+              <div id="wPhotoPreviewWrap" style="display:none;margin-bottom:8px">
+                <img id="wPhotoPreview" style="max-height:100px;border-radius:3px;display:block;margin:0 auto">
+              </div>
+              <div id="wUploadLabel"><span class="icon" style="font-size:1.2rem">📷</span> Tap to add photo</div>
+            </div>
+            <input type="file" id="wPhotoInput" accept="image/*" style="display:none" onchange="previewWeightPhoto(event)">
+          </div>
+        </div>
+      </div>
+      <button class="btn" onclick="logWeight()" style="margin-top:14px">+ Log Entry</button>
+    </div>
+    <div class="card">
+      <div class="card-label">Progress chart</div>
+      <div style="display:flex;gap:8px;margin-bottom:10px">
+        <button onclick="setWeightChartMode('weight')" id="wcm-weight" style="background:rgba(200,241,53,0.15);border:1px solid var(--accent);color:var(--accent);font-family:var(--font-mono);font-size:0.6rem;padding:4px 10px;cursor:pointer;border-radius:2px;letter-spacing:1px">Weight</button>
+        <button onclick="setWeightChartMode('waist')" id="wcm-waist" style="background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-family:var(--font-mono);font-size:0.6rem;padding:4px 10px;cursor:pointer;border-radius:2px;letter-spacing:1px">Waist</button>
+      </div>
+      <div class="chart-wrap"><canvas id="weightChart"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-label">History</div>
+      <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap" id="wFilterBtns">
+        <button onclick="setWFilter('all')" id="wf-all" style="background:rgba(200,241,53,0.1);border:1px solid var(--accent);color:var(--accent);font-family:var(--font-mono);font-size:0.6rem;padding:4px 10px;cursor:pointer;border-radius:2px;letter-spacing:1px">All</button>
+        <button onclick="setWFilter('photos')" id="wf-photos" style="background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-family:var(--font-mono);font-size:0.6rem;padding:4px 10px;cursor:pointer;border-radius:2px;letter-spacing:1px">📷 With photos</button>
+      </div>
+      <div class="log-list" id="weightLog"></div>
+    </div>
+    <div class="card" id="wPhotoGalleryCard">
+      <div class="card-label" style="display:flex;align-items:center;justify-content:space-between">
+        <span>Photo gallery</span>
+        <span id="galleryLockBtn" style="font-size:0.6rem;cursor:pointer;color:var(--muted)" onclick="togglePhotoLock()">🔒 locked</span>
+      </div>
+      <div id="wGalleryLocked" style="text-align:center;padding:24px;font-size:0.7rem;color:var(--muted);letter-spacing:1px">
+        🔒 Enter PIN to view photos
+      </div>
+      <div id="wGalleryUnlocked" style="display:none">
+        <div class="photo-grid" id="wPhotoGrid"></div>
+        <div class="empty" id="wNoPhotos">No photos logged yet.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== WORKOUT ===== -->
+  <div class="tab" id="tab-workout">
+    <div class="section-head">
+      <h2 class="wo-accent">Workout</h2>
+      <p>Log your training sessions</p>
+    </div>
+    <div class="stat-row" id="workoutStats"></div>
+    <div class="card">
+      <div class="card-label">Log session</div>
+      <label style="margin-bottom:8px">Session type</label>
+      <div class="wo-type-grid" id="woTypeGrid"></div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Date</label>
+          <input type="text" id="wo-date" placeholder="dd/mm/yyyy" maxlength="10" oninput="autoDate(event)">
+        </div>
+        <div class="form-group" id="wo-custom-wrap" style="display:none">
+          <label>Custom name</label>
+          <input type="text" id="wo-custom-name" placeholder="e.g. Cardio, Yoga…">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Notes (optional)</label>
+          <textarea id="wo-notes" placeholder="How did it go?"></textarea>
+        </div>
+      </div>
+      <button class="btn" style="background:var(--accent3);color:#000" onclick="logWorkout()">+ Log Workout</button>
+    </div>
+    <div class="card">
+      <div class="card-label">Last 30 days</div>
+      <div class="wo-calendar" id="workoutCalendar"></div>
+      <div class="wo-legend" id="workoutLegend"></div>
+    </div>
+    <div class="card">
+      <div class="card-label">History</div>
+      <div class="log-list" id="workoutLog"></div>
+    </div>
+  </div>
+
+  <!-- ===== ALCOHOL ===== -->
+  <div class="tab" id="tab-alcohol">
+    <div class="section-head">
+      <h2 class="a-accent">Alcohol</h2>
+      <p>Monitor your drinking habits</p>
+    </div>
+    <div class="stat-row" id="alcoholStats"></div>
+    <div class="card">
+      <div class="card-label">Log drinks</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Drink type</label>
+          <select id="al-type">
+            <option>Beer</option>
+            <option>Wine</option>
+            <option>Vodka</option>
+            <option>Whiskey</option>
+            <option>Gin</option>
+            <option>Rum</option>
+            <option>Cocktail</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Units / Drinks</label>
+          <input type="number" id="al-units" step="0.5" placeholder="2" min="0">
+        </div>
+        <div class="form-group">
+          <label>Date</label>
+          <input type="text" id="al-date" placeholder="dd/mm/yyyy" maxlength="10" oninput="autoDate(event)">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Note (optional)</label>
+          <input type="text" id="al-note" placeholder="Night out, dinner…">
+        </div>
+      </div>
+      <button class="btn" style="background:var(--accent4);color:#000" onclick="logAlcohol()">+ Log Drinks</button>
+    </div>
+    <div class="card">
+      <div class="card-label">Last 30 days</div>
+      <div class="wo-calendar" id="alcoholCalendar"></div>
+      <div class="wo-legend" style="margin-top:12px" id="alcoholLegend"></div>
+    </div>
+    <div class="card">
+      <div class="card-label">History</div>
+      <div class="log-list" id="alcoholLog"></div>
+    </div>
+  </div>
+
+  <!-- ===== WORK ===== -->
+  <div class="tab" id="tab-tracking">
+    <div class="section-head">
+      <h2 class="ws-accent">Tracking</h2>
+      <p>Research & hobby tracker</p>
+    </div>
+
+    <!-- 2-WEEK SUMMARY -->
+    <div class="card" id="twoWeekSummary">
+      <div class="card-label">2-week summary</div>
+      <div id="twoWeekContent"></div>
+    </div>
+
+    <!-- RESEARCH -->
+    <div style="font-family:var(--font-display);font-size:1rem;font-weight:800;color:var(--accent2);margin-bottom:10px;letter-spacing:-0.5px">📚 Research</div>
+    <div class="stat-row" id="researchStats"></div>
+    <div class="card" id="weeklyGoalCard">
+      <div class="card-label" style="display:flex;justify-content:space-between;align-items:center">
+        <span>Weekly goal — 8h research</span>
+        <span id="weeklyGoalPct" style="color:var(--accent2);font-weight:700"></span>
+      </div>
+      <div class="prog-bar" style="height:8px;margin-top:4px"><div id="weeklyGoalFill" class="prog-fill" style="width:0%;background:var(--accent2)"></div></div>
+      <div id="weeklyGoalLabel" style="font-size:0.6rem;color:var(--muted);margin-top:6px;letter-spacing:1px"></div>
+    </div>
+    <div class="card">
+      <div class="card-label">Log research session</div>
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-bottom:12px" id="researchTypeGrid"></div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Timer mode</label>
+          <div style="display:flex;gap:6px;margin-bottom:8px">
+            <button id="modeStopwatch" onclick="setTimerMode('stopwatch')" style="flex:1;background:rgba(255,79,79,0.2);border:1px solid var(--accent2);color:var(--accent2);font-family:var(--font-mono);font-size:0.6rem;padding:6px;cursor:pointer;border-radius:2px;letter-spacing:1px">⏱ Free</button>
+            <button id="modePomo" onclick="setTimerMode('pomodoro')" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-family:var(--font-mono);font-size:0.6rem;padding:6px;cursor:pointer;border-radius:2px;letter-spacing:1px">🍅 25min</button>
+          </div>
+          <div style="display:flex;gap:6px;align-items:center">
+            <input type="number" id="wk-duration" placeholder="60" style="flex:1">
+            <button id="timerBtn" onclick="toggleTimer()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:var(--font-mono);font-size:0.65rem;padding:8px 10px;cursor:pointer;border-radius:2px;white-space:nowrap;transition:all 0.15s">▶ Start</button>
+          </div>
+          <div id="timerDisplay" style="font-family:var(--font-display);font-size:1.6rem;font-weight:800;color:var(--accent2);margin-top:6px;display:none;letter-spacing:2px;text-align:center">00:00</div>
+          <div id="pomodoroStatus" style="font-size:0.6rem;color:var(--muted);text-align:center;margin-top:2px;display:none;letter-spacing:1px"></div>
+        </div>
+        <div class="form-group">
+          <label>Date</label>
+          <input type="text" id="wk-date" placeholder="dd/mm/yyyy" maxlength="10" oninput="autoDate(event)">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Notes (optional)</label>
+          <textarea id="wk-notes" placeholder="What did you work on?"></textarea>
+        </div>
+      </div>
+      <button class="btn" style="background:var(--accent2)" onclick="logResearch()">+ Log Research</button>
+    </div>
+    <div class="card">
+      <div class="card-label">14-day heatmap</div>
+      <div class="wo-calendar" id="researchHeatmap" style="grid-template-columns:repeat(7,1fr)"></div>
+      <div class="wo-legend" style="margin-top:10px" id="researchHeatmapLegend"></div>
+    </div>
+    <div class="card">
+      <div class="card-label">This month — hours by type</div>
+      <div id="monthTotals"></div>
+    </div>
+    <div class="card">
+      <div class="card-label">This week — research hours by type</div>
+      <div class="chart-wrap"><canvas id="workChart"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-label" style="display:flex;justify-content:space-between;align-items:center">
+        <span>Research history</span>
+        <input type="text" id="notesSearch" placeholder="Search notes…" oninput="filterResearchLog()" style="width:140px;font-size:0.65rem;padding:4px 8px;background:var(--surface2);border:1px solid var(--border);border-radius:2px;color:var(--text);font-family:var(--font-mono)">
+      </div>
+      <div class="log-list" id="researchLog" style="margin-top:10px"></div>
+    </div>
+
+    <!-- HOBBY -->
+    <div style="font-family:var(--font-display);font-size:1rem;font-weight:800;color:#b388ff;margin:20px 0 10px;letter-spacing:-0.5px">🎯 Hobby</div>
+    <div class="stat-row" id="hobbyStats"></div>
+    <div class="card">
+      <div class="card-label">Log hobby session</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Duration (min)</label>
+          <input type="number" id="hb-duration" placeholder="30">
+        </div>
+        <div class="form-group">
+          <label>Date</label>
+          <input type="text" id="hb-date" placeholder="dd/mm/yyyy" maxlength="10" oninput="autoDate(event)">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Notes (optional)</label>
+          <textarea id="hb-notes" placeholder="What did you practice?"></textarea>
+        </div>
+      </div>
+      <button class="btn" style="background:#b388ff;color:#000" onclick="logHobby()">+ Log Hobby</button>
+    </div>
+    <div class="card">
+      <div class="card-label">Hobby history</div>
+      <div class="log-list" id="hobbyLog"></div>
+    </div>
+  </div>
+  <!-- ===== PLAN ===== -->
+  <div class="tab" id="tab-plan">
+    <div class="section-head">
+      <h2 style="color:var(--accent)">Plan</h2>
+      <p>3-Day Alternating Cut · A/B Weeks · Higher Volume</p>
+    </div>
+
+    <!-- Week overview -->
+    <div class="card">
+      <div class="card-label">Weekly Schedule</div>
+      <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center;font-size:0.6rem">
+        <div style="color:var(--muted);padding:4px">Mon</div>
+        <div style="color:var(--muted);padding:4px">Tue</div>
+        <div style="color:var(--muted);padding:4px">Wed</div>
+        <div style="color:var(--muted);padding:4px">Thu</div>
+        <div style="color:var(--muted);padding:4px">Fri</div>
+        <div style="color:var(--muted);padding:4px">Sat</div>
+        <div style="color:var(--muted);padding:4px">Sun</div>
+        <div style="background:#c084fc;color:#000;border-radius:3px;padding:6px 2px;font-weight:700;font-size:0.55rem;cursor:pointer" onclick="showPlanDay(0)">Day 1</div>
+        <div style="background:#ff9f43;color:#000;border-radius:3px;padding:6px 2px;font-weight:700;font-size:0.55rem;cursor:pointer" onclick="showPlanDay(5)">Run 1</div>
+        <div style="background:#ff6b6b;color:#000;border-radius:3px;padding:6px 2px;font-weight:700;font-size:0.55rem;cursor:pointer" onclick="showPlanDay(2)">Upper</div>
+        <div style="background:#ff9f43;color:#000;border-radius:3px;padding:6px 2px;font-weight:700;font-size:0.55rem;cursor:pointer" onclick="showPlanDay(6)">Run 2</div>
+        <div style="background:#4fc3f7;color:#000;border-radius:3px;padding:6px 2px;font-weight:700;font-size:0.55rem;cursor:pointer" onclick="showPlanDay(3)">Day 3</div>
+        <div style="background:var(--surface2);color:var(--muted);border-radius:3px;padding:6px 2px;font-size:0.55rem">Rest 🚶</div>
+        <div style="background:var(--surface2);color:var(--muted);border-radius:3px;padding:6px 2px;font-size:0.55rem">Rest 💤</div>
+      </div>
+      <div style="font-size:0.6rem;color:var(--muted);margin-top:10px;letter-spacing:0.5px">Alternate weekly — <b style="color:#c084fc">Week A:</b> Day 1 Heavy + Day 3 Bulgarian · <b style="color:#80d4f7">Week B:</b> Day 1 Volume + Day 3 Leg Press. Tap a day to see exercises ↓</div>
+    </div>
+
+    <!-- Day selector buttons -->
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">
+      <button onclick="showPlanDay(0)" class="plan-day-btn" id="planBtn0" style="background:rgba(192,132,252,0.15);border:1px solid #c084fc;color:#c084fc;font-family:var(--font-mono);font-size:0.6rem;padding:6px 10px;cursor:pointer;border-radius:2px;letter-spacing:1px">D1 Heavy</button>
+      <button onclick="showPlanDay(1)" class="plan-day-btn" id="planBtn1" style="background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-family:var(--font-mono);font-size:0.6rem;padding:6px 10px;cursor:pointer;border-radius:2px;letter-spacing:1px">D1 Volume</button>
+      <button onclick="showPlanDay(2)" class="plan-day-btn" id="planBtn2" style="background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-family:var(--font-mono);font-size:0.6rem;padding:6px 10px;cursor:pointer;border-radius:2px;letter-spacing:1px">D2 Upper</button>
+      <button onclick="showPlanDay(3)" class="plan-day-btn" id="planBtn3" style="background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-family:var(--font-mono);font-size:0.6rem;padding:6px 10px;cursor:pointer;border-radius:2px;letter-spacing:1px">D3 Bulgarian</button>
+      <button onclick="showPlanDay(4)" class="plan-day-btn" id="planBtn4" style="background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-family:var(--font-mono);font-size:0.6rem;padding:6px 10px;cursor:pointer;border-radius:2px;letter-spacing:1px">D3 Leg Press</button>
+      <button onclick="showPlanDay(5)" class="plan-day-btn" id="planBtn5" style="background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-family:var(--font-mono);font-size:0.6rem;padding:6px 10px;cursor:pointer;border-radius:2px;letter-spacing:1px">Run 1</button>
+      <button onclick="showPlanDay(6)" class="plan-day-btn" id="planBtn6" style="background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-family:var(--font-mono);font-size:0.6rem;padding:6px 10px;cursor:pointer;border-radius:2px;letter-spacing:1px">Run 2</button>
+    </div>
+
+    <!-- Exercise table -->
+    <div id="planDayContent"></div>
+
+    <!-- 1RM Calculator -->
+    <div class="card" style="margin-top:20px">
+      <div class="card-label">🧮 1RM & Load Calculator</div>
+      <div style="font-size:0.65rem;color:var(--muted);margin-bottom:12px">Enter weight + reps from any set to estimate your 1 rep max</div>
+      <div style="display:flex;gap:8px;margin-bottom:12px">
+        <div style="flex:1">
+          <label>Weight (kg)</label>
+          <input type="number" id="rmWeight" placeholder="80">
+        </div>
+        <div style="flex:1">
+          <label>Reps</label>
+          <input type="number" id="rmReps" placeholder="8">
+        </div>
+        <div style="display:flex;align-items:flex-end">
+          <button onclick="calcRM()" class="btn" style="white-space:nowrap">Calc</button>
+        </div>
+      </div>
+      <div id="rmResult" style="display:none">
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px">
+          <div class="stat-chip"><div class="val" style="color:var(--accent3)" id="val1rm">—</div><div class="lbl">Est. 1RM</div></div>
+          <div class="stat-chip"><div class="val" id="valStr">—</div><div class="lbl">Strength · 5 reps (87%)</div></div>
+          <div class="stat-chip"><div class="val" style="color:var(--accent)" id="valHyp">—</div><div class="lbl">Hypertrophy · 8–10 reps (75%)</div></div>
+          <div class="stat-chip"><div class="val" style="color:#c084fc" id="valVol">—</div><div class="lbl">Volume · 12+ reps (65%)</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== TWEETER ===== -->
+  <div class="tab" id="tab-tweeter">
+    <div class="section-head">
+      <h2 style="color:#5ee7c8">Tweeter</h2>
+      <p>Daily log — morning, noon, evening</p>
+    </div>
+    <div class="stat-row" id="tweeterStats"></div>
+    <div class="card">
+      <div class="card-label">Last 30 days — tap a day to log</div>
+      <div class="wo-calendar" id="tweeterCalendar"></div>
+      <div class="wo-legend" style="margin-top:12px" id="tweeterLegend"></div>
+    </div>
+    <div class="card">
+      <div class="card-label">History</div>
+      <div class="log-list" id="tweeterLog"></div>
+    </div>
+  </div>
+  <!-- ===== CHORES ===== -->
+  <div class="tab" id="tab-chores">
+    <div class="section-head">
+      <h2 style="color:#80cbc4">Chores</h2>
+      <p>Recurring tasks tracker</p>
+    </div>
+    <div id="choresList"></div>
+  </div>
+
+  <!-- ===== WORK (day log: hours + office/home) ===== -->
+  <div class="tab" id="tab-work">
+    <div class="section-head">
+      <h2 style="color:#7c9eff">Work</h2>
+      <p>Sun–Thu — tap a day to log hours and where you worked</p>
+    </div>
+    <div class="stat-row" id="workLogStats"></div>
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <button onclick="workWeekShift(-1)" style="background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-family:var(--font-mono);font-size:0.7rem;padding:4px 10px;cursor:pointer;border-radius:2px">‹</button>
+        <div id="workRangeLabel" style="font-family:var(--font-display);font-weight:800;font-size:0.8rem;letter-spacing:-0.3px"></div>
+        <button onclick="workWeekShift(1)" style="background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-family:var(--font-mono);font-size:0.7rem;padding:4px 10px;cursor:pointer;border-radius:2px">›</button>
+      </div>
+      <div id="workLogCalendar"></div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:12px;font-size:0.55rem;color:var(--muted);letter-spacing:0.5px">
+        <span><span style="display:inline-block;width:8px;height:8px;background:#7c9eff;border-radius:2px;vertical-align:middle"></span> Office</span>
+        <span><span style="display:inline-block;width:8px;height:8px;background:#a5d6a7;border-radius:2px;vertical-align:middle"></span> Home</span>
+        <span><span style="display:inline-block;width:8px;height:8px;background:var(--surface2);border:1px solid var(--border);border-radius:2px;vertical-align:middle"></span> Not logged</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-label">History</div>
+      <div class="log-list" id="workLogList"></div>
+    </div>
+  </div>
+
+  <!-- ===== TASKS ===== -->
+  <div class="tab" id="tab-tasks">
+    <div class="section-head">
+      <h2 style="color:#ffd54f">Tasks</h2>
+      <p>Dated to-dos — tap any day to add one</p>
+    </div>
+    <div class="stat-row" id="tasksStats"></div>
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <button onclick="taskMonthShift(-1)" style="background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-family:var(--font-mono);font-size:0.7rem;padding:4px 10px;cursor:pointer;border-radius:2px">‹</button>
+        <div id="taskMonthLabel" style="font-family:var(--font-display);font-weight:800;font-size:0.85rem;letter-spacing:-0.3px"></div>
+        <button onclick="taskMonthShift(1)" style="background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-family:var(--font-mono);font-size:0.7rem;padding:4px 10px;cursor:pointer;border-radius:2px">›</button>
+      </div>
+      <div id="taskCalendar"></div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:12px;font-size:0.55rem;color:var(--muted);letter-spacing:0.5px">
+        <span><span style="display:inline-block;width:8px;height:8px;background:#ff6b6b;border-radius:2px;vertical-align:middle"></span> Overdue</span>
+        <span><span style="display:inline-block;width:8px;height:8px;background:#ffd54f;border-radius:2px;vertical-align:middle"></span> Open</span>
+        <span><span style="display:inline-block;width:8px;height:8px;background:#5ee7c8;border-radius:2px;vertical-align:middle"></span> All done</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-label">Overdue</div>
+      <div class="log-list" id="tasksOverdue"></div>
+    </div>
+    <div class="card">
+      <div class="card-label">Next 3 days</div>
+      <div class="log-list" id="tasksSoon"></div>
+    </div>
+    <div class="card">
+      <div class="card-label">Later</div>
+      <div class="log-list" id="tasksLater"></div>
+    </div>
+    <div class="card">
+      <div class="card-label">Completed</div>
+      <div class="log-list" id="tasksDone"></div>
+    </div>
+  </div>
+
+</main>
+
+<!-- Work Day Modal -->
+<div class="wo-modal-overlay" id="workLogModal" onclick="if(event.target===this)closeWorkLogModal()">
+  <div class="wo-modal">
+    <div class="wo-modal-title">Log work</div>
+    <div class="wo-modal-sub" id="workLogModalSub"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">
+      <button id="wl-btn-office" onclick="selectWorkLoc('office')"
+        style="padding:12px 6px;border-radius:3px;border:1px solid var(--border);background:var(--surface2);font-family:var(--font-mono);font-size:0.65rem;letter-spacing:0.5px;text-transform:uppercase;color:var(--muted);cursor:pointer;transition:all 0.15s">
+        🏢 Office
+      </button>
+      <button id="wl-btn-home" onclick="selectWorkLoc('home')"
+        style="padding:12px 6px;border-radius:3px;border:1px solid var(--border);background:var(--surface2);font-family:var(--font-mono);font-size:0.65rem;letter-spacing:0.5px;text-transform:uppercase;color:var(--muted);cursor:pointer;transition:all 0.15s">
+        🏠 Home
+      </button>
+    </div>
+    <div class="form-group" style="margin-bottom:12px">
+      <label>Hours worked</label>
+      <input type="number" id="wl-hours" step="0.25" min="0" max="24" placeholder="8" onkeydown="if(event.key==='Enter')saveWorkLog()">
+    </div>
+    <div class="form-group" style="margin-bottom:12px">
+      <label>Note (optional)</label>
+      <input type="text" id="wl-note" placeholder="Half day, offsite…">
+    </div>
+    <div class="wo-modal-footer" style="display:flex;justify-content:space-between;align-items:center">
+      <button id="wl-delete" onclick="deleteWorkLog()" style="background:none;border:1px solid var(--border);color:#ff6b6b;font-family:var(--font-mono);font-size:0.65rem;padding:8px 12px;cursor:pointer;border-radius:2px;display:none">Delete</button>
+      <div style="display:flex;gap:8px;margin-left:auto">
+        <button class="wo-modal-cancel" onclick="closeWorkLogModal()">Cancel</button>
+        <button class="btn" onclick="saveWorkLog()" style="font-size:0.7rem;background:#7c9eff;color:#000">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Task Day Modal -->
+<div class="wo-modal-overlay" id="taskModal" onclick="if(event.target===this)closeTaskModal()">
+  <div class="wo-modal">
+    <div class="wo-modal-title">Add task</div>
+    <div class="wo-modal-sub" id="taskModalSub"></div>
+    <div id="taskModalExisting" style="margin:12px 0"></div>
+    <div class="form-group" style="margin-bottom:12px">
+      <label>Task</label>
+      <input type="text" id="task-title" placeholder="e.g. Dentist appointment" onkeydown="if(event.key==='Enter')saveTaskFromModal()">
+    </div>
+    <div class="wo-modal-footer">
+      <button class="wo-modal-cancel" onclick="closeTaskModal()">Close</button>
+      <button class="btn" onclick="saveTaskFromModal()" style="font-size:0.7rem;background:#ffd54f;color:#000">Add</button>
+    </div>
+  </div>
+</div>
+
+<!-- Alcohol Day Modal -->
+<div class="wo-modal-overlay" id="alcoholModal" onclick="if(event.target===this)closeAlcoholModal()">
+  <div class="wo-modal">
+    <div class="wo-modal-title" id="alcoholModalTitle">Log Drinks</div>
+    <div class="wo-modal-sub" id="alcoholModalSub"></div>
+    <div class="form-row" style="margin-top:12px">
+      <div class="form-group">
+        <label>Drink type</label>
+        <select id="al-modal-type">
+          <option>Beer</option><option>Wine</option><option>Vodka</option>
+          <option>Whiskey</option><option>Gin</option><option>Rum</option>
+          <option>Cocktail</option><option>Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Units</label>
+        <input type="number" id="al-modal-units" step="0.5" placeholder="2" min="0">
+      </div>
+    </div>
+    <div class="form-group" style="margin-bottom:12px">
+      <label>Note (optional)</label>
+      <input type="text" id="al-modal-note" placeholder="Night out, dinner…">
+    </div>
+    <div class="wo-modal-footer">
+      <button class="wo-modal-cancel" onclick="closeAlcoholModal()">Cancel</button>
+      <button class="btn" onclick="saveAlcoholFromModal()" style="font-size:0.7rem">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Tweeter Day Modal -->
+<div class="wo-modal-overlay" id="tweeterModal" onclick="if(event.target===this)closeTweeterModal()">
+  <div class="wo-modal">
+    <div class="wo-modal-title" id="tweeterModalTitle">Log Tweeter</div>
+    <div class="wo-modal-sub" id="tweeterModalSub"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px">
+      <button id="tw-btn-morning" onclick="toggleTwSlot('morning')"
+        style="padding:12px 6px;border-radius:3px;border:1px solid var(--border);background:var(--surface2);font-family:var(--font-mono);font-size:0.65rem;letter-spacing:0.5px;text-transform:uppercase;color:var(--muted);cursor:pointer;transition:all 0.15s">
+        🌅 Morning
+      </button>
+      <button id="tw-btn-noon" onclick="toggleTwSlot('noon')"
+        style="padding:12px 6px;border-radius:3px;border:1px solid var(--border);background:var(--surface2);font-family:var(--font-mono);font-size:0.65rem;letter-spacing:0.5px;text-transform:uppercase;color:var(--muted);cursor:pointer;transition:all 0.15s">
+        ☀️ Noon
+      </button>
+      <button id="tw-btn-evening" onclick="toggleTwSlot('evening')"
+        style="padding:12px 6px;border-radius:3px;border:1px solid var(--border);background:var(--surface2);font-family:var(--font-mono);font-size:0.65rem;letter-spacing:0.5px;text-transform:uppercase;color:var(--muted);cursor:pointer;transition:all 0.15s">
+        🌙 Evening
+      </button>
+    </div>
+    <div class="wo-modal-notes">
+      <label>Note (optional)</label>
+      <textarea id="tweeterModalNote" placeholder="Any notes…" style="min-height:50px"></textarea>
+    </div>
+    <div class="wo-modal-footer">
+      <button class="wo-modal-cancel" onclick="closeTweeterModal()">Cancel</button>
+      <button class="btn" onclick="saveTweeterEntry()" style="font-size:0.7rem">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- PIN Modal -->
+<div class="pin-modal-overlay" id="pinModal">
+  <div class="pin-modal">
+    <h3 id="pinTitle">🔒 Photos</h3>
+    <p id="pinSubtitle">Enter your PIN</p>
+    <div class="pin-dots" id="pinDots"></div>
+    <div class="pin-pad">
+      <button class="pin-key" onclick="pinKey('1')">1</button>
+      <button class="pin-key" onclick="pinKey('2')">2</button>
+      <button class="pin-key" onclick="pinKey('3')">3</button>
+      <button class="pin-key" onclick="pinKey('4')">4</button>
+      <button class="pin-key" onclick="pinKey('5')">5</button>
+      <button class="pin-key" onclick="pinKey('6')">6</button>
+      <button class="pin-key" onclick="pinKey('7')">7</button>
+      <button class="pin-key" onclick="pinKey('8')">8</button>
+      <button class="pin-key" onclick="pinKey('9')">9</button>
+      <button class="pin-key" onclick="pinCancel()" style="font-size:0.65rem;color:var(--muted)">Cancel</button>
+      <button class="pin-key" onclick="pinKey('0')">0</button>
+      <button class="pin-key del" onclick="pinBackspace()">⌫</button>
+    </div>
+    <div class="pin-error" id="pinError"></div>
+    <div class="pin-setup-note" id="pinSetupNote"></div>
+  </div>
+</div>
+
+<!-- Workout Day Modal -->
+<div class="wo-modal-overlay" id="woDayModal" onclick="if(event.target===this)closeWoModal()">
+  <div class="wo-modal">
+    <div class="wo-modal-title" id="woDayModalTitle">Log Workout</div>
+    <div class="wo-modal-sub" id="woDayModalSub"></div>
+    <div class="wo-modal-types" id="woDayModalTypes"></div>
+    <div class="wo-modal-custom" id="woDayModalCustomWrap">
+      <label>Custom name</label>
+      <input type="text" id="woDayModalCustomName" placeholder="e.g. Yoga, Cardio…">
+    </div>
+    <div class="wo-modal-notes">
+      <label>Notes (optional)</label>
+      <textarea id="woDayModalNotes" placeholder="How did it go?" style="min-height:50px"></textarea>
+    </div>
+    <div class="wo-modal-footer">
+      <button class="wo-modal-cancel" onclick="closeWoModal()">Cancel</button>
+      <button id="woDayModalSaveBtn" class="btn" style="display:none;font-size:0.7rem">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Lightbox -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <button class="lightbox-close" onclick="closeLightbox()">✕ Close</button>
+  <img id="lightboxImg" src="" alt="">
+  <div class="lightbox-info" id="lightboxInfo"></div>
+</div>
+
+<!-- Auto-log queue (written by scheduled email watcher; safe if missing) -->
+<script src="queue.js" onerror="window.SELFOS_QUEUE=window.SELFOS_QUEUE||[]"></script>
+
+<script>
+// ======================= STORAGE =======================
+const DB = {
+  get: (k) => JSON.parse(localStorage.getItem('selfos_' + k) || '[]'),
+  set: (k, v) => localStorage.setItem('selfos_' + k, JSON.stringify(v)),
+};
+
+// ======================= EXPORT / IMPORT =======================
+const DB_KEYS = ['weight','workout','alcohol','work','hobby','tweeter','tasks','worklog','photos'];
+
+function exportData() {
+  localStorage.setItem('selfos_lastexport', Date.now().toString());
+  const out = {};
+  const exportKeys = ['weight','workout','alcohol','work','hobby','tweeter','tasks','worklog'];
+  exportKeys.forEach(k => { out[k] = DB.get(k); });
+  out.weight = out.weight.map(e => { const c = {...e}; delete c.photo; return c; });
+  out._pin = localStorage.getItem('selfos_photopin') || '';
+  out._chores = localStorage.getItem('selfos_chores') || '{}';
+  showCopyModal(JSON.stringify(out, null, 2));
+}
+
+function showCopyModal(text) {
+  let m = document.getElementById('copyModal');
+  if (!m) {
+    m = document.createElement('div');
+    m.id = 'copyModal';
+    m.style.cssText = 'position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;padding:20px';
+    m.innerHTML = `<div style="background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:20px;width:100%;max-width:500px">
+      <div style="font-family:var(--font-display);font-weight:800;font-size:1rem;margin-bottom:8px">Copy your data</div>
+      <div style="font-size:0.65rem;color:var(--muted);margin-bottom:10px;letter-spacing:1px">Select all and copy, then save as a .json file</div>
+      <textarea id="copyModalText" style="width:100%;height:200px;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:var(--font-mono);font-size:0.65rem;padding:8px;border-radius:2px;resize:none" readonly></textarea>
+      <div style="display:flex;gap:8px;margin-top:12px;justify-content:flex-end">
+        <button onclick="document.getElementById('copyModal').remove()" style="background:none;border:1px solid var(--border);color:var(--muted);font-family:var(--font-mono);font-size:0.65rem;padding:6px 12px;cursor:pointer;border-radius:2px">Close</button>
+        <button onclick="navigator.clipboard.writeText(document.getElementById('copyModalText').value);showToast('Copied!')" style="background:var(--accent);color:#000;border:none;font-family:var(--font-mono);font-size:0.65rem;font-weight:700;padding:6px 14px;cursor:pointer;border-radius:2px">Copy all</button>
+      </div>
+    </div>`;
+    document.body.appendChild(m);
+    m.addEventListener('click', e => { if (e.target === m) m.remove(); });
+  }
+  document.getElementById('copyModalText').value = text;
+}
+
+function showImportModal() {
+  let m = document.getElementById('importModal');
+  if (!m) {
+    m = document.createElement('div');
+    m.id = 'importModal';
+    m.style.cssText = 'position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;padding:20px';
+    m.innerHTML = `<div style="background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:20px;width:100%;max-width:500px">
+      <div style="font-family:var(--font-display);font-weight:800;font-size:1rem;margin-bottom:6px">Import data</div>
+      <div style="font-size:0.65rem;color:var(--muted);margin-bottom:12px;letter-spacing:1px">Paste your exported JSON below and press Import</div>
+      <textarea id="importPasteArea" style="width:100%;height:200px;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:var(--font-mono);font-size:0.65rem;padding:8px;border-radius:2px;resize:none" placeholder="Paste JSON here..."></textarea>
+      <div id="importError" style="color:var(--accent2);font-size:0.65rem;margin-top:6px;min-height:16px"></div>
+      <div style="display:flex;gap:8px;margin-top:10px;justify-content:flex-end">
+        <button onclick="document.getElementById('importModal').remove()" style="background:none;border:1px solid var(--border);color:var(--muted);font-family:var(--font-mono);font-size:0.65rem;padding:6px 12px;cursor:pointer;border-radius:2px">Cancel</button>
+        <button onclick="doImport()" style="background:var(--accent);color:#000;border:none;font-family:var(--font-mono);font-size:0.65rem;font-weight:700;padding:6px 14px;cursor:pointer;border-radius:2px">Import</button>
+      </div>
+    </div>`;
+    document.body.appendChild(m);
+    m.addEventListener('click', e => { if (e.target === m) m.remove(); });
+  } else {
+    m.style.display = 'flex';
+  }
+  document.getElementById('importPasteArea').value = '';
+  document.getElementById('importError').textContent = '';
+}
+
+function doImport() {
+  const text = document.getElementById('importPasteArea').value.trim();
+  try {
+    const data = JSON.parse(text);
+    const exportKeys = ['weight','workout','alcohol','work','hobby','tweeter','tasks','worklog'];
+    exportKeys.forEach(k => { if (data[k] !== undefined) DB.set(k, data[k]); });
+    if (data._pin) localStorage.setItem('selfos_photopin', data._pin);
+    if (data._chores) localStorage.setItem('selfos_chores', data._chores);
+    document.getElementById('importModal').remove();
+    renderWeight(); renderWorkout(); renderAlcohol(); renderWork(); renderTweeter(); renderTasks(); renderWorkLog(); renderChores();
+    applyPhotoLockState();
+    showToast('Import successful!');
+  } catch(err) {
+    document.getElementById('importError').textContent = 'Invalid JSON — paste the full copied text.';
+  }
+}
+
+function showQRModal() {
+  const out = {};
+  const exportKeys = ['weight','workout','alcohol','work','hobby','tweeter','tasks','worklog'];
+  exportKeys.forEach(k => { out[k] = DB.get(k); });
+  out.weight = out.weight.map(e => { const c = {...e}; delete c.photo; return c; });
+  out._pin = localStorage.getItem('selfos_photopin') || '';
+  out._chores = localStorage.getItem('selfos_chores') || '{}';
+  const json = JSON.stringify(out);
+
+  if (json.length > 2900) {
+    showToast('Data too large for QR — use Export + Import instead');
+    return;
+  }
+
+  let m = document.getElementById('qrModal');
+  if (m) m.remove();
+  m = document.createElement('div');
+  m.id = 'qrModal';
+  m.style.cssText = 'position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,0.9);display:flex;align-items:center;justify-content:center;padding:20px';
+  m.innerHTML = `<div style="background:#fff;border-radius:8px;padding:24px;width:100%;max-width:360px;text-align:center">
+    <div style="font-family:var(--font-display);font-weight:800;font-size:1rem;color:#000;margin-bottom:4px">Scan with your phone</div>
+    <div style="font-size:0.65rem;color:#666;margin-bottom:16px">Scan → copy the text → open SELF OS on phone → ⬆ Import → paste</div>
+    <div id="qrCode" style="display:inline-block;padding:8px;background:#fff;border-radius:4px"></div>
+    <div style="margin-top:16px">
+      <button onclick="document.getElementById('qrModal').remove()" style="background:#111;color:#fff;border:none;font-family:monospace;font-size:0.7rem;padding:8px 20px;cursor:pointer;border-radius:4px;letter-spacing:1px">Close</button>
+    </div>
+  </div>`;
+  document.body.appendChild(m);
+  m.addEventListener('click', e => { if (e.target === m) m.remove(); });
+
+  try {
+    new QRCode(document.getElementById('qrCode'), {
+      text: json,
+      width: 260,
+      height: 260,
+      colorDark: '#000',
+      colorLight: '#fff',
+      correctLevel: QRCode.CorrectLevel.L
+    });
+  } catch(e) {
+    document.getElementById('qrCode').innerHTML = '<p style="color:red;font-size:0.7rem">QR generation failed — data may be too large. Use Export instead.</p>';
+  }
+}
+
+
+function showToast(msg) {
+  const t = document.createElement('div');
+  t.textContent = msg;
+  t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#222;color:#fff;font-family:var(--font-mono);font-size:0.7rem;padding:8px 18px;border-radius:3px;z-index:9999;letter-spacing:1px;border:1px solid var(--border);pointer-events:none;opacity:1;transition:opacity 0.4s';
+  document.body.appendChild(t);
+  setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 400); }, 2000);
+}
+
+// ======================= UTILS =======================
+// Local calendar date (NOT toISOString — that returns UTC and rolls over early in UTC+ timezones)
+const today = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; };
+const todayDMY = () => { const d = new Date(); return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`; };
+const fmtDate = (d) => { const dt = new Date(d + 'T00:00:00'); const dd = String(dt.getDate()).padStart(2,'0'); const mm = String(dt.getMonth()+1).padStart(2,'0'); const yyyy = dt.getFullYear(); return `${dd}/${mm}/${yyyy}`; };
+// Parse dd/mm/yyyy → yyyy-mm-dd (for storage)
+const parseDate = (s) => { if (!s) return ''; const [dd,mm,yyyy] = s.split('/'); if (!dd||!mm||!yyyy) return ''; return `${yyyy}-${mm.padStart(2,'0')}-${dd.padStart(2,'0')}`; };
+// Auto-format date input as user types: insert slashes
+function autoDate(e) {
+  let v = e.target.value.replace(/\D/g,'');
+  if (v.length > 2) v = v.slice(0,2) + '/' + v.slice(2);
+  if (v.length > 5) v = v.slice(0,5) + '/' + v.slice(5,9);
+  e.target.value = v;
+}
+const genId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+
+function setHeaderDate() {
+  const d = new Date();
+  document.getElementById('headerDate').textContent = d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+function switchTab(name) {
+  if (name !== 'weight' && photosUnlocked) {
+    photosUnlocked = false;
+  }
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  document.getElementById('nav-' + name).classList.add('active');
+}
+
+// ======================= PIN / LOCK =======================
+let photosUnlocked = false;
+let navUnlocked = false;
+let pinBuffer = '';
+let pinMode = 'unlock'; // 'unlock' | 'setup' | 'setup-confirm'
+let pinPurpose = 'nav'; // 'nav' | 'photos'
+let pinSetupFirst = '';
+
+const PIN_KEY = 'selfos_photopin';
+const getPin = () => localStorage.getItem(PIN_KEY) || '';
+const setPin = (p) => localStorage.setItem(PIN_KEY, p);
+
+function renderPinDots(len) {
+  document.getElementById('pinDots').innerHTML =
+    Array.from({length: 4}, (_, i) =>
+      `<div class="pin-dot-indicator ${i < len ? 'filled' : ''}"></div>`
+    ).join('');
+}
+
+function openNavPin() {
+  pinPurpose = 'nav';
+  _openPinModal('🔒 More', 'Enter PIN to unlock all tabs');
+}
+
+function openPinModal() {
+  pinPurpose = 'photos';
+  _openPinModal('🔒 Photos', 'Enter PIN to view photos');
+}
+
+function _openPinModal(title, subtitle) {
+  pinBuffer = '';
+  const hasPin = !!getPin();
+  if (!hasPin) {
+    pinMode = 'setup';
+    document.getElementById('pinTitle').textContent = '🔒 Set a PIN';
+    document.getElementById('pinSubtitle').textContent = 'Choose a 4-digit PIN';
+    document.getElementById('pinSetupNote').textContent = 'Used for all private areas.';
+  } else {
+    pinMode = 'unlock';
+    document.getElementById('pinTitle').textContent = title;
+    document.getElementById('pinSubtitle').textContent = subtitle;
+    document.getElementById('pinSetupNote').textContent = '';
+  }
+  document.getElementById('pinError').textContent = '';
+  renderPinDots(0);
+  document.getElementById('pinModal').classList.add('open');
+}
+
+function pinCancel() {
+  pinBuffer = '';
+  document.getElementById('pinModal').classList.remove('open');
+}
+
+function pinKey(digit) {
+  if (pinBuffer.length >= 4) return;
+  pinBuffer += digit;
+  renderPinDots(pinBuffer.length);
+  document.getElementById('pinError').textContent = '';
+  if (pinBuffer.length === 4) {
+    setTimeout(() => handlePinComplete(), 120);
+  }
+}
+
+function pinBackspace() {
+  pinBuffer = pinBuffer.slice(0, -1);
+  renderPinDots(pinBuffer.length);
+}
+
+function handlePinComplete() {
+  if (pinMode === 'unlock') {
+    if (pinBuffer === getPin()) {
+      document.getElementById('pinModal').classList.remove('open');
+      if (pinPurpose === 'nav') {
+        navUnlocked = true;
+        photosUnlocked = true;
+        applyNavLockState();
+        applyPhotoLockState();
+      } else {
+        photosUnlocked = true;
+        applyPhotoLockState();
+      }
+    } else {
+      pinBuffer = '';
+      renderPinDots(0);
+      document.getElementById('pinError').textContent = 'Wrong PIN. Try again.';
+    }
+  } else if (pinMode === 'setup') {
+    pinSetupFirst = pinBuffer;
+    pinBuffer = '';
+    renderPinDots(0);
+    pinMode = 'setup-confirm';
+    document.getElementById('pinSubtitle').textContent = 'Confirm your PIN';
+    document.getElementById('pinSetupNote').textContent = 'Enter the same PIN again.';
+  } else if (pinMode === 'setup-confirm') {
+    if (pinBuffer === pinSetupFirst) {
+      setPin(pinBuffer);
+      document.getElementById('pinModal').classList.remove('open');
+      if (pinPurpose === 'nav') {
+        navUnlocked = true;
+        photosUnlocked = true;
+        applyNavLockState();
+        applyPhotoLockState();
+      } else {
+        photosUnlocked = true;
+        applyPhotoLockState();
+      }
+    } else {
+      pinBuffer = '';
+      pinSetupFirst = '';
+      pinMode = 'setup';
+      renderPinDots(0);
+      document.getElementById('pinSubtitle').textContent = 'PINs didn\'t match. Try again.';
+    }
+  }
+}
+
+function applyNavLockState() {
+  const more = document.getElementById('nav-more');
+  const lockedBtns = ['nav-weight','nav-alcohol','nav-tweeter','nav-tracking','nav-lockbtn'];
+  if (navUnlocked) {
+    lockedBtns.forEach(id => { document.getElementById(id).style.display = 'flex'; });
+    more.style.display = 'none';
+  } else {
+    lockedBtns.forEach(id => { document.getElementById(id).style.display = 'none'; });
+    more.style.display = 'flex';
+  }
+}
+
+function lockNav() {
+  navUnlocked = false;
+  photosUnlocked = false;
+  applyNavLockState();
+  applyPhotoLockState();
+  switchTab('workout');
+}
+
+function togglePhotoLock() {
+  if (photosUnlocked) {
+    photosUnlocked = false;
+    applyPhotoLockState();
+  } else {
+    openPinModal();
+  }
+}
+
+
+function applyPhotoLockState() {
+  document.getElementById('wPhotoLockedMsg').style.display = photosUnlocked ? 'none' : 'block';
+  document.getElementById('wPhotoUploadWrap').style.display = photosUnlocked ? 'block' : 'none';
+  document.getElementById('wPhotoLockStatus').textContent = photosUnlocked ? '🔓 unlocked — tap to lock' : '🔒 locked — tap to unlock';
+  document.getElementById('wPhotoLockStatus').style.color = photosUnlocked ? 'var(--accent)' : 'var(--muted)';
+  document.getElementById('wGalleryLocked').style.display = photosUnlocked ? 'none' : 'block';
+  document.getElementById('wGalleryUnlocked').style.display = photosUnlocked ? 'block' : 'none';
+  document.getElementById('galleryLockBtn').textContent = photosUnlocked ? '🔓 unlocked — tap to lock' : '🔒 locked';
+  document.getElementById('galleryLockBtn').style.color = photosUnlocked ? 'var(--accent)' : 'var(--muted)';
+  renderWeight();
+}
+
+// ======================= WEIGHT =======================
+let weightChart;
+let weightChartMode = 'weight';
+let wFilter = 'all';
+let pendingWeightPhoto = null; // base64
+
+// Downscale + JPEG-compress so photos fit in localStorage (~5MB total quota)
+function compressPhoto(dataUrl, cb) {
+  const img = new Image();
+  img.onload = () => {
+    const MAX = 900; // max long edge in px
+    let { width: w, height: h } = img;
+    if (Math.max(w, h) > MAX) {
+      const scale = MAX / Math.max(w, h);
+      w = Math.round(w * scale);
+      h = Math.round(h * scale);
+    }
+    const canvas = document.createElement('canvas');
+    canvas.width = w; canvas.height = h;
+    canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+    cb(canvas.toDataURL('image/jpeg', 0.72));
+  };
+  img.onerror = () => cb(dataUrl); // fall back to original if decode fails
+  img.src = dataUrl;
+}
+
+function setPendingWeightPhoto(dataUrl) {
+  compressPhoto(dataUrl, (compressed) => {
+    pendingWeightPhoto = compressed;
+    document.getElementById('wPhotoPreview').src = compressed;
+    document.getElementById('wPhotoPreviewWrap').style.display = 'block';
+    document.getElementById('wUploadLabel').textContent = '✓ Photo ready';
+  });
+}
+
+function previewWeightPhoto(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => setPendingWeightPhoto(e.target.result);
+  reader.readAsDataURL(file);
+}
+
+function dropWeightPhoto(e) {
+  e.preventDefault();
+  dragLeave(e, 'wUploadZone');
+  const file = Array.from(e.dataTransfer.files).find(f => f.type.startsWith('image/'));
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => setPendingWeightPhoto(ev.target.result);
+  reader.readAsDataURL(file);
+}
+
+function setWeightChartMode(mode) {
+  weightChartMode = mode;
+  ['weight','waist'].forEach(m => {
+    const btn = document.getElementById('wcm-' + m);
+    const active = m === mode;
+    btn.style.background = active ? 'rgba(200,241,53,0.15)' : 'var(--surface2)';
+    btn.style.borderColor = active ? 'var(--accent)' : 'var(--border)';
+    btn.style.color = active ? 'var(--accent)' : 'var(--muted)';
+  });
+  const data = DB.get('weight');
+  initWeightChart([...data].sort((a,b) => a.date > b.date ? 1 : -1));
+}
+
+function setWFilter(f) {
+  wFilter = f;
+  ['all','photos'].forEach(k => {
+    const btn = document.getElementById('wf-' + k);
+    const active = k === f;
+    btn.style.background = active ? 'rgba(200,241,53,0.1)' : 'var(--surface2)';
+    btn.style.borderColor = active ? 'var(--accent)' : 'var(--border)';
+    btn.style.color = active ? 'var(--accent)' : 'var(--muted)';
+  });
+  renderWeight();
+}
+
+// Chart.js comes from a CDN. If it didn't load (offline / blocked), show a placeholder
+// instead of throwing — a charting failure must never take down the rest of the app.
+function chartUnavailable(canvasId) {
+  if (typeof Chart !== 'undefined') return false;
+  const c = document.getElementById(canvasId);
+  if (c && c.parentElement && !c.parentElement.querySelector('.chart-offline')) {
+    const n = document.createElement('div');
+    n.className = 'chart-offline';
+    n.style.cssText = 'font-size:0.6rem;color:var(--muted);letter-spacing:0.5px;text-align:center;padding:18px 8px';
+    n.textContent = '📉 Chart unavailable — Chart.js could not load (offline?)';
+    c.style.display = 'none';
+    c.parentElement.appendChild(n);
+  }
+  return true;
+}
+
+function initWeightChart(data) {
+  if (chartUnavailable('weightChart')) return;
+  const el = document.getElementById('weightChart');
+  if (!el) return;
+  const ctx = el.getContext('2d');
+  const filtered = data.filter(d => weightChartMode === 'waist' ? d.waist : d.weight).slice(-30);
+  if (weightChart) weightChart.destroy();
+  const color = weightChartMode === 'waist' ? '#d4a0ff' : '#c8f135';
+  const bgColor = weightChartMode === 'waist' ? 'rgba(212,160,255,0.08)' : 'rgba(200,241,53,0.08)';
+  weightChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: filtered.map(d => fmtDate(d.date)),
+      datasets: [{
+        data: filtered.map(d => weightChartMode === 'waist' ? d.waist : d.weight),
+        borderColor: color, backgroundColor: bgColor,
+        tension: 0.4, fill: true, pointRadius: 4,
+        pointBackgroundColor: color, borderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: '#666', font: { family: 'Space Mono', size: 10 } }, grid: { color: '#1a1a1a' } },
+        y: { ticks: { color: '#666', font: { family: 'Space Mono', size: 10 } }, grid: { color: '#1a1a1a' } }
+      }
+    }
+  });
+}
+
+function renderWeight() {
+  const data = DB.get('weight');
+  const sorted = [...data].sort((a, b) => a.date > b.date ? 1 : -1);
+  const latest = sorted[sorted.length - 1];
+  const first = sorted[0];
+  const change = latest && first && sorted.length > 1 ? (latest.weight - first.weight).toFixed(1) : null;
+  const avg7 = sorted.slice(-7).reduce((s, d) => s + d.weight, 0) / (sorted.slice(-7).length || 1);
+  const latestWaist = [...sorted].reverse().find(d => d.waist);
+
+  document.getElementById('weightStats').innerHTML = `
+    <div class="stat-chip"><div class="val w-accent">${latest ? latest.weight + ' kg' : '—'}</div><div class="lbl">Latest weight</div></div>
+    <div class="stat-chip"><div class="val">${avg7 ? avg7.toFixed(1) + ' kg' : '—'}</div><div class="lbl">7-day avg</div></div>
+    <div class="stat-chip"><div class="val" style="color:${change < 0 ? '#c8f135' : '#ff4f4f'}">${change !== null ? (change > 0 ? '+' : '') + change + ' kg' : '—'}</div><div class="lbl">Total change</div></div>
+    <div class="stat-chip"><div class="val" style="color:#d4a0ff">${latestWaist ? latestWaist.waist + ' cm' : '—'}</div><div class="lbl">Latest waist</div></div>
+  `;
+
+  // History list
+  const display = wFilter === 'photos' ? sorted.filter(d => d.photo) : sorted;
+  const log = document.getElementById('weightLog');
+  if (!display.length) { log.innerHTML = '<div class="empty">No entries yet.</div>'; }
+  else {
+    log.innerHTML = display.slice().reverse().map(d => `
+      <div class="log-item" style="flex-direction:column;align-items:flex-start;gap:6px">
+        <div style="display:flex;align-items:center;justify-content:space-between;width:100%">
+          <div>
+            <span style="color:var(--accent);font-weight:700">${d.weight} kg</span>
+            ${d.waist ? `<span style="color:#d4a0ff;margin-left:10px">⌀ ${d.waist} cm</span>` : ''}
+            ${d.note ? `<span style="color:var(--muted);margin-left:8px;font-size:0.7rem">${d.note}</span>` : ''}
+            ${d.photo ? `<span style="color:var(--accent3);margin-left:8px;font-size:0.65rem">📷</span>` : ''}
+            <div class="log-date">${fmtDate(d.date)}</div>
+          </div>
+          <button class="btn-ghost" data-id="${d.id}" onclick="delWeightEntry(this)">✕</button>
+        </div>
+        ${d.photo && photosUnlocked ? `<img src="${d.photo}" style="width:100%;max-height:180px;object-fit:cover;border-radius:3px;cursor:pointer" onclick="openWeightLightbox('${d.id}')">` : (d.photo ? `<div style="font-size:0.65rem;color:var(--muted);padding:4px 0">📷 Photo hidden — unlock to view</div>` : '')}
+      </div>
+    `).join('');
+  }
+
+  // Gallery
+  const withPhotos = sorted.filter(d => d.photo);
+  const gallery = document.getElementById('wPhotoGrid');
+  const noPhotos = document.getElementById('wNoPhotos');
+  if (!withPhotos.length) {
+    gallery.innerHTML = '';
+    noPhotos.style.display = 'block';
+  } else {
+    noPhotos.style.display = 'none';
+    gallery.innerHTML = withPhotos.slice().reverse().map(d => `
+      <div class="photo-item" onclick="openWeightLightbox('${d.id}')">
+        <img src="${d.photo}" alt="">
+        <div class="photo-date">${fmtDate(d.date)}${d.waist ? ' · ⌀'+d.waist : ''}</div>
+      </div>
+    `).join('');
+  }
+
+  if (sorted.length) initWeightChart(sorted);
+}
+
+function logWeight() {
+  const w = parseFloat(document.getElementById('w-weight').value);
+  const d = parseDate(document.getElementById('w-date').value);
+  if (!w || !d) return alert('Please enter weight and date (dd/mm/yyyy).');
+  const waist = parseFloat(document.getElementById('w-waist').value) || null;
+  const data = DB.get('weight');
+  const entry = { id: genId(), weight: w, waist, date: d, note: document.getElementById('w-note').value, photo: pendingWeightPhoto };
+  data.push(entry);
+  try {
+    DB.set('weight', data);
+  } catch (err) {
+    // Storage full (usually the photo). Offer to save without it.
+    if (entry.photo && confirm('Storage is full — the photo can\'t be saved. Save this entry without the photo?\n\n(Tip: delete old photo entries to free space.)')) {
+      entry.photo = null;
+      try { DB.set('weight', data); }
+      catch (e2) { data.pop(); alert('Storage is completely full. Delete some old entries or photos first.'); return; }
+    } else {
+      data.pop();
+      alert('Could not save — storage is full. Delete some old entries or photos to free space.');
+      return;
+    }
+  }
+  document.getElementById('w-weight').value = '';
+  document.getElementById('w-waist').value = '';
+  document.getElementById('w-note').value = '';
+  document.getElementById('wPhotoInput').value = '';
+  document.getElementById('wPhotoPreviewWrap').style.display = 'none';
+  document.getElementById('wUploadLabel').innerHTML = '<span class="icon" style="font-size:1.2rem">📷</span> Tap to add photo';
+  pendingWeightPhoto = null;
+  renderWeight();
+}
+
+function delWeightEntry(btn) {
+  const id = btn.getAttribute('data-id');
+  DB.set('weight', DB.get('weight').filter(e => e.id !== id));
+  renderWeight();
+}
+
+function openWeightLightbox(id) {
+  const entry = DB.get('weight').find(e => e.id === id);
+  if (!entry || !entry.photo) return;
+  document.getElementById('lightboxImg').src = entry.photo;
+  document.getElementById('lightboxInfo').textContent = `${fmtDate(entry.date)} · ${entry.weight} kg${entry.waist ? ' · ⌀ ' + entry.waist + ' cm' : ''}${entry.note ? ' · ' + entry.note : ''}`;
+  document.getElementById('lightbox').classList.add('open');
+}
+
+
+
+// ======================= WORKOUT =======================
+const WO_TYPES = [
+  { key: 'fullbody', label: 'Full Body', color: '#c084fc' },
+  { key: 'upper',    label: 'Upper',     color: '#ff6b6b' },
+  { key: 'lower',    label: 'Lower',     color: '#4fc3f7' },
+  { key: 'arms',     label: 'Arms',      color: '#c8f135' },
+  { key: 'run',      label: 'Run',       color: '#ff9f43' },
+  { key: 'other',    label: 'Other',     color: '#888888' },
+];
+let selectedWoType = null;
+
+function initWoTypeGrid() {
+  const grid = document.getElementById('woTypeGrid');
+  grid.innerHTML = WO_TYPES.map(t => `
+    <button class="wo-type-btn" id="wobtn-${t.key}" onclick="selectWoType('${t.key}')">${t.label}</button>
+  `).join('');
+}
+
+function selectWoType(key) {
+  selectedWoType = key;
+  WO_TYPES.forEach(t => {
+    const btn = document.getElementById('wobtn-' + t.key);
+    if (t.key === key) {
+      btn.classList.add('selected');
+      btn.style.background = t.color;
+      btn.style.borderColor = t.color;
+    } else {
+      btn.classList.remove('selected');
+      btn.style.background = '';
+      btn.style.borderColor = '';
+    }
+  });
+  document.getElementById('wo-custom-wrap').style.display = key === 'other' ? 'block' : 'none';
+}
+
+function renderWorkoutCalendar(data) {
+  const cal = document.getElementById('workoutCalendar');
+  const todayStr = today();
+  const days = [];
+  for (let i = 29; i >= 0; i--) {
+    const d = new Date(); d.setDate(d.getDate() - i);
+    days.push(d.toISOString().slice(0, 10));
+  }
+
+  // Map date -> array of types
+  const dateMap = {};
+  data.forEach(e => {
+    if (!dateMap[e.date]) dateMap[e.date] = [];
+    dateMap[e.date].push(e.type);
+  });
+
+  // Day labels — offset to match the first day
+  const firstDay = new Date(days[0] + 'T00:00:00');
+  const offset = firstDay.getDay(); // 0=Sun
+  const dayNames = ['Su','Mo','Tu','We','Th','Fr','Sa'];
+
+  let html = dayNames.map(d => `<div class="wo-cal-day-label">${d}</div>`).join('');
+  // blank cells before first day
+  for (let i = 0; i < offset; i++) html += `<div></div>`;
+
+  days.forEach(ds => {
+    const d = new Date(ds + 'T00:00:00');
+    const dayNum = d.getDate();
+    const types = dateMap[ds] || [];
+    const isToday = ds === todayStr;
+
+    if (types.length === 0) {
+      html += `<div class="wo-cal-day${isToday ? ' today-marker' : ''}" onclick="openWoModal('${ds}')" style="cursor:pointer"><span class="day-num">${dayNum}</span></div>`;
+    } else if (types.length === 1) {
+      const wo = WO_TYPES.find(t => t.key === types[0]);
+      const color = wo ? wo.color : '#888';
+      const label = wo ? wo.label.split(' ')[0] : types[0];
+      html += `<div class="wo-cal-day has-workout${isToday ? ' today-marker' : ''}" style="background:${color};cursor:pointer" title="${types.map(t => WO_TYPES.find(x=>x.key===t)?.label||t).join(', ')}" onclick="openWoModal('${ds}')">
+        <span class="day-num">${dayNum}</span>
+        <span class="day-abbr">${label}</span>
+      </div>`;
+    } else {
+      const colors = types.map(t => (WO_TYPES.find(x => x.key === t)?.color || '#888'));
+      const gradient = `linear-gradient(135deg, ${colors[0]} 50%, ${colors[1]} 50%)`;
+      html += `<div class="wo-cal-day has-workout${isToday ? ' today-marker' : ''}" style="background:${gradient};cursor:pointer" title="${types.map(t => WO_TYPES.find(x=>x.key===t)?.label||t).join(' + ')}" onclick="openWoModal('${ds}')">
+        <span class="day-num" style="color:#000;text-shadow:0 0 3px rgba(255,255,255,0.5)">${dayNum}</span>
+      </div>`;
+    }
+  });
+
+  cal.innerHTML = html;
+
+  // Legend
+  const usedTypes = [...new Set(data.map(e => e.type))];
+  document.getElementById('workoutLegend').innerHTML = WO_TYPES
+    .filter(t => usedTypes.includes(t.key) || true)
+    .map(t => `<div class="wo-legend-item"><div class="wo-legend-dot" style="background:${t.color}"></div>${t.label}</div>`)
+    .join('');
+}
+
+function renderWorkout() {
+  const data = DB.get('workout');
+  const sorted = [...data].sort((a, b) => a.date > b.date ? 1 : -1);
+  const now = new Date();
+  const weekAgo = new Date(now); weekAgo.setDate(weekAgo.getDate() - 7);
+  const thisWeek = sorted.filter(d => new Date(d.date) >= weekAgo);
+  const streak = calcStreak(data.map(d => d.date));
+
+  document.getElementById('workoutStats').innerHTML = `
+    <div class="stat-chip"><div class="val wo-accent">${data.length}</div><div class="lbl">Total sessions</div></div>
+    <div class="stat-chip"><div class="val">${thisWeek.length}</div><div class="lbl">This week</div></div>
+    <div class="stat-chip"><div class="val" style="color:var(--accent)">${streak}🔥</div><div class="lbl">Day streak</div></div>
+  `;
+
+  renderWorkoutCalendar(sorted);
+
+  const log = document.getElementById('workoutLog');
+  if (!sorted.length) { log.innerHTML = '<div class="empty">No sessions yet.</div>'; }
+  else {
+    log.innerHTML = sorted.slice().reverse().map(d => {
+      const wo = WO_TYPES.find(t => t.key === d.type);
+      const color = wo ? wo.color : '#aaaaaa';
+      const label = wo ? wo.label : (d.customName || d.type);
+      const displayLabel = (d.type === 'other' && d.customName) ? 'Other: ' + d.customName : label;
+      return `<div class="log-item">
+        <div class="log-main">
+          <span class="log-tag" style="background:rgba(128,128,128,0.15);color:${color}">${displayLabel}</span>
+          ${d.notes ? `<div style="color:var(--muted);font-size:0.65rem;margin-top:3px">${d.notes}</div>` : ''}
+          <div class="log-date">${fmtDate(d.date)}</div>
+        </div>
+        <button class="btn-ghost" data-id="${d.id}" onclick="delWorkout(this)">✕</button>
+      </div>`;
+    }).join('');
+  }
+}
+
+function logWorkout() {
+  if (!selectedWoType) return alert('Please select a session type.');
+  const d = parseDate(document.getElementById('wo-date').value);
+  if (!d) return alert('Please select a date (dd/mm/yyyy).');
+  const data = DB.get('workout');
+  data.push({
+    id: genId(),
+    type: selectedWoType,
+    customName: selectedWoType === 'other' ? document.getElementById('wo-custom-name').value : '',
+    date: d,
+    notes: document.getElementById('wo-notes').value
+  });
+  DB.set('workout', data);
+  document.getElementById('wo-notes').value = '';
+  document.getElementById('wo-custom-name').value = '';
+  // Deselect
+  selectedWoType = null;
+  WO_TYPES.forEach(t => {
+    const btn = document.getElementById('wobtn-' + t.key);
+    btn.classList.remove('selected');
+    btn.style.background = '';
+    btn.style.borderColor = '';
+  });
+  document.getElementById('wo-custom-wrap').style.display = 'none';
+  renderWorkout();
+}
+
+// ======================= WORKOUT DAY MODAL =======================
+let woDayModalDate = null;
+
+function openWoModal(dateStr) {
+  woDayModalDate = dateStr;
+  const d = new Date(dateStr + 'T00:00:00');
+  const label = d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
+  document.getElementById('woDayModalTitle').textContent = 'Log Workout';
+  document.getElementById('woDayModalSub').textContent = label;
+  document.getElementById('woDayModalNotes').value = '';
+  document.getElementById('woDayModalCustomName').value = '';
+  document.getElementById('woDayModalCustomWrap').style.display = 'none';
+  document.getElementById('woDayModalSaveBtn').style.display = 'none';
+
+  document.getElementById('woDayModalTypes').innerHTML = WO_TYPES.map(t => `
+    <button class="wo-modal-type-btn" style="background:${t.color}" onclick="selectWoModalType('${t.key}',this)">${t.label}</button>
+  `).join('');
+
+  document.getElementById('woDayModal').classList.add('open');
+}
+
+function selectWoModalType(key, btn) {
+  if (key === 'other') {
+    document.getElementById('woDayModalCustomWrap').style.display = 'block';
+    document.getElementById('woDayModalCustomName').focus();
+  } else {
+    document.getElementById('woDayModalCustomWrap').style.display = 'none';
+  }
+  // Highlight selected
+  document.querySelectorAll('.wo-modal-type-btn').forEach(b => b.style.opacity = '0.4');
+  btn.style.opacity = '1';
+  // Show save button
+  const saveBtn = document.getElementById('woDayModalSaveBtn');
+  saveBtn.style.display = 'inline-block';
+  saveBtn.onclick = () => saveWoFromModal(key);
+}
+
+function closeWoModal() {
+  document.getElementById('woDayModal').classList.remove('open');
+  woDayModalDate = null;
+}
+
+function saveWoFromModal(typeKey) {
+  if (!woDayModalDate) return;
+  const customName = typeKey === 'other' ? document.getElementById('woDayModalCustomName').value : '';
+  if (typeKey === 'other' && !customName) {
+    document.getElementById('woDayModalCustomWrap').style.display = 'block';
+    document.getElementById('woDayModalCustomName').focus();
+    return;
+  }
+  const notes = document.getElementById('woDayModalNotes').value;
+  const data = DB.get('workout');
+  data.push({ id: genId(), type: typeKey, customName, date: woDayModalDate, notes });
+  DB.set('workout', data);
+  closeWoModal();
+  renderWorkout();
+}
+
+
+function renderAlcoholCalendar(data) {
+  const cal = document.getElementById('alcoholCalendar');
+  const todayStr = today();
+  const LIMIT = 5;
+
+  const days = [];
+  for (let i = 29; i >= 0; i--) {
+    const d = new Date(); d.setDate(d.getDate() - i);
+    days.push(d.toISOString().slice(0, 10));
+  }
+
+  // Map date -> total units
+  const dateMap = {};
+  data.forEach(e => { dateMap[e.date] = (dateMap[e.date] || 0) + e.units; });
+
+  const firstDay = new Date(days[0] + 'T00:00:00');
+  const offset = firstDay.getDay();
+  const dayNames = ['Su','Mo','Tu','We','Th','Fr','Sa'];
+
+  // Color scale: 0=empty, >0 and <=limit=gradient orange, >limit=red
+  const unitColor = (u) => {
+    if (!u) return null;
+    if (u >= 5) return '#ff2020';
+    if (u >= 4) return '#ff6030';
+    if (u >= 3) return '#ff8c00';
+    if (u >= 2) return '#e6b800';
+    return '#ffe066';
+  };
+
+  let html = dayNames.map(d => `<div class="wo-cal-day-label">${d}</div>`).join('');
+  for (let i = 0; i < offset; i++) html += `<div></div>`;
+
+  days.forEach(ds => {
+    const d = new Date(ds + 'T00:00:00');
+    const dayNum = d.getDate();
+    const units = dateMap[ds] || 0;
+    const isToday = ds === todayStr;
+    const color = unitColor(units);
+    const textColor = units ? '#000' : 'var(--muted)';
+    const bgStyle = color ? `background:${color};` : '';
+    const overLimit = units >= LIMIT;
+
+    html += `<div class="wo-cal-day${units ? ' has-workout' : ''}${isToday ? ' today-marker' : ''}"
+      style="${bgStyle}cursor:pointer"
+      title="${units ? units + ' unit' + (units !== 1 ? 's' : '') : 'No drinks — tap to log'}"
+      onclick="openAlcoholModal('${ds}')">
+      <span class="day-num" style="color:${units ? '#000' : ''}">${dayNum}</span>
+      ${units ? `<span class="day-abbr" style="color:#000">${overLimit ? '⚠' : units}</span>` : ''}
+    </div>`;
+  });
+
+  cal.innerHTML = html;
+
+  // Legend
+  document.getElementById('alcoholLegend').innerHTML = `
+    <div class="wo-legend-item"><div class="wo-legend-dot" style="background:var(--surface2);border:1px solid var(--border)"></div>0</div>
+    <div class="wo-legend-item"><div class="wo-legend-dot" style="background:#ffe066"></div>1</div>
+    <div class="wo-legend-item"><div class="wo-legend-dot" style="background:#e6b800"></div>2</div>
+    <div class="wo-legend-item"><div class="wo-legend-dot" style="background:#ff8c00"></div>3</div>
+    <div class="wo-legend-item"><div class="wo-legend-dot" style="background:#ff6030"></div>4</div>
+    <div class="wo-legend-item"><div class="wo-legend-dot" style="background:#ff2020"></div>5+</div>
+  `;
+}
+
+function renderAlcohol() {
+  const LIMIT = 5;
+  const data = DB.get('alcohol');
+  const sorted = [...data].sort((a, b) => a.date > b.date ? 1 : -1);
+  const now = new Date();
+  const ago7 = new Date(now); ago7.setDate(ago7.getDate() - 7);
+  const last7 = sorted.filter(d => new Date(d.date) >= ago7);
+  const weekUnits = last7.reduce((s, d) => s + d.units, 0);
+  const soberDays = calcSoberStreak(data.map(d => d.date));
+  const pct = Math.min(weekUnits / LIMIT * 100, 100).toFixed(0);
+  const over = weekUnits > LIMIT;
+
+  document.getElementById('alcoholStats').innerHTML = `
+    <div class="stat-chip">
+      <div class="val a-accent">${weekUnits}<span style="font-size:0.9rem;color:var(--muted)"> / ${LIMIT}</span></div>
+      <div class="lbl">Units last 7 days</div>
+      <div class="prog-bar"><div class="prog-fill" style="width:${pct}%;background:${over ? 'var(--accent2)' : 'var(--accent4)'}"></div></div>
+    </div>
+    <div class="stat-chip"><div class="val" style="color:${over ? 'var(--accent2)' : 'var(--accent)'}">${over ? '⚠ Over' : '✓ OK'}</div><div class="lbl">Limit: ${LIMIT}/week</div></div>
+    <div class="stat-chip"><div class="val">${soberDays}</div><div class="lbl">Sober streak</div></div>
+  `;
+
+  renderAlcoholCalendar(sorted);
+
+  const log = document.getElementById('alcoholLog');
+  if (!sorted.length) { log.innerHTML = '<div class="empty">No entries yet.</div>'; }
+  else {
+    log.innerHTML = sorted.slice().reverse().map(d => `
+      <div class="log-item">
+        <div class="log-main">
+          <span class="log-tag" style="background:rgba(255,159,67,0.15);color:var(--accent4)">${d.type}</span>
+          <span style="margin-left:4px">${d.units} unit${d.units !== 1 ? 's' : ''}</span>
+          ${d.note ? `<span style="color:var(--muted);margin-left:8px;font-size:0.65rem">${d.note}</span>` : ''}
+          <div class="log-date">${fmtDate(d.date)}</div>
+        </div>
+        <button class="btn-ghost" data-id="${d.id}" onclick="delAlcohol(this)">✕</button>
+      </div>
+    `).join('');
+  }
+}
+
+function logAlcohol() {
+  const units = parseFloat(document.getElementById('al-units').value);
+  const d = parseDate(document.getElementById('al-date').value);
+  if (!units || !d) return showToast('Enter units and date.');
+  const data = DB.get('alcohol');
+  data.push({ id: genId(), type: document.getElementById('al-type').value, units, date: d, note: document.getElementById('al-note').value });
+  DB.set('alcohol', data);
+  document.getElementById('al-units').value = '';
+  document.getElementById('al-note').value = '';
+  renderAlcohol();
+}
+
+let alcoholModalDate = null;
+function openAlcoholModal(dateStr) {
+  alcoholModalDate = dateStr;
+  const d = new Date(dateStr + 'T00:00:00');
+  document.getElementById('alcoholModalTitle').textContent = 'Log Drinks';
+  document.getElementById('alcoholModalSub').textContent = d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
+  document.getElementById('al-modal-units').value = '';
+  document.getElementById('al-modal-note').value = '';
+  document.getElementById('alcoholModal').classList.add('open');
+}
+function closeAlcoholModal() {
+  document.getElementById('alcoholModal').classList.remove('open');
+  alcoholModalDate = null;
+}
+function saveAlcoholFromModal() {
+  const units = parseFloat(document.getElementById('al-modal-units').value);
+  if (!units || !alcoholModalDate) return showToast('Enter units.');
+  const data = DB.get('alcohol');
+  data.push({ id: genId(), type: document.getElementById('al-modal-type').value, units, date: alcoholModalDate, note: document.getElementById('al-modal-note').value });
+  DB.set('alcohol', data);
+  closeAlcoholModal();
+  renderAlcohol();
+}
+
+// ======================= LOOK (lightbox only) =======================
+function closeLightbox() { document.getElementById('lightbox').classList.remove('open'); }
+
+// ======================= WORK (Research + Hobby) =======================
+const RESEARCH_TYPES = [
+  { key: 'researching', label: '🔍 Researching', color: '#ff4f4f' },
+  { key: 'coding',      label: '💻 Coding',      color: '#4fc3f7' },
+  { key: 'analyzing',   label: '📊 Analyzing',   color: '#c8f135' },
+  { key: 'debugging',   label: '🐛 Debugging',   color: '#ff9f43' },
+];
+let selectedResearchType = null;
+let workChart;
+
+function initResearchTypeGrid() {
+  const grid = document.getElementById('researchTypeGrid');
+  if (!grid) return;
+  grid.innerHTML = RESEARCH_TYPES.map(t => `
+    <button class="wo-type-btn" id="rtbtn-${t.key}" onclick="selectResearchType('${t.key}')">${t.label}</button>
+  `).join('');
+}
+
+function selectResearchType(key) {
+  selectedResearchType = key;
+  RESEARCH_TYPES.forEach(t => {
+    const btn = document.getElementById('rtbtn-' + t.key);
+    if (!btn) return;
+    if (t.key === key) { btn.classList.add('selected'); btn.style.background = t.color; btn.style.borderColor = t.color; btn.style.color = '#000'; }
+    else { btn.classList.remove('selected'); btn.style.background = ''; btn.style.borderColor = ''; btn.style.color = ''; }
+  });
+}
+
+function initWorkChart(data) {
+  if (chartUnavailable('workChart')) return;
+  const ctx = document.getElementById('workChart');
+  if (!ctx) return;
+  const now = new Date();
+  const weekAgo = new Date(now); weekAgo.setDate(weekAgo.getDate() - 7);
+  const weekData = data.filter(d => new Date(d.date) >= weekAgo);
+  const totals = RESEARCH_TYPES.map(t => +(weekData.filter(d => d.type === t.key).reduce((s, d) => s + d.duration, 0) / 60).toFixed(1));
+  if (workChart) workChart.destroy();
+  workChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: RESEARCH_TYPES.map(t => t.label),
+      datasets: [{ data: totals, backgroundColor: RESEARCH_TYPES.map(t => t.color + 'bb'), borderColor: RESEARCH_TYPES.map(t => t.color), borderWidth: 1, borderRadius: 3 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: '#666', font: { family: 'Space Mono', size: 9 } }, grid: { color: '#1a1a1a' } },
+        y: { ticks: { color: '#666', font: { family: 'Space Mono', size: 9 } }, grid: { color: '#1a1a1a' } }
+      }
+    }
+  });
+}
+
+// ======================= SESSION TIMER (Stopwatch + Pomodoro) =======================
+let timerInterval = null;
+let timerSeconds = 0;
+let timerRunning = false;
+let timerMode = 'stopwatch';
+let pomodoroPhase = 'work'; // 'work' | 'break'
+const POMO_WORK = 25 * 60;
+const POMO_BREAK = 5 * 60;
+
+function setTimerMode(mode) {
+  timerMode = mode;
+  const sw = document.getElementById('modeStopwatch');
+  const pm = document.getElementById('modePomo');
+  if (!sw || !pm) return;
+  if (mode === 'stopwatch') {
+    sw.style.background = 'rgba(255,79,79,0.2)'; sw.style.borderColor = 'var(--accent2)'; sw.style.color = 'var(--accent2)';
+    pm.style.background = 'var(--surface2)'; pm.style.borderColor = 'var(--border)'; pm.style.color = 'var(--muted)';
+  } else {
+    pm.style.background = 'rgba(255,79,79,0.2)'; pm.style.borderColor = 'var(--accent2)'; pm.style.color = 'var(--accent2)';
+    sw.style.background = 'var(--surface2)'; sw.style.borderColor = 'var(--border)'; sw.style.color = 'var(--muted)';
+  }
+  if (timerRunning) { clearInterval(timerInterval); timerRunning = false; timerSeconds = 0; resetTimerDisplay(); }
+}
+
+function resetTimerDisplay() {
+  const btn = document.getElementById('timerBtn');
+  const display = document.getElementById('timerDisplay');
+  const status = document.getElementById('pomodoroStatus');
+  if (btn) { btn.textContent = '▶ Start'; btn.style.borderColor = ''; btn.style.color = ''; }
+  if (display) { display.style.display = 'none'; display.textContent = '00:00'; }
+  if (status) status.style.display = 'none';
+}
+
+function toggleTimer() {
+  const btn = document.getElementById('timerBtn');
+  const display = document.getElementById('timerDisplay');
+  const status = document.getElementById('pomodoroStatus');
+  if (!timerRunning) {
+    timerRunning = true;
+    display.style.display = 'block';
+    btn.textContent = '⏹ Stop';
+    btn.style.borderColor = 'var(--accent2)';
+    btn.style.color = 'var(--accent2)';
+    if (timerMode === 'pomodoro') {
+      timerSeconds = POMO_WORK;
+      pomodoroPhase = 'work';
+      status.style.display = 'block';
+      status.textContent = '🍅 Work session';
+      timerInterval = setInterval(() => {
+        timerSeconds--;
+        if (timerSeconds <= 0) {
+          if (pomodoroPhase === 'work') {
+            pomodoroPhase = 'break';
+            timerSeconds = POMO_BREAK;
+            status.textContent = '☕ Break!';
+            display.style.color = 'var(--accent)';
+            // auto-fill 25min when work phase ends
+            document.getElementById('wk-duration').value = 25;
+          } else {
+            pomodoroPhase = 'work';
+            timerSeconds = POMO_WORK;
+            status.textContent = '🍅 Work session';
+            display.style.color = 'var(--accent2)';
+          }
+        }
+        const m = String(Math.floor(timerSeconds / 60)).padStart(2, '0');
+        const s = String(timerSeconds % 60).padStart(2, '0');
+        display.textContent = m + ':' + s;
+      }, 1000);
+    } else {
+      timerSeconds = 0;
+      timerInterval = setInterval(() => {
+        timerSeconds++;
+        const m = String(Math.floor(timerSeconds / 60)).padStart(2, '0');
+        const s = String(timerSeconds % 60).padStart(2, '0');
+        display.textContent = m + ':' + s;
+      }, 1000);
+    }
+  } else {
+    clearInterval(timerInterval);
+    timerRunning = false;
+    btn.textContent = '▶ Start';
+    btn.style.borderColor = ''; btn.style.color = '';
+    if (timerMode === 'stopwatch') {
+      const mins = Math.round(timerSeconds / 60);
+      if (mins > 0) { document.getElementById('wk-duration').value = mins; showToast(mins + ' min filled in'); }
+    }
+    timerSeconds = 0;
+    display.style.display = 'none';
+    display.textContent = '00:00';
+    display.style.color = 'var(--accent2)';
+    if (status) status.style.display = 'none';
+  }
+}
+
+function renderResearchHeatmap(data) {
+  const cal = document.getElementById('researchHeatmap');
+  if (!cal) return;
+  const todayStr = today();
+  const days = [];
+  for (let i = 13; i >= 0; i--) {
+    const d = new Date(); d.setDate(d.getDate() - i);
+    days.push(d.toISOString().slice(0, 10));
+  }
+  const dateMap = {};
+  data.forEach(e => { dateMap[e.date] = (dateMap[e.date] || 0) + e.duration; });
+
+  const maxMin = Math.max(...Object.values(dateMap), 1);
+  const heatColor = (min) => {
+    if (!min) return null;
+    const t = Math.min(min / Math.max(maxMin, 120), 1);
+    const r = Math.round(255 * (0.2 + 0.8 * t));
+    const g = Math.round(79 * (1 - t));
+    const b = Math.round(79 * (1 - t));
+    return `rgb(${r},${g},${b})`;
+  };
+
+  const firstDay = new Date(days[0] + 'T00:00:00');
+  const offset = firstDay.getDay();
+  const dayNames = ['Su','Mo','Tu','We','Th','Fr','Sa'];
+  let html = dayNames.map(d => `<div class="wo-cal-day-label">${d}</div>`).join('');
+  for (let i = 0; i < offset; i++) html += `<div></div>`;
+
+  days.forEach(ds => {
+    const d = new Date(ds + 'T00:00:00');
+    const min = dateMap[ds] || 0;
+    const color = heatColor(min);
+    const isToday = ds === todayStr;
+    html += `<div class="wo-cal-day${min ? ' has-workout' : ''}${isToday ? ' today-marker' : ''}"
+      style="${color ? 'background:' + color + ';' : ''}cursor:default"
+      title="${min ? (min >= 60 ? (min/60).toFixed(1) + 'h' : min + 'min') : 'No research'}">
+      <span class="day-num" style="${min ? 'color:#fff' : ''}">${d.getDate()}</span>
+      ${min >= 30 ? `<span class="day-abbr" style="color:#fff">${min >= 60 ? (min/60).toFixed(1)+'h' : min+'m'}</span>` : ''}
+    </div>`;
+  });
+
+  cal.innerHTML = html;
+  const leg = document.getElementById('researchHeatmapLegend');
+  if (leg) leg.innerHTML = `
+    <div class="wo-legend-item"><div class="wo-legend-dot" style="background:var(--surface2);border:1px solid var(--border)"></div>None</div>
+    <div class="wo-legend-item"><div class="wo-legend-dot" style="background:rgb(100,20,20)"></div>&lt;1h</div>
+    <div class="wo-legend-item"><div class="wo-legend-dot" style="background:rgb(200,40,40)"></div>1–2h</div>
+    <div class="wo-legend-item"><div class="wo-legend-dot" style="background:rgb(255,79,79)"></div>2h+</div>
+  `;
+}
+
+function renderMonthTotals(data) {
+  const el = document.getElementById('monthTotals');
+  if (!el) return;
+  const now = new Date();
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().slice(0, 10);
+  const monthData = data.filter(d => d.date >= monthStart);
+  const totals = RESEARCH_TYPES.map(t => ({
+    ...t,
+    min: monthData.filter(d => d.type === t.key).reduce((s, d) => s + d.duration, 0)
+  }));
+  const totalMin = totals.reduce((s, t) => s + t.min, 0);
+  if (!totalMin) { el.innerHTML = '<div class="empty" style="padding:10px">No research this month yet.</div>'; return; }
+  el.innerHTML = totals.filter(t => t.min > 0).map(t => {
+    const pct = (t.min / totalMin * 100).toFixed(0);
+    const hrs = (t.min / 60).toFixed(1);
+    return `<div style="margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;font-size:0.7rem;margin-bottom:4px">
+        <span style="color:${t.color}">${t.label}</span>
+        <span style="color:var(--muted)">${hrs}h &nbsp;${pct}%</span>
+      </div>
+      <div class="prog-bar" style="height:6px"><div class="prog-fill" style="width:${pct}%;background:${t.color}"></div></div>
+    </div>`;
+  }).join('') + `<div style="font-size:0.65rem;color:var(--muted);margin-top:8px;letter-spacing:1px">TOTAL: ${(totalMin/60).toFixed(1)}h this month</div>`;
+}
+
+function renderTwoWeekSummary(resData, hobbyData) {
+  const el = document.getElementById('twoWeekContent');
+  if (!el) return;
+  const now = new Date();
+  // Week 1 = older, Week 2 = current
+  const w1start = new Date(now); w1start.setDate(w1start.getDate() - 13); w1start.setHours(0,0,0,0);
+  const w2start = new Date(now); w2start.setDate(w2start.getDate() - 6); w2start.setHours(0,0,0,0);
+
+  const w1res = resData.filter(d => { const dt = new Date(d.date); return dt >= w1start && dt < w2start; });
+  const w2res = resData.filter(d => new Date(d.date) >= w2start);
+  const w1hobby = hobbyData.filter(d => { const dt = new Date(d.date); return dt >= w1start && dt < w2start; });
+  const w2hobby = hobbyData.filter(d => new Date(d.date) >= w2start);
+
+  const w1rMin = w1res.reduce((s,d) => s+d.duration, 0);
+  const w2rMin = w2res.reduce((s,d) => s+d.duration, 0);
+  const w1hMin = w1hobby.reduce((s,d) => s+d.duration, 0);
+  const w2hMin = w2hobby.reduce((s,d) => s+d.duration, 0);
+  const w1hDays = new Set(w1hobby.map(d=>d.date)).size;
+  const w2hDays = new Set(w2hobby.map(d=>d.date)).size;
+
+  const arrow = (a, b) => a === b ? '' : a > b ? `<span style="color:var(--accent);margin-left:4px">↑</span>` : `<span style="color:var(--accent2);margin-left:4px">↓</span>`;
+
+  el.innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);border-radius:3px;overflow:hidden;font-size:0.65rem">
+      <div style="background:var(--surface2);padding:8px 10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px"></div>
+      <div style="background:var(--surface2);padding:8px 10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;display:grid;grid-template-columns:1fr 1fr;gap:4px">
+        <span>Week 1</span><span>Week 2</span>
+      </div>
+      <div style="background:var(--surface2);padding:8px 10px;color:var(--accent2)">📚 Research</div>
+      <div style="background:var(--surface2);padding:8px 10px;display:grid;grid-template-columns:1fr 1fr;gap:4px">
+        <span>${(w1rMin/60).toFixed(1)}h</span>
+        <span style="font-weight:700">${(w2rMin/60).toFixed(1)}h${arrow(w2rMin,w1rMin)}</span>
+      </div>
+      <div style="background:var(--surface2);padding:8px 10px;color:#b388ff">🎯 Hobby days</div>
+      <div style="background:var(--surface2);padding:8px 10px;display:grid;grid-template-columns:1fr 1fr;gap:4px">
+        <span>${w1hDays}d / ${(w1hMin/60).toFixed(1)}h</span>
+        <span style="font-weight:700">${w2hDays}d / ${(w2hMin/60).toFixed(1)}h${arrow(w2hDays,w1hDays)}</span>
+      </div>
+    </div>
+  `;
+}
+
+function renderWork() {
+  const data = DB.get('work');
+  const hobby = DB.get('hobby');
+  const sorted = [...data].sort((a, b) => a.date > b.date ? 1 : -1);
+  const hobbySorted = [...hobby].sort((a, b) => a.date > b.date ? 1 : -1);
+
+  const now = new Date();
+  const weekAgo = new Date(now); weekAgo.setDate(weekAgo.getDate() - 7);
+  const weekData = sorted.filter(d => new Date(d.date) >= weekAgo);
+  const weekMin = weekData.reduce((s, d) => s + d.duration, 0);
+
+  // 2-week summary
+  renderTwoWeekSummary(sorted, hobbySorted);
+
+  // Weekly goal (8h = 480min)
+  const WEEKLY_GOAL_MIN = 480;
+  const goalPct = Math.min(weekMin / WEEKLY_GOAL_MIN * 100, 100).toFixed(0);
+  const goalEl = document.getElementById('weeklyGoalFill');
+  const goalPctEl = document.getElementById('weeklyGoalPct');
+  const goalLabelEl = document.getElementById('weeklyGoalLabel');
+  if (goalEl) goalEl.style.width = goalPct + '%';
+  if (goalEl) goalEl.style.background = weekMin >= WEEKLY_GOAL_MIN ? 'var(--accent)' : 'var(--accent2)';
+  if (goalPctEl) goalPctEl.textContent = (weekMin/60).toFixed(1) + 'h / 8h';
+  if (goalLabelEl) goalLabelEl.textContent = weekMin >= WEEKLY_GOAL_MIN ? '✓ Goal reached!' : `${((WEEKLY_GOAL_MIN - weekMin)/60).toFixed(1)}h remaining this week`;
+
+  // Research stats
+  document.getElementById('researchStats').innerHTML = `
+    <div class="stat-chip"><div class="val ws-accent">${(weekMin/60).toFixed(1)}h</div><div class="lbl">This week</div></div>
+    <div class="stat-chip"><div class="val">${weekData.length}</div><div class="lbl">Sessions</div></div>
+    <div class="stat-chip"><div class="val">${data.length}</div><div class="lbl">Total sessions</div></div>
+  `;
+
+  // Research history (uses filterResearchLog for search support)
+  filterResearchLog();
+
+  renderResearchHeatmap(sorted);
+  renderMonthTotals(sorted);
+  initWorkChart(sorted);
+
+  // Hobby stats — streak + targets
+  const HOBBY_DAY_TARGET = 4;
+  const HOBBY_MIN_TARGET = 120;
+  const hobbyWeek = hobbySorted.filter(d => new Date(d.date) >= weekAgo);
+  const hobbyWeekMin = hobbyWeek.reduce((s, d) => s + d.duration, 0);
+  const hobbyWeekDays = new Set(hobbyWeek.map(d => d.date)).size;
+  const dayPct = Math.min(hobbyWeekDays / HOBBY_DAY_TARGET * 100, 100).toFixed(0);
+  const minPct = Math.min(hobbyWeekMin / HOBBY_MIN_TARGET * 100, 100).toFixed(0);
+  const hobbyStreak = calcStreak(hobby.map(d => d.date));
+
+  document.getElementById('hobbyStats').innerHTML = `
+    <div class="stat-chip">
+      <div class="val" style="color:#b388ff">${hobbyWeekDays}<span style="font-size:0.9rem;color:var(--muted)"> / ${HOBBY_DAY_TARGET}</span></div>
+      <div class="lbl">Days this week</div>
+      <div class="prog-bar"><div class="prog-fill" style="width:${dayPct}%;background:${hobbyWeekDays >= HOBBY_DAY_TARGET ? '#b388ff' : '#7c4dff'}"></div></div>
+    </div>
+    <div class="stat-chip">
+      <div class="val" style="color:#b388ff">${(hobbyWeekMin/60).toFixed(1)}h<span style="font-size:0.9rem;color:var(--muted)"> / 2h</span></div>
+      <div class="lbl">Hours this week</div>
+      <div class="prog-bar"><div class="prog-fill" style="width:${minPct}%;background:${hobbyWeekMin >= HOBBY_MIN_TARGET ? '#b388ff' : '#7c4dff'}"></div></div>
+    </div>
+    <div class="stat-chip"><div class="val" style="color:${hobbyStreak > 0 ? '#b388ff' : 'var(--muted)'}">${hobbyStreak}🔥</div><div class="lbl">Day streak</div></div>
+  `;
+
+  // Hobby history
+  const hLog = document.getElementById('hobbyLog');
+  if (!hobbySorted.length) { hLog.innerHTML = '<div class="empty">No hobby sessions yet.</div>'; }
+  else {
+    hLog.innerHTML = hobbySorted.slice().reverse().map(d => `
+      <div class="log-item">
+        <div class="log-main">
+          <span style="color:#b388ff;font-weight:700">${d.duration} min</span>
+          ${d.notes ? `<div style="color:var(--muted);font-size:0.65rem;margin-top:3px">${d.notes}</div>` : ''}
+          <div class="log-date">${fmtDate(d.date)}</div>
+        </div>
+        <button class="btn-ghost" data-id="${d.id}" onclick="delHobby(this)">✕</button>
+      </div>
+    `).join('');
+  }
+}
+
+function logResearch() {
+  if (!selectedResearchType) return showToast('Select a research type first.');
+  const dur = parseInt(document.getElementById('wk-duration').value);
+  const d = parseDate(document.getElementById('wk-date').value);
+  if (!dur || !d) return showToast('Enter duration and date.');
+  const data = DB.get('work');
+  data.push({ id: genId(), type: selectedResearchType, duration: dur, date: d, notes: document.getElementById('wk-notes').value });
+  DB.set('work', data);
+  document.getElementById('wk-duration').value = '';
+  document.getElementById('wk-notes').value = '';
+  selectedResearchType = null;
+  RESEARCH_TYPES.forEach(t => {
+    const btn = document.getElementById('rtbtn-' + t.key);
+    if (btn) { btn.classList.remove('selected'); btn.style.background = ''; btn.style.borderColor = ''; btn.style.color = ''; }
+  });
+  renderWork();
+}
+
+function logHobby() {
+  const dur = parseInt(document.getElementById('hb-duration').value);
+  const d = parseDate(document.getElementById('hb-date').value);
+  if (!dur || !d) return showToast('Enter duration and date.');
+  const data = DB.get('hobby');
+  data.push({ id: genId(), duration: dur, date: d, notes: document.getElementById('hb-notes').value });
+  DB.set('hobby', data);
+  document.getElementById('hb-duration').value = '';
+  document.getElementById('hb-notes').value = '';
+  renderWork();
+}
+
+function filterResearchLog() {
+  const q = (document.getElementById('notesSearch')?.value || '').toLowerCase();
+  const data = DB.get('work');
+  const sorted = [...data].sort((a, b) => a.date > b.date ? 1 : -1);
+  const filtered = q ? sorted.filter(d => (d.notes || '').toLowerCase().includes(q) || (d.type || '').toLowerCase().includes(q)) : sorted;
+  const rLog = document.getElementById('researchLog');
+  if (!rLog) return;
+  if (!filtered.length) { rLog.innerHTML = '<div class="empty">No matching sessions.</div>'; return; }
+  rLog.innerHTML = filtered.slice().reverse().map(d => {
+    const t = RESEARCH_TYPES.find(t => t.key === d.type);
+    const color = t ? t.color : '#888';
+    const label = t ? t.label : d.type;
+    const notesHtml = d.notes ? `<div style="color:var(--muted);font-size:0.65rem;margin-top:3px">${q ? d.notes.replace(new RegExp(q,'gi'), m => `<mark style="background:var(--accent2);color:#000;border-radius:2px">${m}</mark>`) : d.notes}</div>` : '';
+    return `<div class="log-item">
+      <div class="log-main">
+        <span class="log-tag" style="background:rgba(128,128,128,0.15);color:${color}">${label}</span>
+        <span style="color:var(--muted);margin-left:8px">${d.duration} min</span>
+        ${notesHtml}
+        <div class="log-date">${fmtDate(d.date)}</div>
+      </div>
+      <button class="btn-ghost" data-id="${d.id}" onclick="delResearch(this)">✕</button>
+    </div>`;
+  }).join('');
+}
+
+
+function delResearch(btn) {
+  const id = btn.getAttribute('data-id');
+  DB.set('work', DB.get('work').filter(e => e.id !== id));
+  renderWork();
+}
+
+function delHobby(btn) {
+  const id = btn.getAttribute('data-id');
+  DB.set('hobby', DB.get('hobby').filter(e => e.id !== id));
+  renderWork();
+}
+
+// ======================= HELPERS =======================
+function delWorkout(btn) {
+  const id = btn.getAttribute('data-id');
+  DB.set('workout', DB.get('workout').filter(e => e.id !== id));
+  renderWorkout();
+}
+
+function delAlcohol(btn) {
+  const id = btn.getAttribute('data-id');
+  DB.set('alcohol', DB.get('alcohol').filter(e => e.id !== id));
+  renderAlcohol();
+}
+
+function delEntry(store, id) {
+  DB.set(store, DB.get(store).filter(e => e.id !== id));
+  if (store === 'weight') renderWeight();
+  if (store === 'alcohol') renderAlcohol();
+  if (store === 'work') renderWork();
+}
+
+function calcStreak(dates) {
+  if (!dates.length) return 0;
+  const unique = [...new Set(dates)].sort().reverse();
+  let streak = 0;
+  let checkDate = new Date(); checkDate.setHours(0,0,0,0);
+  for (const d of unique) {
+    const dd = new Date(d + 'T00:00:00');
+    const diff = Math.round((checkDate - dd) / 86400000);
+    if (diff === 0 || diff === 1) { streak++; checkDate = dd; }
+    else break;
+  }
+  return streak;
+}
+
+function calcSoberStreak(drinkDates) {
+  const drinkSet = new Set(drinkDates);
+  let streak = 0;
+  const d = new Date();
+  while (true) {
+    const ds = d.toISOString().slice(0, 10);
+    if (drinkSet.has(ds)) break;
+    streak++;
+    d.setDate(d.getDate() - 1);
+    if (streak > 365) break;
+  }
+  return streak;
+}
+
+// ======================= TWEETER =======================
+const TW_COLOR = '#5ee7c8';
+const TW_SLOTS = ['morning','noon','evening'];
+const TW_ICONS = { morning: '🌅', noon: '☀️', evening: '🌙' };
+const TW_COLORS = { morning: '#ffb347', noon: '#ffe44d', evening: '#7b8cde' };
+let tweeterModalDate = null;
+let tweeterModalSlots = { morning: false, noon: false, evening: false };
+
+function slotColor(count) {
+  if (!count) return null;
+  if (count === 1) return '#a8f0e0';
+  if (count === 2) return '#5ee7c8';
+  return '#00c9a7';
+}
+
+function renderTweeterCalendar(data) {
+  const cal = document.getElementById('tweeterCalendar');
+  const todayStr = today();
+  const days = [];
+  for (let i = 29; i >= 0; i--) {
+    const d = new Date(); d.setDate(d.getDate() - i);
+    days.push(d.toISOString().slice(0, 10));
+  }
+
+  const dateMap = {};
+  data.forEach(e => { dateMap[e.date] = e; });
+
+  const firstDay = new Date(days[0] + 'T00:00:00');
+  const offset = firstDay.getDay();
+  const dayNames = ['Su','Mo','Tu','We','Th','Fr','Sa'];
+
+  let html = dayNames.map(d => `<div class="wo-cal-day-label">${d}</div>`).join('');
+  for (let i = 0; i < offset; i++) html += `<div></div>`;
+
+  days.forEach(ds => {
+    const d = new Date(ds + 'T00:00:00');
+    const dayNum = d.getDate();
+    const entry = dateMap[ds];
+    const isToday = ds === todayStr;
+    const activeSlots = entry ? TW_SLOTS.filter(s => entry[s]) : [];
+    const count = activeSlots.length;
+
+    if (count === 0) {
+      html += `<div class="wo-cal-day${isToday ? ' today-marker' : ''}" style="cursor:pointer" onclick="openTweeterModal('${ds}')">
+        <span class="day-num">${dayNum}</span>
+      </div>`;
+    } else if (count === 1) {
+      const c = TW_COLORS[activeSlots[0]];
+      html += `<div class="wo-cal-day has-workout${isToday ? ' today-marker' : ''}" style="background:${c};cursor:pointer" onclick="openTweeterModal('${ds}')">
+        <span class="day-num" style="color:#000">${dayNum}</span>
+        <span class="day-abbr" style="color:#000">${TW_ICONS[activeSlots[0]]}</span>
+      </div>`;
+    } else if (count === 2) {
+      const c1 = TW_COLORS[activeSlots[0]], c2 = TW_COLORS[activeSlots[1]];
+      html += `<div class="wo-cal-day has-workout${isToday ? ' today-marker' : ''}" style="background:linear-gradient(135deg,${c1} 50%,${c2} 50%);cursor:pointer" onclick="openTweeterModal('${ds}')">
+        <span class="day-num" style="color:#000;text-shadow:0 0 3px rgba(255,255,255,0.4)">${dayNum}</span>
+      </div>`;
+    } else {
+      const c1 = TW_COLORS.morning, c2 = TW_COLORS.noon, c3 = TW_COLORS.evening;
+      html += `<div class="wo-cal-day has-workout${isToday ? ' today-marker' : ''}" style="background:linear-gradient(135deg,${c1} 33%,${c2} 33%,${c2} 66%,${c3} 66%);cursor:pointer" onclick="openTweeterModal('${ds}')">
+        <span class="day-num" style="color:#000;text-shadow:0 0 3px rgba(255,255,255,0.4)">${dayNum}</span>
+      </div>`;
+    }
+  });
+
+  cal.innerHTML = html;
+
+  document.getElementById('tweeterLegend').innerHTML = `
+    <div class="wo-legend-item"><div class="wo-legend-dot" style="background:${TW_COLORS.morning}"></div>Morning</div>
+    <div class="wo-legend-item"><div class="wo-legend-dot" style="background:${TW_COLORS.noon}"></div>Noon</div>
+    <div class="wo-legend-item"><div class="wo-legend-dot" style="background:${TW_COLORS.evening}"></div>Evening</div>
+  `;
+}
+
+// ---- Auto-log queue: merges entries dropped in queue.js by the email watcher ----
+// Queue item: { id, date:'YYYY-MM-DD', slot:'morning'|'noon'|'evening', note?:'' }
+// Each id is processed once, so unchecking a slot by hand sticks.
+function processTweeterQueue() {
+  const q = window.SELFOS_QUEUE;
+  if (!Array.isArray(q) || !q.length) return;
+  const seen = JSON.parse(localStorage.getItem('selfos_queue_seen') || '[]');
+  const seenSet = new Set(seen);
+  const data = DB.get('tweeter');
+  let changed = false;
+
+  q.forEach(item => {
+    if (!item || !item.id || !item.date || seenSet.has(item.id)) return;
+    if (!TW_SLOTS.includes(item.slot)) return;
+    let e = data.find(x => x.date === item.date);
+    if (!e) {
+      e = { id: genId(), date: item.date, morning: false, noon: false, evening: false, note: '' };
+      data.push(e);
+    }
+    e[item.slot] = true;
+    if (item.note) e.note = e.note ? (e.note + ' | ' + item.note) : item.note;
+    seenSet.add(item.id);
+    changed = true;
+  });
+
+  if (changed) {
+    DB.set('tweeter', data);
+    localStorage.setItem('selfos_queue_seen', JSON.stringify([...seenSet].slice(-2000)));
+  }
+}
+
+function renderTweeter() {
+  const data = DB.get('tweeter');
+  const sorted = [...data].sort((a, b) => a.date > b.date ? 1 : -1);
+  const now = new Date();
+  const ago7 = new Date(now); ago7.setDate(ago7.getDate() - 7);
+  const last7 = sorted.filter(d => new Date(d.date) >= ago7);
+  const totalSlots = data.reduce((s, e) => s + TW_SLOTS.filter(sl => e[sl]).length, 0);
+  const week7 = last7.reduce((s, e) => s + TW_SLOTS.filter(sl => e[sl]).length, 0);
+
+  document.getElementById('tweeterStats').innerHTML = `
+    <div class="stat-chip"><div class="val" style="color:${TW_COLOR}">${week7}</div><div class="lbl">Entries this week</div></div>
+    <div class="stat-chip"><div class="val">${data.length}</div><div class="lbl">Days logged</div></div>
+    <div class="stat-chip"><div class="val">${totalSlots}</div><div class="lbl">Total entries</div></div>
+  `;
+
+  renderTweeterCalendar(sorted);
+
+  const log = document.getElementById('tweeterLog');
+  if (!sorted.length) { log.innerHTML = '<div class="empty">No entries yet. Tap a day on the calendar.</div>'; return; }
+  log.innerHTML = sorted.slice().reverse().map(e => {
+    const slots = TW_SLOTS.filter(s => e[s]).map(s => `<span style="margin-right:6px">${TW_ICONS[s]} ${s}</span>`).join('');
+    return `<div class="log-item">
+      <div class="log-main">
+        <div style="font-size:0.75rem">${slots}</div>
+        ${e.note ? `<div style="color:var(--muted);font-size:0.65rem;margin-top:3px">${e.note}</div>` : ''}
+        <div class="log-date">${fmtDate(e.date)}</div>
+      </div>
+      <button class="btn-ghost" data-id="${e.id}" onclick="delTweeter(this)">✕</button>
+    </div>`;
+  }).join('');
+}
+
+function openTweeterModal(dateStr) {
+  tweeterModalDate = dateStr;
+  const existing = DB.get('tweeter').find(e => e.date === dateStr);
+  tweeterModalSlots = {
+    morning: existing ? !!existing.morning : false,
+    noon:    existing ? !!existing.noon    : false,
+    evening: existing ? !!existing.evening : false,
+  };
+  const d = new Date(dateStr + 'T00:00:00');
+  document.getElementById('tweeterModalTitle').textContent = 'Log Tweeter';
+  document.getElementById('tweeterModalSub').textContent = d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
+  document.getElementById('tweeterModalNote').value = existing ? (existing.note || '') : '';
+  updateTwButtons();
+  document.getElementById('tweeterModal').classList.add('open');
+}
+
+function toggleTwSlot(slot) {
+  tweeterModalSlots[slot] = !tweeterModalSlots[slot];
+  updateTwButtons();
+}
+
+function updateTwButtons() {
+  TW_SLOTS.forEach(s => {
+    const btn = document.getElementById('tw-btn-' + s);
+    const on = tweeterModalSlots[s];
+    btn.style.background = on ? TW_COLOR : 'var(--surface2)';
+    btn.style.borderColor = on ? TW_COLOR : 'var(--border)';
+    btn.style.color = on ? '#000' : 'var(--muted)';
+    btn.style.fontWeight = on ? '700' : '400';
+  });
+}
+
+function closeTweeterModal() {
+  document.getElementById('tweeterModal').classList.remove('open');
+  tweeterModalDate = null;
+}
+
+function saveTweeterEntry() {
+  if (!tweeterModalDate) return;
+  const data = DB.get('tweeter');
+  const idx = data.findIndex(e => e.date === tweeterModalDate);
+  const entry = {
+    id: idx >= 0 ? data[idx].id : genId(),
+    date: tweeterModalDate,
+    morning: tweeterModalSlots.morning,
+    noon: tweeterModalSlots.noon,
+    evening: tweeterModalSlots.evening,
+    note: document.getElementById('tweeterModalNote').value
+  };
+  if (idx >= 0) data[idx] = entry; else data.push(entry);
+  DB.set('tweeter', data);
+  closeTweeterModal();
+  renderTweeter();
+}
+
+function delTweeter(btn) {
+  const id = btn.getAttribute('data-id');
+  DB.set('tweeter', DB.get('tweeter').filter(e => e.id !== id));
+  renderTweeter();
+}
+
+// ======================= DAILY BRIEF =======================
+// Single source of truth for the daily summary. Returns plain data so the same
+// numbers can be rendered in-app or read out by an external notifier.
+function buildDailyBrief() {
+  const t = today();
+
+  // 1. Last trained, per session type
+  const workouts = DB.get('workout');
+  const lastTrained = WO_TYPES.map(type => {
+    const matches = workouts.filter(w => w.type === type.key && w.date <= t);
+    if (!matches.length) return { key: type.key, label: type.label, color: type.color, date: null, days: null };
+    const last = matches.reduce((a, b) => (a.date > b.date ? a : b));
+    return { key: type.key, label: type.label, color: type.color, date: last.date, days: daysAgo(last.date) };
+  });
+
+  // 2 & 3. Overdue and due-soon, merging calendar tasks with recurring chores
+  const b = taskBuckets();
+  const overdue = [
+    ...b.overdue.map(x => ({ kind: 'task',  label: x.title, date: x.date, lateBy: daysAgo(x.date) })),
+    ...CHORES_DEF.filter(c => daysUntilDue(c) < 0)
+                 .map(c => ({ kind: 'chore', label: c.label, date: null, lateBy: -daysUntilDue(c) })),
+  ].sort((a, b2) => b2.lateBy - a.lateBy);
+
+  const soon = [
+    ...b.soon.map(x => ({ kind: 'task',  label: x.title, date: x.date, inDays: -daysAgo(x.date) })),
+    ...CHORES_DEF.filter(c => { const d = daysUntilDue(c); return d >= 0 && d <= 3; })
+                 .map(c => ({ kind: 'chore', label: c.label, date: null, inDays: daysUntilDue(c) })),
+  ].sort((a, b2) => a.inDays - b2.inDays);
+
+  // 4. Did yesterday's work day go unlogged?
+  // Only fires when yesterday was Sun–Thu, which naturally limits this to Mon–Fri.
+  const y = addDays(t, -1);
+  const workMissing = (isWorkDay(y) && !getWorkLog(y)) ? y : null;
+
+  return { date: t, lastTrained, overdue, soon, workMissing };
+}
+
+function renderDailyBrief() {
+  const br = buildDailyBrief();
+  const el = document.getElementById('dailyBrief');
+  if (!el) return;
+
+  const trainedRows = br.lastTrained.map(x => {
+    const txt = x.days === null ? 'never' : (x.days === 0 ? 'today' : `${x.days}d ago`);
+    const stale = x.days === null || x.days >= 7;
+    return `<div style="display:flex;align-items:center;gap:6px;font-size:0.62rem;padding:3px 0">
+      <span style="display:inline-block;width:7px;height:7px;border-radius:2px;background:${x.color};flex:none"></span>
+      <span style="flex:1;color:var(--muted)">${x.label}</span>
+      <span style="font-weight:700;color:${stale ? '#ff6b6b' : 'var(--text)'}">${txt}</span>
+    </div>`;
+  }).join('');
+
+  const itemRows = (list, tone, fmtRight) => list.length
+    ? list.map(x => `<div style="display:flex;align-items:baseline;gap:6px;font-size:0.62rem;padding:3px 0">
+        <span style="flex:none;opacity:0.7">${x.kind === 'chore' ? '🔁' : '📌'}</span>
+        <span style="flex:1">${escapeHtml(x.label)}${x.date ? ` <span style="color:var(--muted)">· ${fmtDate(x.date)}</span>` : ''}</span>
+        <span style="font-weight:700;color:${tone};flex:none">${fmtRight(x)}</span>
+      </div>`).join('')
+    : `<div style="font-size:0.6rem;color:var(--muted);letter-spacing:0.5px;padding:3px 0">Nothing — you're clear.</div>`;
+
+  el.innerHTML = `
+    <div class="card" style="border-color:rgba(255,213,79,0.25);margin-bottom:16px">
+      <div class="card-label">📣 Daily brief</div>
+
+      ${br.workMissing ? `
+      <div onclick="switchTab('work');openWorkLogModal('${br.workMissing}')"
+        style="margin:10px 0 2px;background:rgba(124,158,255,0.1);border:1px solid #7c9eff;border-radius:3px;padding:9px 12px;font-size:0.63rem;color:#7c9eff;letter-spacing:0.3px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px">
+        <span>💼 You didn't log work yesterday (${fmtDate(br.workMissing)})</span>
+        <span style="font-weight:700;flex:none">Log it →</span>
+      </div>` : ''}
+
+      <div style="font-size:0.55rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin:10px 0 4px">🏋 Last trained</div>
+      ${trainedRows}
+
+      <div style="font-size:0.55rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin:14px 0 4px">
+        ⚠ Overdue${br.overdue.length ? ` <span style="color:#ff6b6b">(${br.overdue.length})</span>` : ''}
+      </div>
+      ${itemRows(br.overdue, '#ff6b6b', x => `${x.lateBy}d late`)}
+
+      <div style="font-size:0.55rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin:14px 0 4px">
+        📅 Next 3 days${br.soon.length ? ` <span style="color:${TASK_COLOR}">(${br.soon.length})</span>` : ''}
+      </div>
+      ${itemRows(br.soon, TASK_COLOR, x => x.inDays === 0 ? 'today' : `in ${x.inDays}d`)}
+    </div>`;
+}
+
+// ======================= TODAY DASHBOARD =======================
+function renderToday() {
+  renderDailyBrief();
+  const todayStr = today();
+  const d = new Date();
+  document.getElementById('todaySubtitle').textContent = d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
+  // Backup reminder
+  const lastExport = localStorage.getItem('selfos_lastexport');
+  const banner = document.getElementById('backupBanner');
+  if (banner) {
+    if (!lastExport || (Date.now() - parseInt(lastExport)) > 7 * 86400000) {
+      banner.style.display = 'flex';
+    } else {
+      banner.style.display = 'none';
+    }
+  }
+
+  const workout = DB.get('workout').filter(e => e.date === todayStr);
+  const work = DB.get('work').filter(e => e.date === todayStr);
+  const hobby = DB.get('hobby').filter(e => e.date === todayStr);
+  const alcohol = DB.get('alcohol').filter(e => e.date === todayStr);
+  const tweeter = DB.get('tweeter').find(e => e.date === todayStr);
+  const weight = DB.get('weight').filter(e => e.date === todayStr);
+
+  const workMin = work.reduce((s,e) => s+e.duration, 0);
+  const hobbyMin = hobby.reduce((s,e) => s+e.duration, 0);
+  const alcoholUnits = alcohol.reduce((s,e) => s+e.units, 0);
+
+  const slot = (label, val, color, sub) => `
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:3px;padding:12px;display:flex;flex-direction:column;gap:3px">
+      <div style="font-size:0.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px">${label}</div>
+      <div style="font-family:var(--font-display);font-size:1.3rem;font-weight:800;color:${color}">${val}</div>
+      ${sub ? `<div style="font-size:0.6rem;color:var(--muted)">${sub}</div>` : ''}
+    </div>`;
+
+  const twSlots = tweeter ? ['morning','noon','evening'].filter(s => tweeter[s]).map(s => ({morning:'🌅',noon:'☀️',evening:'🌙'}[s])).join(' ') : '—';
+
+  document.getElementById('todayDashboard').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">
+      ${slot('Workout', workout.length ? workout.map(w => { const t = WO_TYPES.find(x=>x.key===w.type); return t?t.label.split(' ')[0]:w.type; }).join(', ') : '—', workout.length ? 'var(--accent3)' : 'var(--muted)')}
+      ${slot('Research', workMin ? (workMin/60).toFixed(1)+'h' : '—', workMin ? 'var(--accent2)' : 'var(--muted)', workMin ? work.map(w=>{ const t=RESEARCH_TYPES.find(x=>x.key===w.type); return t?t.label:''; }).filter(Boolean).join(', ') : '')}
+      ${slot('Hobby', hobbyMin ? hobbyMin+' min' : '—', hobbyMin ? '#b388ff' : 'var(--muted)')}
+      ${slot('Alcohol', alcoholUnits ? alcoholUnits+' units' : '—', alcoholUnits ? (alcoholUnits>=3?'var(--accent2)':'var(--accent4)') : 'var(--muted)')}
+      ${slot('Tweeter', twSlots, twSlots !== '—' ? '#5ee7c8' : 'var(--muted)')}
+      ${slot('Weight', weight.length ? weight[weight.length-1].weight+' kg' : '—', weight.length ? 'var(--accent)' : 'var(--muted)')}
+    </div>`;
+
+  // Chores due today
+  renderChoresDueToday();
+}
+
+// ======================= WORK LOG (Sun–Thu hours + office/home) =======================
+// Entry: { id, date:'YYYY-MM-DD', hours:Number, location:'office'|'home', note:'' }
+const WORK_LOCS = {
+  office: { label: '🏢 Office', short: 'Office', color: '#7c9eff' },
+  home:   { label: '🏠 Home',   short: 'Home',   color: '#a5d6a7' },
+};
+const WORK_DAY_NAMES = ['Sun','Mon','Tue','Wed','Thu'];   // getDay() 0..4
+const WORK_WEEKS_SHOWN = 6;
+
+let workWeekOffset = 0;      // 0 = window ending this week
+let workLogModalDate = null;
+let selectedWorkLoc = null;
+
+// Sun–Thu only. getDay(): 0=Sun … 6=Sat
+function isWorkDay(dateStr) {
+  const p = dateStr.split('-').map(Number);
+  return new Date(p[0], p[1] - 1, p[2]).getDay() <= 4;
+}
+
+// Sunday that starts the week containing dateStr
+function weekStartSunday(dateStr) {
+  const p = dateStr.split('-').map(Number);
+  const d = new Date(p[0], p[1] - 1, p[2]);
+  return addDays(dateStr, -d.getDay());
+}
+
+function getWorkLog(dateStr) { return DB.get('worklog').find(w => w.date === dateStr) || null; }
+
+function workWeekShift(n) { workWeekOffset += n; renderWorkLog(); }
+
+function selectWorkLoc(key) {
+  selectedWorkLoc = key;
+  Object.keys(WORK_LOCS).forEach(k => {
+    const btn = document.getElementById('wl-btn-' + k);
+    const on = k === key;
+    btn.style.background = on ? WORK_LOCS[k].color : 'var(--surface2)';
+    btn.style.borderColor = on ? WORK_LOCS[k].color : 'var(--border)';
+    btn.style.color = on ? '#000' : 'var(--muted)';
+    btn.style.fontWeight = on ? '700' : '400';
+  });
+}
+
+function openWorkLogModal(dateStr) {
+  workLogModalDate = dateStr;
+  const existing = getWorkLog(dateStr);
+  const d = new Date(dateStr + 'T00:00:00');
+  document.getElementById('workLogModalSub').textContent =
+    d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  document.getElementById('wl-hours').value = existing ? existing.hours : '';
+  document.getElementById('wl-note').value = existing ? (existing.note || '') : '';
+  document.getElementById('wl-delete').style.display = existing ? 'block' : 'none';
+  selectedWorkLoc = null;
+  Object.keys(WORK_LOCS).forEach(k => {
+    const btn = document.getElementById('wl-btn-' + k);
+    btn.style.background = 'var(--surface2)';
+    btn.style.borderColor = 'var(--border)';
+    btn.style.color = 'var(--muted)';
+    btn.style.fontWeight = '400';
+  });
+  if (existing) selectWorkLoc(existing.location);
+  document.getElementById('workLogModal').classList.add('open');
+}
+
+function closeWorkLogModal() {
+  document.getElementById('workLogModal').classList.remove('open');
+  workLogModalDate = null;
+  selectedWorkLoc = null;
+}
+
+function saveWorkLog() {
+  if (!workLogModalDate) return;
+  if (!selectedWorkLoc) return showToast('Pick Office or Home first');
+  const hours = parseFloat(document.getElementById('wl-hours').value);
+  if (!(hours > 0)) return showToast('Enter the hours you worked');
+
+  const data = DB.get('worklog');
+  const idx = data.findIndex(w => w.date === workLogModalDate);
+  const entry = {
+    id: idx >= 0 ? data[idx].id : genId(),
+    date: workLogModalDate,
+    hours,
+    location: selectedWorkLoc,
+    note: document.getElementById('wl-note').value.trim(),
+  };
+  if (idx >= 0) data[idx] = entry; else data.push(entry);
+  DB.set('worklog', data);
+  closeWorkLogModal();
+  renderWorkLog();
+  renderToday();
+  showToast('Work logged');
+}
+
+function deleteWorkLog() {
+  if (!workLogModalDate) return;
+  DB.set('worklog', DB.get('worklog').filter(w => w.date !== workLogModalDate));
+  closeWorkLogModal();
+  renderWorkLog();
+  renderToday();
+}
+
+function renderWorkLogCalendar() {
+  const t = today();
+  // Window of WORK_WEEKS_SHOWN weeks ending with the week containing today
+  const thisSunday = weekStartSunday(t);
+  const firstSunday = addDays(thisSunday, (workWeekOffset - (WORK_WEEKS_SHOWN - 1)) * 7);
+  const byDate = {};
+  DB.get('worklog').forEach(w => { byDate[w.date] = w; });
+
+  const lastThu = addDays(firstSunday, (WORK_WEEKS_SHOWN - 1) * 7 + 4);
+  document.getElementById('workRangeLabel').textContent = `${fmtDate(firstSunday)} — ${fmtDate(lastThu)}`;
+
+  let html = '<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:4px">';
+  html += WORK_DAY_NAMES.map(n => `<div style="font-size:0.5rem;color:var(--muted);text-align:center;padding:2px 0;text-transform:uppercase">${n}</div>`).join('');
+
+  for (let w = 0; w < WORK_WEEKS_SHOWN; w++) {
+    for (let dow = 0; dow < 5; dow++) {
+      const ds = addDays(firstSunday, w * 7 + dow);
+      const e = byDate[ds];
+      const isToday = ds === t;
+      const future = ds > t;
+      const bg = e ? WORK_LOCS[e.location].color : 'var(--surface2)';
+      const fg = e ? '#000' : 'var(--muted)';
+      const border = isToday ? 'var(--accent)' : (e ? WORK_LOCS[e.location].color : 'var(--border)');
+      const dn = Number(ds.slice(8, 10));
+      html += `<div onclick="openWorkLogModal('${ds}')" title="${ds}${e ? ` · ${e.hours}h ${WORK_LOCS[e.location].short}` : ''}"
+        style="aspect-ratio:1;border-radius:3px;border:1px solid ${border};background:${bg};opacity:${future && !e ? 0.35 : 1};
+        display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;
+        font-size:0.6rem;font-weight:700;color:${fg};line-height:1.1">
+        ${dn}${e ? `<span style="font-size:0.48rem;font-weight:400">${e.hours}h</span>` : ''}
+      </div>`;
+    }
+  }
+  html += '</div>';
+  document.getElementById('workLogCalendar').innerHTML = html;
+}
+
+function renderWorkLog() {
+  const t = today();
+  const data = DB.get('worklog');
+  renderWorkLogCalendar();
+
+  const weekStart = weekStartSunday(t);
+  const thisWeek = data.filter(w => w.date >= weekStart && w.date <= t);
+  const weekHours = thisWeek.reduce((s, w) => s + w.hours, 0);
+  const monthPrefix = t.slice(0, 7);
+  const thisMonth = data.filter(w => w.date.slice(0, 7) === monthPrefix);
+  const monthHours = thisMonth.reduce((s, w) => s + w.hours, 0);
+  const office = thisMonth.filter(w => w.location === 'office').length;
+  const home = thisMonth.filter(w => w.location === 'home').length;
+
+  document.getElementById('workLogStats').innerHTML = `
+    <div class="stat-chip"><div class="val" style="color:#7c9eff">${weekHours.toFixed(1)}h</div><div class="lbl">This week</div></div>
+    <div class="stat-chip"><div class="val">${monthHours.toFixed(1)}h</div><div class="lbl">This month</div></div>
+    <div class="stat-chip"><div class="val" style="font-size:1rem">${office}<span style="color:var(--muted)">🏢</span> ${home}<span style="color:var(--muted)">🏠</span></div><div class="lbl">Days this month</div></div>
+  `;
+
+  const sorted = [...data].sort((a, b) => a.date > b.date ? -1 : 1).slice(0, 40);
+  const list = document.getElementById('workLogList');
+  list.innerHTML = sorted.length ? sorted.map(w => `
+    <div class="log-item">
+      <div class="log-main">
+        <span class="log-tag" style="background:${WORK_LOCS[w.location].color};color:#000">${WORK_LOCS[w.location].short}</span>
+        <span style="margin-left:8px;font-weight:700">${w.hours}h</span>
+        ${w.note ? `<span style="color:var(--muted);margin-left:8px">${escapeHtml(w.note)}</span>` : ''}
+      </div>
+      <div class="log-date">${fmtDate(w.date)}</div>
+      <button class="btn-ghost" onclick="openWorkLogModal('${w.date}')">✎</button>
+    </div>`).join('') : '<div class="empty">No work days logged yet.</div>';
+}
+
+// ======================= TASKS (dated calendar to-dos) =======================
+// Entry: { id, date:'YYYY-MM-DD', title, done:false, doneDate:'' }
+const TASK_COLOR = '#ffd54f';
+let taskMonthOffset = 0;     // 0 = current month
+let taskModalDate = null;
+
+const addDays = (dateStr, n) => {
+  const p = dateStr.split('-').map(Number);
+  const d = new Date(p[0], p[1] - 1, p[2] + n);
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+};
+
+function taskMonthShift(n) { taskMonthOffset += n; renderTasks(); }
+
+function openTaskModal(dateStr) {
+  taskModalDate = dateStr;
+  document.getElementById('taskModalSub').textContent = fmtDate(dateStr);
+  document.getElementById('task-title').value = '';
+
+  const existing = DB.get('tasks').filter(t => t.date === dateStr);
+  document.getElementById('taskModalExisting').innerHTML = existing.length
+    ? existing.map(t => `
+        <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border)">
+          <input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleTaskDone('${t.id}')" style="cursor:pointer">
+          <span style="flex:1;font-size:0.7rem;${t.done ? 'text-decoration:line-through;color:var(--muted)' : ''}">${escapeHtml(t.title)}</span>
+          <button onclick="delTaskById('${t.id}')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:0.7rem">✕</button>
+        </div>`).join('')
+    : '<div style="font-size:0.6rem;color:var(--muted);letter-spacing:0.5px">Nothing scheduled for this day yet.</div>';
+
+  document.getElementById('taskModal').classList.add('open');
+  setTimeout(() => document.getElementById('task-title').focus(), 50);
+}
+
+function closeTaskModal() {
+  document.getElementById('taskModal').classList.remove('open');
+  taskModalDate = null;
+}
+
+function saveTaskFromModal() {
+  const title = document.getElementById('task-title').value.trim();
+  if (!taskModalDate || !title) return;
+  const data = DB.get('tasks');
+  data.push({ id: genId(), date: taskModalDate, title, done: false, doneDate: '' });
+  DB.set('tasks', data);
+  document.getElementById('task-title').value = '';
+  openTaskModal(taskModalDate);   // refresh the in-modal list
+  renderTasks();
+  renderToday();
+  showToast('Task added');
+}
+
+function toggleTaskDone(id) {
+  const data = DB.get('tasks');
+  const t = data.find(x => x.id === id);
+  if (!t) return;
+  t.done = !t.done;
+  t.doneDate = t.done ? today() : '';
+  DB.set('tasks', data);
+  if (taskModalDate) openTaskModal(taskModalDate);
+  renderTasks();
+  renderToday();
+}
+
+function delTaskById(id) {
+  DB.set('tasks', DB.get('tasks').filter(t => t.id !== id));
+  if (taskModalDate) openTaskModal(taskModalDate);
+  renderTasks();
+  renderToday();
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+}
+
+// Buckets used by both the Tasks tab and the Daily Brief
+function taskBuckets() {
+  const t = today();
+  const soonEnd = addDays(t, 3);
+  const all = DB.get('tasks');
+  return {
+    overdue: all.filter(x => !x.done && x.date < t).sort((a,b) => a.date < b.date ? -1 : 1),
+    soon:    all.filter(x => !x.done && x.date >= t && x.date <= soonEnd).sort((a,b) => a.date < b.date ? -1 : 1),
+    later:   all.filter(x => !x.done && x.date > soonEnd).sort((a,b) => a.date < b.date ? -1 : 1),
+    done:    all.filter(x => x.done).sort((a,b) => a.date > b.date ? -1 : 1),
+  };
+}
+
+function renderTaskCalendar() {
+  const t = today();
+  const base = new Date();
+  base.setDate(1);
+  base.setMonth(base.getMonth() + taskMonthOffset);
+  const year = base.getFullYear(), month = base.getMonth();
+
+  document.getElementById('taskMonthLabel').textContent =
+    base.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const offset = new Date(year, month, 1).getDay();
+  const dayNames = ['Su','Mo','Tu','We','Th','Fr','Sa'];
+
+  const byDate = {};
+  DB.get('tasks').forEach(x => { (byDate[x.date] = byDate[x.date] || []).push(x); });
+
+  let html = '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px">';
+  html += dayNames.map(d => `<div style="font-size:0.5rem;color:var(--muted);text-align:center;padding:2px 0;text-transform:uppercase">${d}</div>`).join('');
+  for (let i = 0; i < offset; i++) html += '<div></div>';
+
+  for (let dn = 1; dn <= daysInMonth; dn++) {
+    const ds = `${year}-${String(month+1).padStart(2,'0')}-${String(dn).padStart(2,'0')}`;
+    const items = byDate[ds] || [];
+    const open = items.filter(x => !x.done);
+    const isToday = ds === t;
+    let bg = 'var(--surface2)', fg = 'var(--muted)', border = 'var(--border)';
+    if (items.length && !open.length)      { bg = '#5ee7c8'; fg = '#000'; border = '#5ee7c8'; }
+    else if (open.length && ds < t)        { bg = '#ff6b6b'; fg = '#000'; border = '#ff6b6b'; }
+    else if (open.length)                  { bg = TASK_COLOR; fg = '#000'; border = TASK_COLOR; }
+    if (isToday) border = 'var(--accent)';
+
+    html += `<div onclick="openTaskModal('${ds}')" title="${items.length ? escapeHtml(items.map(x=>x.title).join(', ')) : ''}"
+      style="aspect-ratio:1;border-radius:3px;border:1px solid ${border};background:${bg};
+      display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;
+      font-size:0.62rem;font-weight:700;color:${fg};line-height:1;position:relative"
+      >${dn}${items.length ? `<span style="font-size:0.45rem;font-weight:400;margin-top:2px">${open.length ? open.length : '✓'}</span>` : ''}</div>`;
+  }
+  html += '</div>';
+  document.getElementById('taskCalendar').innerHTML = html;
+}
+
+function taskRow(x) {
+  const t = today();
+  const late = !x.done && x.date < t;
+  const when = x.date === t ? 'today' : (late ? `${daysAgo(x.date)}d late` : `in ${-daysAgo(x.date)}d`);
+  return `
+    <div class="log-item">
+      <div class="log-main" style="display:flex;align-items:center;gap:8px">
+        <input type="checkbox" ${x.done ? 'checked' : ''} onchange="toggleTaskDone('${x.id}')" style="cursor:pointer">
+        <span style="${x.done ? 'text-decoration:line-through;color:var(--muted)' : ''}">${escapeHtml(x.title)}</span>
+      </div>
+      <div class="log-date">${fmtDate(x.date)}${x.done ? '' : ` · <span style="color:${late ? '#ff6b6b' : 'var(--muted)'}">${when}</span>`}</div>
+      <button class="btn-ghost" onclick="delTaskById('${x.id}')">✕</button>
+    </div>`;
+}
+
+function renderTasks() {
+  const b = taskBuckets();
+  renderTaskCalendar();
+
+  document.getElementById('tasksStats').innerHTML = `
+    <div class="stat-chip"><div class="val" style="color:${b.overdue.length ? '#ff6b6b' : 'var(--muted)'}">${b.overdue.length}</div><div class="lbl">Overdue</div></div>
+    <div class="stat-chip"><div class="val" style="color:${TASK_COLOR}">${b.soon.length}</div><div class="lbl">Next 3 days</div></div>
+    <div class="stat-chip"><div class="val">${b.later.length}</div><div class="lbl">Later</div></div>
+  `;
+
+  const fill = (id, list, empty) => {
+    document.getElementById(id).innerHTML = list.length ? list.map(taskRow).join('') : `<div class="empty">${empty}</div>`;
+  };
+  fill('tasksOverdue', b.overdue, 'Nothing overdue. 🎉');
+  fill('tasksSoon',    b.soon,    'Nothing due in the next 3 days.');
+  fill('tasksLater',   b.later,   'Nothing scheduled further out.');
+  fill('tasksDone',    b.done.slice(0, 30), 'No completed tasks yet.');
+}
+
+// ======================= CHORES =======================
+const CHORES_DEF = [
+  { id: 'bathroom',   label: '🚿 Deep clean bathroom', days: 10 },
+  { id: 'washroom',   label: '🧹 Deep clean washroom', days: 7  },
+  { id: 'sink',       label: '🚰 Clean sink',           days: 10 },
+  { id: 'sheets',     label: '🛏 Change bed sheets',    days: 21 },
+  { id: 'lenses',     label: '👁 Change contact lenses',days: 28 },
+  { id: 'plants',     label: '🪴 Water plants',         days: 14 },
+  { id: 'sofa',       label: '🛋 Vacuum sofa',          days: 10 },
+  { id: 'car',        label: '🚗 Vacuum car',           days: 10 },
+  { id: 'wardrobe',   label: '👔 Rearrange wardrobe',   days: 30 },
+];
+
+function getChoreLog() { return JSON.parse(localStorage.getItem('selfos_chores') || '{}'); }
+function setChoreLog(log) { localStorage.setItem('selfos_chores', JSON.stringify(log)); }
+
+function daysAgo(dateStr) {
+  if (!dateStr) return Infinity;
+  // Compare using local date strings to avoid timezone drift
+  const todayParts = today().split('-').map(Number);
+  const lastParts = dateStr.split('-').map(Number);
+  const todayMs = Date.UTC(todayParts[0], todayParts[1]-1, todayParts[2]);
+  const lastMs  = Date.UTC(lastParts[0],  lastParts[1]-1,  lastParts[2]);
+  return Math.round((todayMs - lastMs) / 86400000);
+}
+
+function daysUntilDue(chore) {
+  const log = getChoreLog();
+  const last = log[chore.id];
+  if (!last) return 0; // never done = overdue
+  return chore.days - daysAgo(last);
+}
+
+function markChoreDone(id) {
+  const chore = CHORES_DEF.find(c => c.id === id);
+  const log = getChoreLog();
+
+  let m = document.getElementById('choreDateModal');
+  if (m) m.remove();
+  m = document.createElement('div');
+  m.id = 'choreDateModal';
+  m.style.cssText = 'position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;padding:20px';
+
+  // Build 30-day calendar
+  const todayStr = today();
+  const days = [];
+  for (let i = 29; i >= 0; i--) {
+    const d = new Date(); d.setDate(d.getDate() - i);
+    days.push(d.toISOString().slice(0,10));
+  }
+  const firstDay = new Date(days[0]+'T00:00:00').getDay();
+  const dayNames = ['Su','Mo','Tu','We','Th','Fr','Sa'];
+  let calHtml = `<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:14px">`;
+  calHtml += dayNames.map(d => `<div style="font-size:0.5rem;color:var(--muted);text-align:center;padding:2px 0;text-transform:uppercase">${d}</div>`).join('');
+  for (let i=0;i<firstDay;i++) calHtml += '<div></div>';
+  days.forEach(ds => {
+    const dn = new Date(ds+'T00:00:00').getDate();
+    const isToday = ds === todayStr;
+    const isLast = ds === log[id];
+    calHtml += `<div data-date="${ds}" onclick="selectChoreDate('${id}','${ds}')"
+      style="aspect-ratio:1;border-radius:3px;border:1px solid ${isToday?'var(--accent)':isLast?'#80cbc4':'var(--border)'};
+      background:${isLast?'#80cbc4':isToday?'rgba(200,241,53,0.08)':'var(--surface2)'};
+      display:flex;align-items:center;justify-content:center;cursor:pointer;
+      font-size:0.65rem;font-weight:700;color:${isLast?'#000':'var(--muted)'};
+      transition:all 0.1s" onmouseover="this.style.borderColor='#80cbc4'" onmouseout="this.style.borderColor='${isToday?'var(--accent)':isLast?'#80cbc4':'var(--border)'}'">
+      ${dn}
+    </div>`;
+  });
+  calHtml += '</div>';
+
+  m.innerHTML = `<div style="background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:24px;width:100%;max-width:360px">
+    <div style="font-family:var(--font-display);font-weight:800;font-size:1rem;margin-bottom:4px">${chore ? chore.label : id}</div>
+    <div style="font-size:0.65rem;color:var(--muted);margin-bottom:16px;letter-spacing:1px">When did you do this? Tap a day.</div>
+    ${calHtml}
+    <div style="display:flex;justify-content:flex-end">
+      <button onclick="document.getElementById('choreDateModal').remove()" style="background:none;border:1px solid var(--border);color:var(--muted);font-family:var(--font-mono);font-size:0.65rem;padding:8px 14px;cursor:pointer;border-radius:2px">Cancel</button>
+    </div>
+  </div>`;
+  document.body.appendChild(m);
+  m.addEventListener('click', e => { if (e.target === m) m.remove(); });
+}
+
+function selectChoreDate(id, dateStr) {
+  const log = getChoreLog();
+  log[id] = dateStr;
+  setChoreLog(log);
+  document.getElementById('choreDateModal').remove();
+  renderChores();
+  renderToday();
+  showToast('Logged ✓');
+}
+
+function renderChoresDueToday() {
+  const el = document.getElementById('choresDueToday');
+  if (!el) return;
+  const log = getChoreLog();
+
+  const choreColor = (due) => {
+    if (due < 0) return '#ff4f4f';       // overdue — red
+    if (due === 0) return '#ff6030';     // due today — deep orange
+    if (due <= 2) return '#ff9f43';      // due soon — orange
+    if (due <= 5) return '#e6b800';      // approaching — yellow
+    return '#4caf82';                    // fine — green
+  };
+
+  el.innerHTML = `<div class="card">
+    <div class="card-label" style="color:#80cbc4;margin-bottom:12px">Chores</div>
+    ${CHORES_DEF.map(c => {
+      const due = daysUntilDue(c);
+      const last = log[c.id];
+      const color = choreColor(due);
+      const statusText = due < 0 ? `Overdue by ${Math.abs(due)}d` : due === 0 ? 'Due today' : `In ${due}d`;
+      return `<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">
+        <div style="flex:1">
+          <div style="font-size:0.75rem">${c.label}</div>
+          <div style="font-size:0.58rem;color:var(--muted);margin-top:2px">${last ? 'Last: ' + fmtDate(last) : 'Never done'}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:0.65rem;color:${color};font-weight:700;min-width:70px;text-align:right">${statusText}</span>
+          <button onclick="markChoreDone('${c.id}')" style="background:${due<=0?color:'var(--surface2)'};color:${due<=0?'#000':'var(--muted)'};border:1px solid ${color};font-family:var(--font-mono);font-size:0.6rem;padding:4px 10px;cursor:pointer;border-radius:2px;font-weight:700;white-space:nowrap">✓</button>
+        </div>
+      </div>`;
+    }).join('')}
+  </div>`;
+}
+
+function renderChores() {
+  const el = document.getElementById('choresList');
+  if (!el) return;
+  const log = getChoreLog();
+
+  el.innerHTML = CHORES_DEF.map(c => {
+    const due = daysUntilDue(c);
+    const last = log[c.id];
+    const pct = last ? Math.min((c.days - Math.max(due,0)) / c.days * 100, 100).toFixed(0) : 100;
+    const overdue = due <= 0;
+    const soon = due > 0 && due <= 2;
+    const color = overdue ? 'var(--accent2)' : soon ? 'var(--accent4)' : '#80cbc4';
+    const statusLabel = overdue ? `Overdue by ${Math.abs(due)}d` : due === 0 ? 'Due today' : `Due in ${due}d`;
+    return `<div class="card" style="border-color:${overdue ? 'var(--accent2)' : soon ? 'var(--accent4)' : 'var(--border)'}">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <div>
+          <div style="font-size:0.8rem;font-weight:700">${c.label}</div>
+          <div style="font-size:0.6rem;color:var(--muted);margin-top:2px">Every ${c.days} days${last ? ' · Last: '+fmtDate(last) : ' · Never done'}</div>
+        </div>
+        <button onclick="markChoreDone('${c.id}')" style="background:${overdue?'var(--accent2)':'var(--surface2)'};color:${overdue?'#fff':'var(--muted)'};border:1px solid ${color};font-family:var(--font-mono);font-size:0.6rem;padding:6px 12px;cursor:pointer;border-radius:2px;white-space:nowrap">✓ Done</button>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+        <span style="font-size:0.6rem;color:${color};letter-spacing:0.5px">${statusLabel}</span>
+        <span style="font-size:0.6rem;color:var(--muted)">${overdue ? '' : pct+'% of interval'}  </span>
+      </div>
+      <div class="prog-bar"><div class="prog-fill" style="width:${pct}%;background:${color}"></div></div>
+    </div>`;
+  }).join('');
+}
+
+// ======================= PLAN =======================
+const PLAN_DAYS = [
+  {
+    title: 'Day 1 Opt 1 — Full Body: Heavy Squat',
+    color: '#c084fc',
+    sub: 'Mon · Week A · pair with Day 3 Bulgarian',
+    note: 'Heavy squat week. Keep 1–3 RIR; no grinding. Use in the same week as Day 3 Opt 1 (Bulgarian).',
+    exercises: [
+      { name: 'Barbell Squat ★', sets: '3 sets: 3, 8, 10', muscle: 'Quads, Glutes', notes: '150×3, 125×8, 105–110×10. Heavy top set then two back-offs. No grinding.' },
+      { name: 'Machine Chest Press', sets: '3 × 8-10', muscle: 'Chest', notes: 'Progress reps before load: 140×7×3 → 8 → 9 → 10, then add weight and drop back to 7-8.' },
+      { name: 'Chest-Supported Row', sets: '3 × 8-12', muscle: 'Back (Mid/Lats)', notes: 'Saves lower-back fatigue.' },
+      { name: 'Neutral / Narrow Pulldown', sets: '2 × 10-12', muscle: 'Back (Lats)', notes: 'Pulldown is Day 1 & Day 2 only — Day 3 uses a cable pullover instead.' },
+      { name: 'Leg Curl', sets: '3 × 10-12', muscle: 'Hamstrings', notes: 'Seated or lying. Controlled eccentric.' },
+      { name: 'DB Overhead Press', sets: '2 × 8-10', muscle: 'Shoulders (Front/Side)', notes: 'Keep moderate. Avoid repeated 0-RIR work. Progress reps first, then load.' },
+      { name: 'Standing / Seated Calf Raise', sets: '2 × 12-20', muscle: 'Calves', notes: 'Pause/stretch at the bottom.' },
+      { name: 'Rope Tricep Ext. + Hammer Curl (SS)', sets: '3 supersets × 12-15', muscle: 'Triceps / Biceps', notes: 'Minimal rest within; rest after each superset.' },
+      { name: 'Farmer Walk', sets: '2-3 × 25-50 steps', muscle: 'Trunk, Grip, Upper Back', notes: 'Stay tall, ribcage controlled, don\'t let shoulders roll forward. No straps when grip/forearms are the goal; straps fine if grip limits the upper-back stimulus.' },
+    ]
+  },
+  {
+    title: 'Day 1 Opt 2 — Full Body: Volume Squat',
+    color: '#c084fc',
+    sub: 'Mon · Week B · pair with Day 3 Leg Press',
+    note: 'Easier/volume squat week. Leave more in the tank. Use in the same week as Day 3 Opt 2 (Leg Press).',
+    exercises: [
+      { name: 'Barbell Squat ★', sets: '2 sets: 6-8, 8', muscle: 'Quads, Glutes', notes: 'Easier than heavy week. e.g. 130–135×6–8, then 125×8. Keep reps clean.' },
+      { name: 'Machine Chest Press', sets: '3 × 8-10', muscle: 'Chest', notes: 'Same progression as Opt 1 — reps before load.' },
+      { name: 'Chest-Supported Row', sets: '3 × 8-12', muscle: 'Back (Mid/Lats)', notes: 'Controlled reps.' },
+      { name: 'Neutral / Narrow Pulldown', sets: '2 × 10-12', muscle: 'Back (Lats)', notes: 'Pulldown is Day 1 & Day 2 only — Day 3 uses a cable pullover instead.' },
+      { name: 'Leg Curl', sets: '3 × 10-12', muscle: 'Hamstrings', notes: 'Controlled eccentric.' },
+      { name: 'DB Overhead Press', sets: '2 × 8-10', muscle: 'Shoulders (Front/Side)', notes: 'Keep moderate. Avoid repeated 0-RIR work. Progress reps first, then load.' },
+      { name: 'Standing / Seated Calf Raise', sets: '2 × 12-20', muscle: 'Calves', notes: 'Controlled stretch.' },
+      { name: 'Rope Tricep Ext. + Hammer Curl (SS)', sets: '3 supersets × 12-15', muscle: 'Triceps / Biceps', notes: 'Keep it strict.' },
+      { name: 'Farmer Walk', sets: '2-3 × 25-50 steps', muscle: 'Trunk, Grip, Upper Back', notes: 'Stay tall, ribcage controlled, don\'t let shoulders roll forward. No straps when grip/forearms are the goal; straps fine if grip limits the upper-back stimulus.' },
+    ]
+  },
+  {
+    title: 'Day 2 — Upper: Chest, Back, Delts, Arms',
+    color: '#ff6b6b',
+    sub: 'Wed · Same every week',
+    exercises: [
+      { name: 'Incline Dumbbell Press ★', sets: '3 × 8-10', muscle: 'Chest (Upper)', notes: 'Main upper-chest press. If 3×8 gives 8,7,6 — hold the weight until performance improves rather than forcing load.' },
+      { name: 'Neutral / Wide Lat Pulldown', sets: '3 × 8-10', muscle: 'Back (Width)', notes: 'Use neutral if shoulders or elbows feel sensitive. Pulldown is Day 1 & Day 2 only.' },
+      { name: 'Chest-Supported Row / Seated Row', sets: '2 × 8-12', muscle: 'Back (Mid)', notes: 'Supported row preferred over unsupported barbell row — less unnecessary lower-back fatigue.' },
+      { name: 'Cable Lateral Raise', sets: '3 × 15-20', muscle: 'Side Delts', notes: 'Only lateral-raise slot of the week.' },
+      { name: 'Face Pull', sets: '3 × 15-20', muscle: 'Rear Delts, Upper Back', notes: 'Rear delts / upper back / shoulder health.' },
+      { name: 'Cable Fly', sets: '3 × 12-15', muscle: 'Chest', notes: 'Low-fatigue chest volume.' },
+      { name: 'Standing Single-Arm Cable Curl', sets: '3 × 10-15 / arm', muscle: 'Biceps', notes: 'Strict reps. Squeeze at the top.' },
+      { name: 'Tate Press', sets: '3 × 10-12', muscle: 'Triceps', notes: 'Controlled lowering.' },
+      { name: 'Reverse Curl', sets: '2 × 12-15', muscle: 'Forearms, Brachialis', notes: 'Brachialis + forearms.' },
+      { name: 'Seated DB Wrist Curl', sets: '1-2 × 15-20', muscle: 'Forearms (Flexors)', notes: 'Optional if time or energy is low.' },
+    ]
+  },
+  {
+    title: 'Day 3 Opt 1 — Lower + Pump: Bulgarian Week',
+    color: '#4fc3f7',
+    sub: 'Fri · Week A · pair with Day 1 Heavy',
+    note: 'Bulgarian week. Don’t grind RDL. Use in the same week as Day 1 Opt 1.',
+    exercises: [
+      { name: 'Barbell RDL ★', sets: '2 sets: 6, 10', muscle: 'Hamstrings, Glutes', notes: '150×6, then 120×10. Do not grind.' },
+      { name: 'Bulgarian Split Squat', sets: '2 × 8-10 / leg', muscle: 'Quads, Glutes', notes: 'Heavy movement. Rest 90–150 sec. Keep 1–3 RIR.' },
+      { name: 'Hip Thrust (optional)', sets: '1-2 × 10-12', muscle: 'Glutes', notes: 'Optional glute add-on. Keep 1–2 RIR.' },
+      { name: 'Leg Extension', sets: '3 × 12-15', muscle: 'Quads', notes: 'Quad volume with low systemic fatigue.' },
+      { name: 'Seated Calf Raise', sets: '4 × 12-15', muscle: 'Calves (Soleus)', notes: '2-second stretch at the bottom.' },
+      { name: 'Cable Crunch', sets: '4 × 15-20', muscle: 'Abs', notes: 'Round the back; do not pull with arms/neck.' },
+      { name: 'Cable Fly', sets: '3 × 12-15', muscle: 'Chest', notes: 'Extra chest pump, low fatigue.' },
+      { name: 'Cable Pullover', sets: '3 × 12-15', muscle: 'Back (Lats)', notes: 'Pullover, not another pulldown. Controlled stretch.' },
+      { name: 'Reverse Pec Deck / Rear-Delt Fly', sets: '3 × 15-20', muscle: 'Rear Delts, Upper Back', notes: 'Replaces Day 3 lateral raise. Rear-delt focus.' },
+    ]
+  },
+  {
+    title: 'Day 3 Opt 2 — Lower + Pump: Leg Press Week',
+    color: '#4fc3f7',
+    sub: 'Fri · Week B · pair with Day 1 Volume',
+    note: 'Leg press week. Don’t grind RDL. Use in the same week as Day 1 Opt 2.',
+    exercises: [
+      { name: 'Barbell RDL ★', sets: '3 sets: 6, 8, 10', muscle: 'Hamstrings, Glutes', notes: '150×6, 130×8, 110×10. Do not grind.' },
+      { name: 'Leg Press', sets: '2-3 × 10-12', muscle: 'Quads, Glutes', notes: 'Main quad/glute work for this version.' },
+      { name: 'Hip Thrust (optional)', sets: '2 × 8-12', muscle: 'Glutes', notes: 'More appropriate here than Bulgarian week. Keep 1–2 RIR.' },
+      { name: 'Leg Extension', sets: '3 × 12-15', muscle: 'Quads', notes: 'Controlled reps.' },
+      { name: 'Seated Calf Raise', sets: '4 × 12-15', muscle: 'Calves (Soleus)', notes: '2-second stretch at the bottom.' },
+      { name: 'Cable Crunch', sets: '4 × 15-20', muscle: 'Abs', notes: 'Controlled reps.' },
+      { name: 'Cable Fly', sets: '3 × 12-15', muscle: 'Chest', notes: 'Extra chest pump.' },
+      { name: 'Cable Pullover', sets: '3 × 12-15', muscle: 'Back (Lats)', notes: 'Pullover, not another pulldown. Controlled stretch.' },
+      { name: 'Reverse Pec Deck / Rear-Delt Fly', sets: '3 × 15-20', muscle: 'Rear Delts, Upper Back', notes: 'Rear-delt focus.' },
+    ]
+  },
+  {
+    title: 'Run 1 — Easy Run',
+    color: '#ff9f43',
+    sub: 'Tue · Conditioning · conversational pace',
+    note: 'Effort: conversational pace — you should be able to talk.',
+    exercises: [
+      { name: 'Warm-up walk/jog', sets: '5 min', muscle: 'Warm-up', notes: 'Ease in gradually.' },
+      { name: 'Easy run', sets: '20-30 min', muscle: 'Aerobic', notes: 'Conversational pace.' },
+      { name: 'Cooldown', sets: '5 min', muscle: 'Recovery', notes: 'Walk it out.' },
+    ]
+  },
+  {
+    title: 'Run 2 — Easy Run',
+    color: '#ff9f43',
+    sub: 'Thu · Conditioning · keep it easy',
+    note: 'Keep both runs easy. No hard intervals for now.',
+    exercises: [
+      { name: 'Warm-up walk/jog', sets: '5 min', muscle: 'Warm-up', notes: 'Ease in gradually.' },
+      { name: 'Easy run', sets: '20-30 min', muscle: 'Aerobic', notes: 'Conversational pace.' },
+      { name: 'Cooldown', sets: '5 min', muscle: 'Recovery', notes: 'Walk it out.' },
+    ]
+  },
+];
+
+let activePlanDay = 0;
+
+function showPlanDay(idx) {
+  activePlanDay = idx;
+  const day = PLAN_DAYS[idx];
+
+  // Update buttons
+  document.querySelectorAll('.plan-day-btn').forEach((btn, i) => {
+    const color = i === idx ? day.color : 'var(--muted)';
+    btn.style.background = i === idx ? day.color + '22' : 'var(--surface2)';
+    btn.style.borderColor = i === idx ? day.color : 'var(--border)';
+    btn.style.color = color;
+  });
+
+  const hasAlt = day.exercises.some(e => e.alt);
+
+  document.getElementById('planDayContent').innerHTML = `
+    <div class="card" style="border-color:${day.color}22">
+      <div style="font-family:var(--font-display);font-size:1rem;font-weight:800;color:${day.color};margin-bottom:4px">${day.title}</div>
+      <div style="font-size:0.65rem;color:var(--muted);margin-bottom:${day.note ? '6px' : '14px'}">${day.sub}</div>
+      ${day.note ? `<div style="font-size:0.6rem;color:var(--accent4);background:rgba(255,159,67,0.08);border:1px solid rgba(255,159,67,0.2);border-radius:3px;padding:8px;margin-bottom:14px;letter-spacing:0.3px">⚡ ${day.note}</div>` : ''}
+      <div style="overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:0.7rem">
+          <thead>
+            <tr style="border-bottom:1px solid var(--border)">
+              <th style="text-align:left;padding:6px 8px;color:var(--muted);font-size:0.58rem;letter-spacing:1px;text-transform:uppercase;font-weight:400;min-width:140px">Exercise</th>
+              <th style="text-align:left;padding:6px 8px;color:var(--muted);font-size:0.58rem;letter-spacing:1px;text-transform:uppercase;font-weight:400;white-space:nowrap">Sets & Reps</th>
+              <th style="text-align:left;padding:6px 8px;color:var(--muted);font-size:0.58rem;letter-spacing:1px;text-transform:uppercase;font-weight:400;white-space:nowrap">Muscle</th>
+              <th style="text-align:left;padding:6px 8px;color:var(--muted);font-size:0.58rem;letter-spacing:1px;text-transform:uppercase;font-weight:400;min-width:160px">Notes</th>
+              ${hasAlt ? `<th style="text-align:left;padding:6px 8px;color:${day.color};font-size:0.58rem;letter-spacing:1px;text-transform:uppercase;font-weight:400;white-space:nowrap">Alt</th>` : ''}
+            </tr>
+          </thead>
+          <tbody>
+            ${day.exercises.map((ex, i) => `
+              <tr style="border-bottom:1px solid var(--border);background:${i%2===0?'transparent':'rgba(255,255,255,0.02)'}">
+                <td style="padding:8px;color:${ex.name.includes('★') ? day.color : 'var(--text)'};font-weight:${ex.name.includes('★') ? '700' : '400'}">${ex.name}</td>
+                <td style="padding:8px;color:var(--muted);white-space:nowrap">${ex.sets}</td>
+                <td style="padding:8px;color:var(--accent);white-space:nowrap;font-size:0.65rem">${ex.muscle}</td>
+                <td style="padding:8px;color:var(--muted);font-size:0.65rem">${ex.notes}</td>
+                ${hasAlt ? `<td style="padding:8px;color:var(--muted);font-size:0.6rem;white-space:nowrap">${ex.alt || '—'}</td>` : ''}
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
+function calcRM() {
+  const w = parseFloat(document.getElementById('rmWeight').value);
+  const r = parseFloat(document.getElementById('rmReps').value);
+  if (!w || !r) return;
+  const oneRM = Math.round(w * (1 + r / 30));
+  document.getElementById('val1rm').textContent = oneRM + ' kg';
+  document.getElementById('valStr').textContent = Math.round(oneRM * 0.87) + ' kg';
+  document.getElementById('valHyp').textContent = Math.round(oneRM * 0.75) + ' kg';
+  document.getElementById('valVol').textContent = Math.round(oneRM * 0.65) + ' kg';
+  document.getElementById('rmResult').style.display = 'block';
+}
+
+
+function setDefaultDates() {
+  const t = todayDMY();
+  ['w-date','wo-date','al-date','wk-date','hb-date'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = t;
+  });
+}
+
+// ======================= BOOT =======================
+// Each step is isolated: if one throws (a missing CDN library, corrupt stored data),
+// the remaining sections still render instead of leaving a blank page.
+// localStorage is scoped per origin: data saved at file:// is invisible to the
+// hosted copy and vice versa. The hosted copy is the source of truth, so warn
+// loudly if this page was opened straight off the disk.
+function warnIfLocalCopy() {
+  if (location.protocol !== 'file:') return;
+  const main = document.querySelector('main');
+  if (!main) return;
+  const b = document.createElement('div');
+  b.style.cssText = 'background:rgba(255,159,67,0.12);border:1px solid var(--accent4);color:var(--accent4);font-family:var(--font-mono);font-size:0.62rem;padding:10px 12px;margin:0 0 14px;border-radius:3px;letter-spacing:0.3px;line-height:1.5';
+  b.innerHTML = '⚠ <b>Local copy.</b> Anything you log here is stored only on this computer and will <b>not</b> appear on the web version. Open the hosted copy instead — that\'s where your data lives.';
+  main.insertBefore(b, main.firstChild);
+}
+
+function boot() {
+  const steps = [
+    ['origin check',   warnIfLocalCopy],
+    ['header date',    setHeaderDate],
+    ['default dates',  setDefaultDates],
+    ['workout types',  initWoTypeGrid],
+    ['research types', initResearchTypeGrid],
+    ['plan',           () => showPlanDay(0)],
+    ['weight',         renderWeight],
+    ['workout',        renderWorkout],
+    ['alcohol',        renderAlcohol],
+    ['tracking',       renderWork],
+    ['tweeter queue',  processTweeterQueue],
+    ['tweeter',        renderTweeter],
+    ['tasks',          renderTasks],
+    ['work log',       renderWorkLog],
+    ['today',          renderToday],
+    ['chores',         renderChores],
+    ['nav lock',       applyNavLockState],
+    ['photo lock',     applyPhotoLockState],
+  ];
+  const failed = [];
+  steps.forEach(([name, fn]) => {
+    try { fn(); } catch (err) { failed.push(name); console.error(`[boot] "${name}" failed:`, err); }
+  });
+  if (failed.length) {
+    const b = document.createElement('div');
+    b.style.cssText = 'background:rgba(255,107,107,0.12);border:1px solid #ff6b6b;color:#ff6b6b;font-family:var(--font-mono);font-size:0.6rem;padding:8px 12px;margin:0 0 12px;border-radius:3px;letter-spacing:0.3px';
+    b.textContent = `⚠ Some sections failed to load: ${failed.join(', ')}. Everything else still works — open the console for details.`;
+    const main = document.querySelector('main');
+    if (main) main.insertBefore(b, main.firstChild);
+  }
+}
+
+boot();
+
+// If the local library files are missing or moved, pull them from the CDN and
+// redraw the charts once they arrive. Nothing else depends on this succeeding.
+function recoverMissingLibs() {
+  const libs = [
+    { global: 'Chart',   url: 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js',
+      after: () => {
+        document.querySelectorAll('.chart-offline').forEach(n => n.remove());
+        ['weightChart','workChart'].forEach(id => { const c = document.getElementById(id); if (c) c.style.display = ''; });
+        try { renderWeight(); renderWork(); } catch (e) { console.error('[libs] redraw failed:', e); }
+      } },
+    { global: 'QRCode',  url: 'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js', after: () => {} },
+  ];
+  libs.forEach(lib => {
+    if (typeof window[lib.global] !== 'undefined') return;
+    const s = document.createElement('script');
+    s.src = lib.url;
+    s.onload = () => { console.warn(`[libs] ${lib.global} loaded from CDN — local copy missing.`); lib.after(); };
+    s.onerror = () => console.warn(`[libs] ${lib.global} unavailable locally and from the CDN. Charts stay disabled.`);
+    document.head.appendChild(s);
+  });
+}
+
+recoverMissingLibs();
+</script>
+</body>
+</html>
