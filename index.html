@@ -8,8 +8,10 @@
 <title>SELF OS</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<!-- Local copies load first so the app works with no internet at all.
+     If a local file is missing, the CDN is used as a fallback (see recoverMissingLibs). -->
+<script src="chart.umd.min.js"></script>
+<script src="qrcode.min.js"></script>
 <style>
   :root {
     --bg: #0a0a0a;
@@ -377,10 +379,13 @@
     <span class="nav-dot" style="background:#c8f135"></span> Plan
   </button>
   <button class="nav-btn" onclick="switchTab('work')" id="nav-work">
-    <span class="nav-dot" style="background:var(--accent2)"></span> Work
+    <span class="nav-dot" style="background:#7c9eff"></span> Work
   </button>
   <button class="nav-btn" onclick="switchTab('chores')" id="nav-chores">
     <span class="nav-dot" style="background:#80cbc4"></span> Chores
+  </button>
+  <button class="nav-btn" onclick="switchTab('tasks')" id="nav-tasks">
+    <span class="nav-dot" style="background:#ffd54f"></span> Tasks
   </button>
   <button class="nav-btn" onclick="switchTab('weight')" id="nav-weight" style="display:none">
     <span class="nav-dot" style="background:var(--accent)"></span> Weight
@@ -391,8 +396,8 @@
   <button class="nav-btn" onclick="switchTab('tweeter')" id="nav-tweeter" style="display:none">
     <span class="nav-dot" style="background:#5ee7c8"></span> Tweeter
   </button>
-  <button class="nav-btn" onclick="switchTab('chores')" id="nav-chores" style="display:none">
-    <span class="nav-dot" style="background:#80cbc4"></span> Chores
+  <button class="nav-btn" onclick="switchTab('tracking')" id="nav-tracking" style="display:none">
+    <span class="nav-dot" style="background:var(--accent2)"></span> Tracking
   </button>
   <button class="nav-btn" onclick="lockNav()" id="nav-lockbtn" style="display:none;color:var(--muted);font-size:0.6rem">
     🔒 Lock
@@ -414,6 +419,7 @@
       <span>⚠ You haven't exported your data in 7+ days</span>
       <button onclick="exportData();this.parentElement.style.display='none'" style="background:var(--accent4);color:#000;border:none;font-family:var(--font-mono);font-size:0.6rem;padding:4px 10px;cursor:pointer;border-radius:2px;font-weight:700">Export now</button>
     </div>
+    <div id="dailyBrief"></div>
     <div id="todayDashboard"></div>
     <div id="choresDueToday"></div>
   </div>
@@ -589,9 +595,9 @@
   </div>
 
   <!-- ===== WORK ===== -->
-  <div class="tab" id="tab-work">
+  <div class="tab" id="tab-tracking">
     <div class="section-head">
-      <h2 class="ws-accent">Work</h2>
+      <h2 class="ws-accent">Tracking</h2>
       <p>Research & hobby tracker</p>
     </div>
 
@@ -716,6 +722,7 @@
         <div style="background:#4fc3f7;color:#000;border-radius:3px;padding:6px 2px;font-weight:700;font-size:0.55rem;cursor:pointer" onclick="showPlanDay(3)">Day 3</div>
         <div style="background:var(--surface2);color:var(--muted);border-radius:3px;padding:6px 2px;font-size:0.55rem">Rest 🚶</div>
         <div style="background:var(--surface2);color:var(--muted);border-radius:3px;padding:6px 2px;font-size:0.55rem">Rest 💤</div>
+      </div>
       <div style="font-size:0.6rem;color:var(--muted);margin-top:10px;letter-spacing:0.5px">Alternate weekly — <b style="color:#c084fc">Week A:</b> Day 1 Heavy + Day 3 Bulgarian · <b style="color:#80d4f7">Week B:</b> Day 1 Volume + Day 3 Leg Press. Tap a day to see exercises ↓</div>
     </div>
 
@@ -787,7 +794,121 @@
     <div id="choresList"></div>
   </div>
 
+  <!-- ===== WORK (day log: hours + office/home) ===== -->
+  <div class="tab" id="tab-work">
+    <div class="section-head">
+      <h2 style="color:#7c9eff">Work</h2>
+      <p>Sun–Thu — tap a day to log hours and where you worked</p>
+    </div>
+    <div class="stat-row" id="workLogStats"></div>
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <button onclick="workWeekShift(-1)" style="background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-family:var(--font-mono);font-size:0.7rem;padding:4px 10px;cursor:pointer;border-radius:2px">‹</button>
+        <div id="workRangeLabel" style="font-family:var(--font-display);font-weight:800;font-size:0.8rem;letter-spacing:-0.3px"></div>
+        <button onclick="workWeekShift(1)" style="background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-family:var(--font-mono);font-size:0.7rem;padding:4px 10px;cursor:pointer;border-radius:2px">›</button>
+      </div>
+      <div id="workLogCalendar"></div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:12px;font-size:0.55rem;color:var(--muted);letter-spacing:0.5px">
+        <span><span style="display:inline-block;width:8px;height:8px;background:#7c9eff;border-radius:2px;vertical-align:middle"></span> Office</span>
+        <span><span style="display:inline-block;width:8px;height:8px;background:#a5d6a7;border-radius:2px;vertical-align:middle"></span> Home</span>
+        <span><span style="display:inline-block;width:8px;height:8px;background:var(--surface2);border:1px solid var(--border);border-radius:2px;vertical-align:middle"></span> Not logged</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-label">History</div>
+      <div class="log-list" id="workLogList"></div>
+    </div>
+  </div>
+
+  <!-- ===== TASKS ===== -->
+  <div class="tab" id="tab-tasks">
+    <div class="section-head">
+      <h2 style="color:#ffd54f">Tasks</h2>
+      <p>Dated to-dos — tap any day to add one</p>
+    </div>
+    <div class="stat-row" id="tasksStats"></div>
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <button onclick="taskMonthShift(-1)" style="background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-family:var(--font-mono);font-size:0.7rem;padding:4px 10px;cursor:pointer;border-radius:2px">‹</button>
+        <div id="taskMonthLabel" style="font-family:var(--font-display);font-weight:800;font-size:0.85rem;letter-spacing:-0.3px"></div>
+        <button onclick="taskMonthShift(1)" style="background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-family:var(--font-mono);font-size:0.7rem;padding:4px 10px;cursor:pointer;border-radius:2px">›</button>
+      </div>
+      <div id="taskCalendar"></div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:12px;font-size:0.55rem;color:var(--muted);letter-spacing:0.5px">
+        <span><span style="display:inline-block;width:8px;height:8px;background:#ff6b6b;border-radius:2px;vertical-align:middle"></span> Overdue</span>
+        <span><span style="display:inline-block;width:8px;height:8px;background:#ffd54f;border-radius:2px;vertical-align:middle"></span> Open</span>
+        <span><span style="display:inline-block;width:8px;height:8px;background:#5ee7c8;border-radius:2px;vertical-align:middle"></span> All done</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-label">Overdue</div>
+      <div class="log-list" id="tasksOverdue"></div>
+    </div>
+    <div class="card">
+      <div class="card-label">Next 3 days</div>
+      <div class="log-list" id="tasksSoon"></div>
+    </div>
+    <div class="card">
+      <div class="card-label">Later</div>
+      <div class="log-list" id="tasksLater"></div>
+    </div>
+    <div class="card">
+      <div class="card-label">Completed</div>
+      <div class="log-list" id="tasksDone"></div>
+    </div>
+  </div>
+
 </main>
+
+<!-- Work Day Modal -->
+<div class="wo-modal-overlay" id="workLogModal" onclick="if(event.target===this)closeWorkLogModal()">
+  <div class="wo-modal">
+    <div class="wo-modal-title">Log work</div>
+    <div class="wo-modal-sub" id="workLogModalSub"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">
+      <button id="wl-btn-office" onclick="selectWorkLoc('office')"
+        style="padding:12px 6px;border-radius:3px;border:1px solid var(--border);background:var(--surface2);font-family:var(--font-mono);font-size:0.65rem;letter-spacing:0.5px;text-transform:uppercase;color:var(--muted);cursor:pointer;transition:all 0.15s">
+        🏢 Office
+      </button>
+      <button id="wl-btn-home" onclick="selectWorkLoc('home')"
+        style="padding:12px 6px;border-radius:3px;border:1px solid var(--border);background:var(--surface2);font-family:var(--font-mono);font-size:0.65rem;letter-spacing:0.5px;text-transform:uppercase;color:var(--muted);cursor:pointer;transition:all 0.15s">
+        🏠 Home
+      </button>
+    </div>
+    <div class="form-group" style="margin-bottom:12px">
+      <label>Hours worked</label>
+      <input type="number" id="wl-hours" step="0.25" min="0" max="24" placeholder="8" onkeydown="if(event.key==='Enter')saveWorkLog()">
+    </div>
+    <div class="form-group" style="margin-bottom:12px">
+      <label>Note (optional)</label>
+      <input type="text" id="wl-note" placeholder="Half day, offsite…">
+    </div>
+    <div class="wo-modal-footer" style="display:flex;justify-content:space-between;align-items:center">
+      <button id="wl-delete" onclick="deleteWorkLog()" style="background:none;border:1px solid var(--border);color:#ff6b6b;font-family:var(--font-mono);font-size:0.65rem;padding:8px 12px;cursor:pointer;border-radius:2px;display:none">Delete</button>
+      <div style="display:flex;gap:8px;margin-left:auto">
+        <button class="wo-modal-cancel" onclick="closeWorkLogModal()">Cancel</button>
+        <button class="btn" onclick="saveWorkLog()" style="font-size:0.7rem;background:#7c9eff;color:#000">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Task Day Modal -->
+<div class="wo-modal-overlay" id="taskModal" onclick="if(event.target===this)closeTaskModal()">
+  <div class="wo-modal">
+    <div class="wo-modal-title">Add task</div>
+    <div class="wo-modal-sub" id="taskModalSub"></div>
+    <div id="taskModalExisting" style="margin:12px 0"></div>
+    <div class="form-group" style="margin-bottom:12px">
+      <label>Task</label>
+      <input type="text" id="task-title" placeholder="e.g. Dentist appointment" onkeydown="if(event.key==='Enter')saveTaskFromModal()">
+    </div>
+    <div class="wo-modal-footer">
+      <button class="wo-modal-cancel" onclick="closeTaskModal()">Close</button>
+      <button class="btn" onclick="saveTaskFromModal()" style="font-size:0.7rem;background:#ffd54f;color:#000">Add</button>
+    </div>
+  </div>
+</div>
 
 <!-- Alcohol Day Modal -->
 <div class="wo-modal-overlay" id="alcoholModal" onclick="if(event.target===this)closeAlcoholModal()">
@@ -902,6 +1023,9 @@
   <div class="lightbox-info" id="lightboxInfo"></div>
 </div>
 
+<!-- Auto-log queue (written by scheduled email watcher; safe if missing) -->
+<script src="queue.js" onerror="window.SELFOS_QUEUE=window.SELFOS_QUEUE||[]"></script>
+
 <script>
 // ======================= STORAGE =======================
 const DB = {
@@ -910,12 +1034,12 @@ const DB = {
 };
 
 // ======================= EXPORT / IMPORT =======================
-const DB_KEYS = ['weight','workout','alcohol','work','hobby','tweeter','photos'];
+const DB_KEYS = ['weight','workout','alcohol','work','hobby','tweeter','tasks','worklog','photos'];
 
 function exportData() {
   localStorage.setItem('selfos_lastexport', Date.now().toString());
   const out = {};
-  const exportKeys = ['weight','workout','alcohol','work','hobby','tweeter'];
+  const exportKeys = ['weight','workout','alcohol','work','hobby','tweeter','tasks','worklog'];
   exportKeys.forEach(k => { out[k] = DB.get(k); });
   out.weight = out.weight.map(e => { const c = {...e}; delete c.photo; return c; });
   out._pin = localStorage.getItem('selfos_photopin') || '';
@@ -973,12 +1097,12 @@ function doImport() {
   const text = document.getElementById('importPasteArea').value.trim();
   try {
     const data = JSON.parse(text);
-    const exportKeys = ['weight','workout','alcohol','work','hobby','tweeter'];
+    const exportKeys = ['weight','workout','alcohol','work','hobby','tweeter','tasks','worklog'];
     exportKeys.forEach(k => { if (data[k] !== undefined) DB.set(k, data[k]); });
     if (data._pin) localStorage.setItem('selfos_photopin', data._pin);
     if (data._chores) localStorage.setItem('selfos_chores', data._chores);
     document.getElementById('importModal').remove();
-    renderWeight(); renderWorkout(); renderAlcohol(); renderWork(); renderTweeter();
+    renderWeight(); renderWorkout(); renderAlcohol(); renderWork(); renderTweeter(); renderTasks(); renderWorkLog(); renderChores();
     applyPhotoLockState();
     showToast('Import successful!');
   } catch(err) {
@@ -988,7 +1112,7 @@ function doImport() {
 
 function showQRModal() {
   const out = {};
-  const exportKeys = ['weight','workout','alcohol','work','hobby','tweeter'];
+  const exportKeys = ['weight','workout','alcohol','work','hobby','tweeter','tasks','worklog'];
   exportKeys.forEach(k => { out[k] = DB.get(k); });
   out.weight = out.weight.map(e => { const c = {...e}; delete c.photo; return c; });
   out._pin = localStorage.getItem('selfos_photopin') || '';
@@ -1040,7 +1164,8 @@ function showToast(msg) {
 }
 
 // ======================= UTILS =======================
-const today = () => new Date().toISOString().slice(0, 10);
+// Local calendar date (NOT toISOString — that returns UTC and rolls over early in UTC+ timezones)
+const today = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; };
 const todayDMY = () => { const d = new Date(); return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`; };
 const fmtDate = (d) => { const dt = new Date(d + 'T00:00:00'); const dd = String(dt.getDate()).padStart(2,'0'); const mm = String(dt.getMonth()+1).padStart(2,'0'); const yyyy = dt.getFullYear(); return `${dd}/${mm}/${yyyy}`; };
 // Parse dd/mm/yyyy → yyyy-mm-dd (for storage)
@@ -1052,7 +1177,7 @@ function autoDate(e) {
   if (v.length > 5) v = v.slice(0,5) + '/' + v.slice(5,9);
   e.target.value = v;
 }
-const genId = () => Date.now().toString(36);
+const genId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 
 function setHeaderDate() {
   const d = new Date();
@@ -1187,7 +1312,7 @@ function handlePinComplete() {
 
 function applyNavLockState() {
   const more = document.getElementById('nav-more');
-  const lockedBtns = ['nav-weight','nav-alcohol','nav-tweeter','nav-lockbtn'];
+  const lockedBtns = ['nav-weight','nav-alcohol','nav-tweeter','nav-tracking','nav-lockbtn'];
   if (navUnlocked) {
     lockedBtns.forEach(id => { document.getElementById(id).style.display = 'flex'; });
     more.style.display = 'none';
@@ -1305,8 +1430,27 @@ function setWFilter(f) {
   renderWeight();
 }
 
+// Chart.js comes from a CDN. If it didn't load (offline / blocked), show a placeholder
+// instead of throwing — a charting failure must never take down the rest of the app.
+function chartUnavailable(canvasId) {
+  if (typeof Chart !== 'undefined') return false;
+  const c = document.getElementById(canvasId);
+  if (c && c.parentElement && !c.parentElement.querySelector('.chart-offline')) {
+    const n = document.createElement('div');
+    n.className = 'chart-offline';
+    n.style.cssText = 'font-size:0.6rem;color:var(--muted);letter-spacing:0.5px;text-align:center;padding:18px 8px';
+    n.textContent = '📉 Chart unavailable — Chart.js could not load (offline?)';
+    c.style.display = 'none';
+    c.parentElement.appendChild(n);
+  }
+  return true;
+}
+
 function initWeightChart(data) {
-  const ctx = document.getElementById('weightChart').getContext('2d');
+  if (chartUnavailable('weightChart')) return;
+  const el = document.getElementById('weightChart');
+  if (!el) return;
+  const ctx = el.getContext('2d');
   const filtered = data.filter(d => weightChartMode === 'waist' ? d.waist : d.weight).slice(-30);
   if (weightChart) weightChart.destroy();
   const color = weightChartMode === 'waist' ? '#d4a0ff' : '#c8f135';
@@ -1829,6 +1973,7 @@ function selectResearchType(key) {
 }
 
 function initWorkChart(data) {
+  if (chartUnavailable('workChart')) return;
   const ctx = document.getElementById('workChart');
   if (!ctx) return;
   const now = new Date();
@@ -2336,6 +2481,37 @@ function renderTweeterCalendar(data) {
   `;
 }
 
+// ---- Auto-log queue: merges entries dropped in queue.js by the email watcher ----
+// Queue item: { id, date:'YYYY-MM-DD', slot:'morning'|'noon'|'evening', note?:'' }
+// Each id is processed once, so unchecking a slot by hand sticks.
+function processTweeterQueue() {
+  const q = window.SELFOS_QUEUE;
+  if (!Array.isArray(q) || !q.length) return;
+  const seen = JSON.parse(localStorage.getItem('selfos_queue_seen') || '[]');
+  const seenSet = new Set(seen);
+  const data = DB.get('tweeter');
+  let changed = false;
+
+  q.forEach(item => {
+    if (!item || !item.id || !item.date || seenSet.has(item.id)) return;
+    if (!TW_SLOTS.includes(item.slot)) return;
+    let e = data.find(x => x.date === item.date);
+    if (!e) {
+      e = { id: genId(), date: item.date, morning: false, noon: false, evening: false, note: '' };
+      data.push(e);
+    }
+    e[item.slot] = true;
+    if (item.note) e.note = e.note ? (e.note + ' | ' + item.note) : item.note;
+    seenSet.add(item.id);
+    changed = true;
+  });
+
+  if (changed) {
+    DB.set('tweeter', data);
+    localStorage.setItem('selfos_queue_seen', JSON.stringify([...seenSet].slice(-2000)));
+  }
+}
+
 function renderTweeter() {
   const data = DB.get('tweeter');
   const sorted = [...data].sort((a, b) => a.date > b.date ? 1 : -1);
@@ -2429,8 +2605,95 @@ function delTweeter(btn) {
   renderTweeter();
 }
 
+// ======================= DAILY BRIEF =======================
+// Single source of truth for the daily summary. Returns plain data so the same
+// numbers can be rendered in-app or read out by an external notifier.
+function buildDailyBrief() {
+  const t = today();
+
+  // 1. Last trained, per session type
+  const workouts = DB.get('workout');
+  const lastTrained = WO_TYPES.map(type => {
+    const matches = workouts.filter(w => w.type === type.key && w.date <= t);
+    if (!matches.length) return { key: type.key, label: type.label, color: type.color, date: null, days: null };
+    const last = matches.reduce((a, b) => (a.date > b.date ? a : b));
+    return { key: type.key, label: type.label, color: type.color, date: last.date, days: daysAgo(last.date) };
+  });
+
+  // 2 & 3. Overdue and due-soon, merging calendar tasks with recurring chores
+  const b = taskBuckets();
+  const overdue = [
+    ...b.overdue.map(x => ({ kind: 'task',  label: x.title, date: x.date, lateBy: daysAgo(x.date) })),
+    ...CHORES_DEF.filter(c => daysUntilDue(c) < 0)
+                 .map(c => ({ kind: 'chore', label: c.label, date: null, lateBy: -daysUntilDue(c) })),
+  ].sort((a, b2) => b2.lateBy - a.lateBy);
+
+  const soon = [
+    ...b.soon.map(x => ({ kind: 'task',  label: x.title, date: x.date, inDays: -daysAgo(x.date) })),
+    ...CHORES_DEF.filter(c => { const d = daysUntilDue(c); return d >= 0 && d <= 3; })
+                 .map(c => ({ kind: 'chore', label: c.label, date: null, inDays: daysUntilDue(c) })),
+  ].sort((a, b2) => a.inDays - b2.inDays);
+
+  // 4. Did yesterday's work day go unlogged?
+  // Only fires when yesterday was Sun–Thu, which naturally limits this to Mon–Fri.
+  const y = addDays(t, -1);
+  const workMissing = (isWorkDay(y) && !getWorkLog(y)) ? y : null;
+
+  return { date: t, lastTrained, overdue, soon, workMissing };
+}
+
+function renderDailyBrief() {
+  const br = buildDailyBrief();
+  const el = document.getElementById('dailyBrief');
+  if (!el) return;
+
+  const trainedRows = br.lastTrained.map(x => {
+    const txt = x.days === null ? 'never' : (x.days === 0 ? 'today' : `${x.days}d ago`);
+    const stale = x.days === null || x.days >= 7;
+    return `<div style="display:flex;align-items:center;gap:6px;font-size:0.62rem;padding:3px 0">
+      <span style="display:inline-block;width:7px;height:7px;border-radius:2px;background:${x.color};flex:none"></span>
+      <span style="flex:1;color:var(--muted)">${x.label}</span>
+      <span style="font-weight:700;color:${stale ? '#ff6b6b' : 'var(--text)'}">${txt}</span>
+    </div>`;
+  }).join('');
+
+  const itemRows = (list, tone, fmtRight) => list.length
+    ? list.map(x => `<div style="display:flex;align-items:baseline;gap:6px;font-size:0.62rem;padding:3px 0">
+        <span style="flex:none;opacity:0.7">${x.kind === 'chore' ? '🔁' : '📌'}</span>
+        <span style="flex:1">${escapeHtml(x.label)}${x.date ? ` <span style="color:var(--muted)">· ${fmtDate(x.date)}</span>` : ''}</span>
+        <span style="font-weight:700;color:${tone};flex:none">${fmtRight(x)}</span>
+      </div>`).join('')
+    : `<div style="font-size:0.6rem;color:var(--muted);letter-spacing:0.5px;padding:3px 0">Nothing — you're clear.</div>`;
+
+  el.innerHTML = `
+    <div class="card" style="border-color:rgba(255,213,79,0.25);margin-bottom:16px">
+      <div class="card-label">📣 Daily brief</div>
+
+      ${br.workMissing ? `
+      <div onclick="switchTab('work');openWorkLogModal('${br.workMissing}')"
+        style="margin:10px 0 2px;background:rgba(124,158,255,0.1);border:1px solid #7c9eff;border-radius:3px;padding:9px 12px;font-size:0.63rem;color:#7c9eff;letter-spacing:0.3px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px">
+        <span>💼 You didn't log work yesterday (${fmtDate(br.workMissing)})</span>
+        <span style="font-weight:700;flex:none">Log it →</span>
+      </div>` : ''}
+
+      <div style="font-size:0.55rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin:10px 0 4px">🏋 Last trained</div>
+      ${trainedRows}
+
+      <div style="font-size:0.55rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin:14px 0 4px">
+        ⚠ Overdue${br.overdue.length ? ` <span style="color:#ff6b6b">(${br.overdue.length})</span>` : ''}
+      </div>
+      ${itemRows(br.overdue, '#ff6b6b', x => `${x.lateBy}d late`)}
+
+      <div style="font-size:0.55rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin:14px 0 4px">
+        📅 Next 3 days${br.soon.length ? ` <span style="color:${TASK_COLOR}">(${br.soon.length})</span>` : ''}
+      </div>
+      ${itemRows(br.soon, TASK_COLOR, x => x.inDays === 0 ? 'today' : `in ${x.inDays}d`)}
+    </div>`;
+}
+
 // ======================= TODAY DASHBOARD =======================
 function renderToday() {
+  renderDailyBrief();
   const todayStr = today();
   const d = new Date();
   document.getElementById('todaySubtitle').textContent = d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
@@ -2478,6 +2741,339 @@ function renderToday() {
 
   // Chores due today
   renderChoresDueToday();
+}
+
+// ======================= WORK LOG (Sun–Thu hours + office/home) =======================
+// Entry: { id, date:'YYYY-MM-DD', hours:Number, location:'office'|'home', note:'' }
+const WORK_LOCS = {
+  office: { label: '🏢 Office', short: 'Office', color: '#7c9eff' },
+  home:   { label: '🏠 Home',   short: 'Home',   color: '#a5d6a7' },
+};
+const WORK_DAY_NAMES = ['Sun','Mon','Tue','Wed','Thu'];   // getDay() 0..4
+const WORK_WEEKS_SHOWN = 6;
+
+let workWeekOffset = 0;      // 0 = window ending this week
+let workLogModalDate = null;
+let selectedWorkLoc = null;
+
+// Sun–Thu only. getDay(): 0=Sun … 6=Sat
+function isWorkDay(dateStr) {
+  const p = dateStr.split('-').map(Number);
+  return new Date(p[0], p[1] - 1, p[2]).getDay() <= 4;
+}
+
+// Sunday that starts the week containing dateStr
+function weekStartSunday(dateStr) {
+  const p = dateStr.split('-').map(Number);
+  const d = new Date(p[0], p[1] - 1, p[2]);
+  return addDays(dateStr, -d.getDay());
+}
+
+function getWorkLog(dateStr) { return DB.get('worklog').find(w => w.date === dateStr) || null; }
+
+function workWeekShift(n) { workWeekOffset += n; renderWorkLog(); }
+
+function selectWorkLoc(key) {
+  selectedWorkLoc = key;
+  Object.keys(WORK_LOCS).forEach(k => {
+    const btn = document.getElementById('wl-btn-' + k);
+    const on = k === key;
+    btn.style.background = on ? WORK_LOCS[k].color : 'var(--surface2)';
+    btn.style.borderColor = on ? WORK_LOCS[k].color : 'var(--border)';
+    btn.style.color = on ? '#000' : 'var(--muted)';
+    btn.style.fontWeight = on ? '700' : '400';
+  });
+}
+
+function openWorkLogModal(dateStr) {
+  workLogModalDate = dateStr;
+  const existing = getWorkLog(dateStr);
+  const d = new Date(dateStr + 'T00:00:00');
+  document.getElementById('workLogModalSub').textContent =
+    d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  document.getElementById('wl-hours').value = existing ? existing.hours : '';
+  document.getElementById('wl-note').value = existing ? (existing.note || '') : '';
+  document.getElementById('wl-delete').style.display = existing ? 'block' : 'none';
+  selectedWorkLoc = null;
+  Object.keys(WORK_LOCS).forEach(k => {
+    const btn = document.getElementById('wl-btn-' + k);
+    btn.style.background = 'var(--surface2)';
+    btn.style.borderColor = 'var(--border)';
+    btn.style.color = 'var(--muted)';
+    btn.style.fontWeight = '400';
+  });
+  if (existing) selectWorkLoc(existing.location);
+  document.getElementById('workLogModal').classList.add('open');
+}
+
+function closeWorkLogModal() {
+  document.getElementById('workLogModal').classList.remove('open');
+  workLogModalDate = null;
+  selectedWorkLoc = null;
+}
+
+function saveWorkLog() {
+  if (!workLogModalDate) return;
+  if (!selectedWorkLoc) return showToast('Pick Office or Home first');
+  const hours = parseFloat(document.getElementById('wl-hours').value);
+  if (!(hours > 0)) return showToast('Enter the hours you worked');
+
+  const data = DB.get('worklog');
+  const idx = data.findIndex(w => w.date === workLogModalDate);
+  const entry = {
+    id: idx >= 0 ? data[idx].id : genId(),
+    date: workLogModalDate,
+    hours,
+    location: selectedWorkLoc,
+    note: document.getElementById('wl-note').value.trim(),
+  };
+  if (idx >= 0) data[idx] = entry; else data.push(entry);
+  DB.set('worklog', data);
+  closeWorkLogModal();
+  renderWorkLog();
+  renderToday();
+  showToast('Work logged');
+}
+
+function deleteWorkLog() {
+  if (!workLogModalDate) return;
+  DB.set('worklog', DB.get('worklog').filter(w => w.date !== workLogModalDate));
+  closeWorkLogModal();
+  renderWorkLog();
+  renderToday();
+}
+
+function renderWorkLogCalendar() {
+  const t = today();
+  // Window of WORK_WEEKS_SHOWN weeks ending with the week containing today
+  const thisSunday = weekStartSunday(t);
+  const firstSunday = addDays(thisSunday, (workWeekOffset - (WORK_WEEKS_SHOWN - 1)) * 7);
+  const byDate = {};
+  DB.get('worklog').forEach(w => { byDate[w.date] = w; });
+
+  const lastThu = addDays(firstSunday, (WORK_WEEKS_SHOWN - 1) * 7 + 4);
+  document.getElementById('workRangeLabel').textContent = `${fmtDate(firstSunday)} — ${fmtDate(lastThu)}`;
+
+  let html = '<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:4px">';
+  html += WORK_DAY_NAMES.map(n => `<div style="font-size:0.5rem;color:var(--muted);text-align:center;padding:2px 0;text-transform:uppercase">${n}</div>`).join('');
+
+  for (let w = 0; w < WORK_WEEKS_SHOWN; w++) {
+    for (let dow = 0; dow < 5; dow++) {
+      const ds = addDays(firstSunday, w * 7 + dow);
+      const e = byDate[ds];
+      const isToday = ds === t;
+      const future = ds > t;
+      const bg = e ? WORK_LOCS[e.location].color : 'var(--surface2)';
+      const fg = e ? '#000' : 'var(--muted)';
+      const border = isToday ? 'var(--accent)' : (e ? WORK_LOCS[e.location].color : 'var(--border)');
+      const dn = Number(ds.slice(8, 10));
+      html += `<div onclick="openWorkLogModal('${ds}')" title="${ds}${e ? ` · ${e.hours}h ${WORK_LOCS[e.location].short}` : ''}"
+        style="aspect-ratio:1;border-radius:3px;border:1px solid ${border};background:${bg};opacity:${future && !e ? 0.35 : 1};
+        display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;
+        font-size:0.6rem;font-weight:700;color:${fg};line-height:1.1">
+        ${dn}${e ? `<span style="font-size:0.48rem;font-weight:400">${e.hours}h</span>` : ''}
+      </div>`;
+    }
+  }
+  html += '</div>';
+  document.getElementById('workLogCalendar').innerHTML = html;
+}
+
+function renderWorkLog() {
+  const t = today();
+  const data = DB.get('worklog');
+  renderWorkLogCalendar();
+
+  const weekStart = weekStartSunday(t);
+  const thisWeek = data.filter(w => w.date >= weekStart && w.date <= t);
+  const weekHours = thisWeek.reduce((s, w) => s + w.hours, 0);
+  const monthPrefix = t.slice(0, 7);
+  const thisMonth = data.filter(w => w.date.slice(0, 7) === monthPrefix);
+  const monthHours = thisMonth.reduce((s, w) => s + w.hours, 0);
+  const office = thisMonth.filter(w => w.location === 'office').length;
+  const home = thisMonth.filter(w => w.location === 'home').length;
+
+  document.getElementById('workLogStats').innerHTML = `
+    <div class="stat-chip"><div class="val" style="color:#7c9eff">${weekHours.toFixed(1)}h</div><div class="lbl">This week</div></div>
+    <div class="stat-chip"><div class="val">${monthHours.toFixed(1)}h</div><div class="lbl">This month</div></div>
+    <div class="stat-chip"><div class="val" style="font-size:1rem">${office}<span style="color:var(--muted)">🏢</span> ${home}<span style="color:var(--muted)">🏠</span></div><div class="lbl">Days this month</div></div>
+  `;
+
+  const sorted = [...data].sort((a, b) => a.date > b.date ? -1 : 1).slice(0, 40);
+  const list = document.getElementById('workLogList');
+  list.innerHTML = sorted.length ? sorted.map(w => `
+    <div class="log-item">
+      <div class="log-main">
+        <span class="log-tag" style="background:${WORK_LOCS[w.location].color};color:#000">${WORK_LOCS[w.location].short}</span>
+        <span style="margin-left:8px;font-weight:700">${w.hours}h</span>
+        ${w.note ? `<span style="color:var(--muted);margin-left:8px">${escapeHtml(w.note)}</span>` : ''}
+      </div>
+      <div class="log-date">${fmtDate(w.date)}</div>
+      <button class="btn-ghost" onclick="openWorkLogModal('${w.date}')">✎</button>
+    </div>`).join('') : '<div class="empty">No work days logged yet.</div>';
+}
+
+// ======================= TASKS (dated calendar to-dos) =======================
+// Entry: { id, date:'YYYY-MM-DD', title, done:false, doneDate:'' }
+const TASK_COLOR = '#ffd54f';
+let taskMonthOffset = 0;     // 0 = current month
+let taskModalDate = null;
+
+const addDays = (dateStr, n) => {
+  const p = dateStr.split('-').map(Number);
+  const d = new Date(p[0], p[1] - 1, p[2] + n);
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+};
+
+function taskMonthShift(n) { taskMonthOffset += n; renderTasks(); }
+
+function openTaskModal(dateStr) {
+  taskModalDate = dateStr;
+  document.getElementById('taskModalSub').textContent = fmtDate(dateStr);
+  document.getElementById('task-title').value = '';
+
+  const existing = DB.get('tasks').filter(t => t.date === dateStr);
+  document.getElementById('taskModalExisting').innerHTML = existing.length
+    ? existing.map(t => `
+        <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border)">
+          <input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleTaskDone('${t.id}')" style="cursor:pointer">
+          <span style="flex:1;font-size:0.7rem;${t.done ? 'text-decoration:line-through;color:var(--muted)' : ''}">${escapeHtml(t.title)}</span>
+          <button onclick="delTaskById('${t.id}')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:0.7rem">✕</button>
+        </div>`).join('')
+    : '<div style="font-size:0.6rem;color:var(--muted);letter-spacing:0.5px">Nothing scheduled for this day yet.</div>';
+
+  document.getElementById('taskModal').classList.add('open');
+  setTimeout(() => document.getElementById('task-title').focus(), 50);
+}
+
+function closeTaskModal() {
+  document.getElementById('taskModal').classList.remove('open');
+  taskModalDate = null;
+}
+
+function saveTaskFromModal() {
+  const title = document.getElementById('task-title').value.trim();
+  if (!taskModalDate || !title) return;
+  const data = DB.get('tasks');
+  data.push({ id: genId(), date: taskModalDate, title, done: false, doneDate: '' });
+  DB.set('tasks', data);
+  document.getElementById('task-title').value = '';
+  openTaskModal(taskModalDate);   // refresh the in-modal list
+  renderTasks();
+  renderToday();
+  showToast('Task added');
+}
+
+function toggleTaskDone(id) {
+  const data = DB.get('tasks');
+  const t = data.find(x => x.id === id);
+  if (!t) return;
+  t.done = !t.done;
+  t.doneDate = t.done ? today() : '';
+  DB.set('tasks', data);
+  if (taskModalDate) openTaskModal(taskModalDate);
+  renderTasks();
+  renderToday();
+}
+
+function delTaskById(id) {
+  DB.set('tasks', DB.get('tasks').filter(t => t.id !== id));
+  if (taskModalDate) openTaskModal(taskModalDate);
+  renderTasks();
+  renderToday();
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+}
+
+// Buckets used by both the Tasks tab and the Daily Brief
+function taskBuckets() {
+  const t = today();
+  const soonEnd = addDays(t, 3);
+  const all = DB.get('tasks');
+  return {
+    overdue: all.filter(x => !x.done && x.date < t).sort((a,b) => a.date < b.date ? -1 : 1),
+    soon:    all.filter(x => !x.done && x.date >= t && x.date <= soonEnd).sort((a,b) => a.date < b.date ? -1 : 1),
+    later:   all.filter(x => !x.done && x.date > soonEnd).sort((a,b) => a.date < b.date ? -1 : 1),
+    done:    all.filter(x => x.done).sort((a,b) => a.date > b.date ? -1 : 1),
+  };
+}
+
+function renderTaskCalendar() {
+  const t = today();
+  const base = new Date();
+  base.setDate(1);
+  base.setMonth(base.getMonth() + taskMonthOffset);
+  const year = base.getFullYear(), month = base.getMonth();
+
+  document.getElementById('taskMonthLabel').textContent =
+    base.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const offset = new Date(year, month, 1).getDay();
+  const dayNames = ['Su','Mo','Tu','We','Th','Fr','Sa'];
+
+  const byDate = {};
+  DB.get('tasks').forEach(x => { (byDate[x.date] = byDate[x.date] || []).push(x); });
+
+  let html = '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px">';
+  html += dayNames.map(d => `<div style="font-size:0.5rem;color:var(--muted);text-align:center;padding:2px 0;text-transform:uppercase">${d}</div>`).join('');
+  for (let i = 0; i < offset; i++) html += '<div></div>';
+
+  for (let dn = 1; dn <= daysInMonth; dn++) {
+    const ds = `${year}-${String(month+1).padStart(2,'0')}-${String(dn).padStart(2,'0')}`;
+    const items = byDate[ds] || [];
+    const open = items.filter(x => !x.done);
+    const isToday = ds === t;
+    let bg = 'var(--surface2)', fg = 'var(--muted)', border = 'var(--border)';
+    if (items.length && !open.length)      { bg = '#5ee7c8'; fg = '#000'; border = '#5ee7c8'; }
+    else if (open.length && ds < t)        { bg = '#ff6b6b'; fg = '#000'; border = '#ff6b6b'; }
+    else if (open.length)                  { bg = TASK_COLOR; fg = '#000'; border = TASK_COLOR; }
+    if (isToday) border = 'var(--accent)';
+
+    html += `<div onclick="openTaskModal('${ds}')" title="${items.length ? escapeHtml(items.map(x=>x.title).join(', ')) : ''}"
+      style="aspect-ratio:1;border-radius:3px;border:1px solid ${border};background:${bg};
+      display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;
+      font-size:0.62rem;font-weight:700;color:${fg};line-height:1;position:relative"
+      >${dn}${items.length ? `<span style="font-size:0.45rem;font-weight:400;margin-top:2px">${open.length ? open.length : '✓'}</span>` : ''}</div>`;
+  }
+  html += '</div>';
+  document.getElementById('taskCalendar').innerHTML = html;
+}
+
+function taskRow(x) {
+  const t = today();
+  const late = !x.done && x.date < t;
+  const when = x.date === t ? 'today' : (late ? `${daysAgo(x.date)}d late` : `in ${-daysAgo(x.date)}d`);
+  return `
+    <div class="log-item">
+      <div class="log-main" style="display:flex;align-items:center;gap:8px">
+        <input type="checkbox" ${x.done ? 'checked' : ''} onchange="toggleTaskDone('${x.id}')" style="cursor:pointer">
+        <span style="${x.done ? 'text-decoration:line-through;color:var(--muted)' : ''}">${escapeHtml(x.title)}</span>
+      </div>
+      <div class="log-date">${fmtDate(x.date)}${x.done ? '' : ` · <span style="color:${late ? '#ff6b6b' : 'var(--muted)'}">${when}</span>`}</div>
+      <button class="btn-ghost" onclick="delTaskById('${x.id}')">✕</button>
+    </div>`;
+}
+
+function renderTasks() {
+  const b = taskBuckets();
+  renderTaskCalendar();
+
+  document.getElementById('tasksStats').innerHTML = `
+    <div class="stat-chip"><div class="val" style="color:${b.overdue.length ? '#ff6b6b' : 'var(--muted)'}">${b.overdue.length}</div><div class="lbl">Overdue</div></div>
+    <div class="stat-chip"><div class="val" style="color:${TASK_COLOR}">${b.soon.length}</div><div class="lbl">Next 3 days</div></div>
+    <div class="stat-chip"><div class="val">${b.later.length}</div><div class="lbl">Later</div></div>
+  `;
+
+  const fill = (id, list, empty) => {
+    document.getElementById(id).innerHTML = list.length ? list.map(taskRow).join('') : `<div class="empty">${empty}</div>`;
+  };
+  fill('tasksOverdue', b.overdue, 'Nothing overdue. 🎉');
+  fill('tasksSoon',    b.soon,    'Nothing due in the next 3 days.');
+  fill('tasksLater',   b.later,   'Nothing scheduled further out.');
+  fill('tasksDone',    b.done.slice(0, 30), 'No completed tasks yet.');
 }
 
 // ======================= CHORES =======================
@@ -2644,14 +3240,15 @@ const PLAN_DAYS = [
     sub: 'Mon · Week A · pair with Day 3 Bulgarian',
     note: 'Heavy squat week. Keep 1–3 RIR; no grinding. Use in the same week as Day 3 Opt 1 (Bulgarian).',
     exercises: [
-      { name: 'Barbell Squat ★', sets: '2 sets: 3, 6-8', muscle: 'Quads, Glutes', notes: 'Heavy top set + back-off. e.g. 150×3, then 125–130×6–8. No grinding.' },
-      { name: 'Machine Chest Press', sets: '3 × 8-10', muscle: 'Chest', notes: 'Current 140×7×3 (max 155). Progress by reps before load.' },
+      { name: 'Barbell Squat ★', sets: '3 sets: 3, 8, 10', muscle: 'Quads, Glutes', notes: '150×3, 125×8, 105–110×10. Heavy top set then two back-offs. No grinding.' },
+      { name: 'Machine Chest Press', sets: '3 × 8-10', muscle: 'Chest', notes: 'Progress reps before load: 140×7×3 → 8 → 9 → 10, then add weight and drop back to 7-8.' },
       { name: 'Chest-Supported Row', sets: '3 × 8-12', muscle: 'Back (Mid/Lats)', notes: 'Saves lower-back fatigue.' },
-      { name: 'Neutral / Narrow Pulldown', sets: '2 × 10-12', muscle: 'Back (Lats)', notes: 'Extra lat volume without lower-back fatigue.' },
+      { name: 'Neutral / Narrow Pulldown', sets: '2 × 10-12', muscle: 'Back (Lats)', notes: 'Pulldown is Day 1 & Day 2 only — Day 3 uses a cable pullover instead.' },
       { name: 'Leg Curl', sets: '3 × 10-12', muscle: 'Hamstrings', notes: 'Seated or lying. Controlled eccentric.' },
-      { name: 'DB Overhead Press', sets: '2 × 8-10', muscle: 'Shoulders (Front/Side)', notes: 'Moderate, not max effort.' },
+      { name: 'DB Overhead Press', sets: '2 × 8-10', muscle: 'Shoulders (Front/Side)', notes: 'Keep moderate. Avoid repeated 0-RIR work. Progress reps first, then load.' },
       { name: 'Standing / Seated Calf Raise', sets: '2 × 12-20', muscle: 'Calves', notes: 'Pause/stretch at the bottom.' },
       { name: 'Rope Tricep Ext. + Hammer Curl (SS)', sets: '3 supersets × 12-15', muscle: 'Triceps / Biceps', notes: 'Minimal rest within; rest after each superset.' },
+      { name: 'Farmer Walk', sets: '2-3 × 25-50 steps', muscle: 'Trunk, Grip, Upper Back', notes: 'Stay tall, ribcage controlled, don\'t let shoulders roll forward. No straps when grip/forearms are the goal; straps fine if grip limits the upper-back stimulus.' },
     ]
   },
   {
@@ -2661,13 +3258,14 @@ const PLAN_DAYS = [
     note: 'Easier/volume squat week. Leave more in the tank. Use in the same week as Day 3 Opt 2 (Leg Press).',
     exercises: [
       { name: 'Barbell Squat ★', sets: '2 sets: 6-8, 8', muscle: 'Quads, Glutes', notes: 'Easier than heavy week. e.g. 130–135×6–8, then 125×8. Keep reps clean.' },
-      { name: 'Machine Chest Press', sets: '3 × 8-10', muscle: 'Chest', notes: 'Same progression as Opt 1.' },
+      { name: 'Machine Chest Press', sets: '3 × 8-10', muscle: 'Chest', notes: 'Same progression as Opt 1 — reps before load.' },
       { name: 'Chest-Supported Row', sets: '3 × 8-12', muscle: 'Back (Mid/Lats)', notes: 'Controlled reps.' },
-      { name: 'Neutral / Narrow Pulldown', sets: '2 × 10-12', muscle: 'Back (Lats)', notes: 'Extra lat volume.' },
+      { name: 'Neutral / Narrow Pulldown', sets: '2 × 10-12', muscle: 'Back (Lats)', notes: 'Pulldown is Day 1 & Day 2 only — Day 3 uses a cable pullover instead.' },
       { name: 'Leg Curl', sets: '3 × 10-12', muscle: 'Hamstrings', notes: 'Controlled eccentric.' },
-      { name: 'DB Overhead Press', sets: '2 × 8-10', muscle: 'Shoulders (Front/Side)', notes: 'Moderate. Do not chase failure.' },
+      { name: 'DB Overhead Press', sets: '2 × 8-10', muscle: 'Shoulders (Front/Side)', notes: 'Keep moderate. Avoid repeated 0-RIR work. Progress reps first, then load.' },
       { name: 'Standing / Seated Calf Raise', sets: '2 × 12-20', muscle: 'Calves', notes: 'Controlled stretch.' },
       { name: 'Rope Tricep Ext. + Hammer Curl (SS)', sets: '3 supersets × 12-15', muscle: 'Triceps / Biceps', notes: 'Keep it strict.' },
+      { name: 'Farmer Walk', sets: '2-3 × 25-50 steps', muscle: 'Trunk, Grip, Upper Back', notes: 'Stay tall, ribcage controlled, don\'t let shoulders roll forward. No straps when grip/forearms are the goal; straps fine if grip limits the upper-back stimulus.' },
     ]
   },
   {
@@ -2675,9 +3273,9 @@ const PLAN_DAYS = [
     color: '#ff6b6b',
     sub: 'Wed · Same every week',
     exercises: [
-      { name: 'Incline Dumbbell Press ★', sets: '3 × 8-10', muscle: 'Chest (Upper)', notes: 'Main upper-chest press.' },
-      { name: 'Neutral / Wide Lat Pulldown', sets: '3 × 8-10', muscle: 'Back (Width)', notes: 'Use neutral if shoulders or elbows feel sensitive.' },
-      { name: 'Barbell Row', sets: '2 × 6-10', muscle: 'Back (Mid)', notes: 'Strict, no lower-back cheating.' },
+      { name: 'Incline Dumbbell Press ★', sets: '3 × 8-10', muscle: 'Chest (Upper)', notes: 'Main upper-chest press. If 3×8 gives 8,7,6 — hold the weight until performance improves rather than forcing load.' },
+      { name: 'Neutral / Wide Lat Pulldown', sets: '3 × 8-10', muscle: 'Back (Width)', notes: 'Use neutral if shoulders or elbows feel sensitive. Pulldown is Day 1 & Day 2 only.' },
+      { name: 'Chest-Supported Row / Seated Row', sets: '2 × 8-12', muscle: 'Back (Mid)', notes: 'Supported row preferred over unsupported barbell row — less unnecessary lower-back fatigue.' },
       { name: 'Cable Lateral Raise', sets: '3 × 15-20', muscle: 'Side Delts', notes: 'Only lateral-raise slot of the week.' },
       { name: 'Face Pull', sets: '3 × 15-20', muscle: 'Rear Delts, Upper Back', notes: 'Rear delts / upper back / shoulder health.' },
       { name: 'Cable Fly', sets: '3 × 12-15', muscle: 'Chest', notes: 'Low-fatigue chest volume.' },
@@ -2693,14 +3291,14 @@ const PLAN_DAYS = [
     sub: 'Fri · Week A · pair with Day 1 Heavy',
     note: 'Bulgarian week. Don’t grind RDL. Use in the same week as Day 1 Opt 1.',
     exercises: [
-      { name: 'Barbell RDL ★', sets: '2 sets: 7, 10', muscle: 'Hamstrings, Glutes', notes: 'e.g. 150×7, then ~130×10. Do not grind.' },
-      { name: 'Bulgarian Split Squat', sets: '2 × 8-10 / leg', muscle: 'Quads, Glutes', notes: 'Heavy movement. Rest 90–150 sec.' },
+      { name: 'Barbell RDL ★', sets: '2 sets: 6, 10', muscle: 'Hamstrings, Glutes', notes: '150×6, then 120×10. Do not grind.' },
+      { name: 'Bulgarian Split Squat', sets: '2 × 8-10 / leg', muscle: 'Quads, Glutes', notes: 'Heavy movement. Rest 90–150 sec. Keep 1–3 RIR.' },
       { name: 'Hip Thrust (optional)', sets: '1-2 × 10-12', muscle: 'Glutes', notes: 'Optional glute add-on. Keep 1–2 RIR.' },
       { name: 'Leg Extension', sets: '3 × 12-15', muscle: 'Quads', notes: 'Quad volume with low systemic fatigue.' },
       { name: 'Seated Calf Raise', sets: '4 × 12-15', muscle: 'Calves (Soleus)', notes: '2-second stretch at the bottom.' },
       { name: 'Cable Crunch', sets: '4 × 15-20', muscle: 'Abs', notes: 'Round the back; do not pull with arms/neck.' },
       { name: 'Cable Fly', sets: '3 × 12-15', muscle: 'Chest', notes: 'Extra chest pump, low fatigue.' },
-      { name: 'Cable Pullover / Narrow Pulldown', sets: '3 × 12-15', muscle: 'Back (Lats)', notes: 'Extra lat volume. Controlled stretch.' },
+      { name: 'Cable Pullover', sets: '3 × 12-15', muscle: 'Back (Lats)', notes: 'Pullover, not another pulldown. Controlled stretch.' },
       { name: 'Reverse Pec Deck / Rear-Delt Fly', sets: '3 × 15-20', muscle: 'Rear Delts, Upper Back', notes: 'Replaces Day 3 lateral raise. Rear-delt focus.' },
     ]
   },
@@ -2710,14 +3308,14 @@ const PLAN_DAYS = [
     sub: 'Fri · Week B · pair with Day 1 Volume',
     note: 'Leg press week. Don’t grind RDL. Use in the same week as Day 1 Opt 2.',
     exercises: [
-      { name: 'Barbell RDL ★', sets: '2 sets: 7, 10', muscle: 'Hamstrings, Glutes', notes: 'e.g. 150×7, then ~130×10. Do not grind.' },
+      { name: 'Barbell RDL ★', sets: '3 sets: 6, 8, 10', muscle: 'Hamstrings, Glutes', notes: '150×6, 130×8, 110×10. Do not grind.' },
       { name: 'Leg Press', sets: '2-3 × 10-12', muscle: 'Quads, Glutes', notes: 'Main quad/glute work for this version.' },
       { name: 'Hip Thrust (optional)', sets: '2 × 8-12', muscle: 'Glutes', notes: 'More appropriate here than Bulgarian week. Keep 1–2 RIR.' },
       { name: 'Leg Extension', sets: '3 × 12-15', muscle: 'Quads', notes: 'Controlled reps.' },
       { name: 'Seated Calf Raise', sets: '4 × 12-15', muscle: 'Calves (Soleus)', notes: '2-second stretch at the bottom.' },
       { name: 'Cable Crunch', sets: '4 × 15-20', muscle: 'Abs', notes: 'Controlled reps.' },
       { name: 'Cable Fly', sets: '3 × 12-15', muscle: 'Chest', notes: 'Extra chest pump.' },
-      { name: 'Cable Pullover / Narrow Pulldown', sets: '3 × 12-15', muscle: 'Back (Lats)', notes: 'Extra lat volume.' },
+      { name: 'Cable Pullover', sets: '3 × 12-15', muscle: 'Back (Lats)', notes: 'Pullover, not another pulldown. Controlled stretch.' },
       { name: 'Reverse Pec Deck / Rear-Delt Fly', sets: '3 × 15-20', muscle: 'Rear Delts, Upper Back', notes: 'Rear-delt focus.' },
     ]
   },
@@ -2814,20 +3412,81 @@ function setDefaultDates() {
   });
 }
 
-setHeaderDate();
-setDefaultDates();
-initWoTypeGrid();
-initResearchTypeGrid();
-showPlanDay(0);
-renderWeight();
-renderWorkout();
-renderAlcohol();
-renderWork();
-renderTweeter();
-renderToday();
-renderChores();
-applyNavLockState();
-applyPhotoLockState();
+// ======================= BOOT =======================
+// Each step is isolated: if one throws (a missing CDN library, corrupt stored data),
+// the remaining sections still render instead of leaving a blank page.
+// localStorage is scoped per origin: data saved at file:// is invisible to the
+// hosted copy and vice versa. The hosted copy is the source of truth, so warn
+// loudly if this page was opened straight off the disk.
+function warnIfLocalCopy() {
+  if (location.protocol !== 'file:') return;
+  const main = document.querySelector('main');
+  if (!main) return;
+  const b = document.createElement('div');
+  b.style.cssText = 'background:rgba(255,159,67,0.12);border:1px solid var(--accent4);color:var(--accent4);font-family:var(--font-mono);font-size:0.62rem;padding:10px 12px;margin:0 0 14px;border-radius:3px;letter-spacing:0.3px;line-height:1.5';
+  b.innerHTML = '⚠ <b>Local copy.</b> Anything you log here is stored only on this computer and will <b>not</b> appear on the web version. Open the hosted copy instead — that\'s where your data lives.';
+  main.insertBefore(b, main.firstChild);
+}
+
+function boot() {
+  const steps = [
+    ['origin check',   warnIfLocalCopy],
+    ['header date',    setHeaderDate],
+    ['default dates',  setDefaultDates],
+    ['workout types',  initWoTypeGrid],
+    ['research types', initResearchTypeGrid],
+    ['plan',           () => showPlanDay(0)],
+    ['weight',         renderWeight],
+    ['workout',        renderWorkout],
+    ['alcohol',        renderAlcohol],
+    ['tracking',       renderWork],
+    ['tweeter queue',  processTweeterQueue],
+    ['tweeter',        renderTweeter],
+    ['tasks',          renderTasks],
+    ['work log',       renderWorkLog],
+    ['today',          renderToday],
+    ['chores',         renderChores],
+    ['nav lock',       applyNavLockState],
+    ['photo lock',     applyPhotoLockState],
+  ];
+  const failed = [];
+  steps.forEach(([name, fn]) => {
+    try { fn(); } catch (err) { failed.push(name); console.error(`[boot] "${name}" failed:`, err); }
+  });
+  if (failed.length) {
+    const b = document.createElement('div');
+    b.style.cssText = 'background:rgba(255,107,107,0.12);border:1px solid #ff6b6b;color:#ff6b6b;font-family:var(--font-mono);font-size:0.6rem;padding:8px 12px;margin:0 0 12px;border-radius:3px;letter-spacing:0.3px';
+    b.textContent = `⚠ Some sections failed to load: ${failed.join(', ')}. Everything else still works — open the console for details.`;
+    const main = document.querySelector('main');
+    if (main) main.insertBefore(b, main.firstChild);
+  }
+}
+
+boot();
+
+// If the local library files are missing or moved, pull them from the CDN and
+// redraw the charts once they arrive. Nothing else depends on this succeeding.
+function recoverMissingLibs() {
+  const libs = [
+    { global: 'Chart',   url: 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js',
+      after: () => {
+        document.querySelectorAll('.chart-offline').forEach(n => n.remove());
+        ['weightChart','workChart'].forEach(id => { const c = document.getElementById(id); if (c) c.style.display = ''; });
+        try { renderWeight(); renderWork(); } catch (e) { console.error('[libs] redraw failed:', e); }
+      } },
+    { global: 'QRCode',  url: 'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js', after: () => {} },
+  ];
+  libs.forEach(lib => {
+    if (typeof window[lib.global] !== 'undefined') return;
+    const s = document.createElement('script');
+    s.src = lib.url;
+    s.onload = () => { console.warn(`[libs] ${lib.global} loaded from CDN — local copy missing.`); lib.after(); };
+    s.onerror = () => console.warn(`[libs] ${lib.global} unavailable locally and from the CDN. Charts stay disabled.`);
+    document.head.appendChild(s);
+  });
+}
+
+recoverMissingLibs();
 </script>
 </body>
 </html>
