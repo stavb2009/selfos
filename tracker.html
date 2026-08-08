@@ -365,8 +365,21 @@
     <button onclick="exportData()" style="background:none;border:1px solid var(--border);color:var(--muted);font-family:var(--font-mono);font-size:0.55rem;padding:4px 8px;cursor:pointer;border-radius:2px;letter-spacing:1px" title="Export all data">⬇ Export</button>
     <button onclick="showImportModal()" style="background:none;border:1px solid var(--border);color:var(--muted);font-family:var(--font-mono);font-size:0.55rem;padding:4px 8px;cursor:pointer;border-radius:2px;letter-spacing:1px" title="Import data">⬆ Import</button>
     <button onclick="showQRModal()" style="background:none;border:1px solid var(--accent);color:var(--accent);font-family:var(--font-mono);font-size:0.55rem;padding:4px 8px;cursor:pointer;border-radius:2px;letter-spacing:1px" title="Share via QR">⬡ QR</button>
+    <button id="syncBtn" onclick="openSyncModal()" style="background:none;border:1px solid var(--border);color:var(--muted);font-family:var(--font-mono);font-size:0.55rem;padding:4px 8px;cursor:pointer;border-radius:2px;letter-spacing:1px;display:none">🔗 Sync</button>
   </div>
 </header>
+
+<!-- Sync / Login Modal -->
+<div class="wo-modal-overlay" id="syncModal" onclick="if(event.target===this)closeSyncModal()">
+  <div class="wo-modal">
+    <div class="wo-modal-title">🔗 Cross-device sync</div>
+    <div class="wo-modal-sub" id="syncModalSub">Log in once per device to keep phone and desktop in sync</div>
+    <div id="syncModalBody"></div>
+    <div class="wo-modal-footer">
+      <button class="wo-modal-cancel" onclick="closeSyncModal()">Close</button>
+    </div>
+  </div>
+</div>
 
 <nav>
   <button class="nav-btn active" onclick="switchTab('today')" id="nav-today">
@@ -1025,12 +1038,37 @@
 
 <!-- Auto-log queue (written by scheduled email watcher; safe if missing) -->
 <script src="queue.js" onerror="window.SELFOS_QUEUE=window.SELFOS_QUEUE||[]"></script>
+<!-- Cross-device sync (Supabase). Safe if missing: app runs local-only, sync UI just won't appear. -->
+<script src="sync.js"></script>
 
 <script>
 // ======================= STORAGE =======================
 const DB = {
   get: (k) => JSON.parse(localStorage.getItem('selfos_' + k) || '[]'),
-  set: (k, v) => localStorage.setItem('selfos_' + k, JSON.stringify(v)),
+  set: (k, v) => {
+    // Sync bookkeeping, additive and non-blocking: stamp entries that actually changed so a later
+    // merge with another device can tell which copy is newer, and tombstone any id that disappeared
+    // so a delete here doesn't get resurrected by a stale copy synced from elsewhere. A failure here
+    // must never stop the save itself.
+    if (Array.isArray(v)) {
+      try {
+        const prev = JSON.parse(localStorage.getItem('selfos_' + k) || '[]');
+        const prevById = new Map(prev.filter(e => e && e.id).map(e => [e.id, e]));
+        v.forEach(e => {
+          if (!e || !e.id) return;
+          const before = prevById.get(e.id);
+          const strip = x => JSON.stringify({ ...x, _t: undefined });
+          if (!before || strip(before) !== strip(e)) e._t = Date.now();
+          else if (before._t) e._t = before._t;
+        });
+        if (window.SELFOS_SYNC && SELFOS_SYNC.recordTombstone) {
+          const nextIds = new Set(v.map(e => e && e.id));
+          prev.forEach(e => { if (e && e.id && !nextIds.has(e.id)) SELFOS_SYNC.recordTombstone(k, e.id); });
+        }
+      } catch (err) { console.error('[sync] bookkeeping failed (save still proceeds):', err); }
+    }
+    localStorage.setItem('selfos_' + k, JSON.stringify(v));
+  },
 };
 
 // ======================= EXPORT / IMPORT =======================
@@ -1182,6 +1220,92 @@ const genId = () => Date.now().toString(36) + Math.random().toString(36).slice(2
 function setHeaderDate() {
   const d = new Date();
   document.getElementById('headerDate').textContent = d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+// ======================= SYNC (cross-device, via Supabase) =======================
+function syncStatusText() {
+  if (!window.SELFOS_SYNC) return 'Sync unavailable';
+  if (!SELFOS_SYNC.isLoggedIn()) return 'Not signed in';
+  const t = SELFOS_SYNC.lastSyncedAt();
+  if (!t) return 'Signed in — syncing…';
+  const mins = Math.round((Date.now() - t.getTime()) / 60000);
+  if (mins < 1) return 'Synced just now';
+  if (mins < 60) return `Synced ${mins}m ago`;
+  return `Synced ${Math.round(mins / 60)}h ago`;
+}
+
+function updateSyncButton() {
+  const btn = document.getElementById('syncBtn');
+  if (!btn || !window.SELFOS_SYNC) return;
+  btn.style.display = 'block';
+  const loggedIn = SELFOS_SYNC.isLoggedIn();
+  btn.style.borderColor = loggedIn ? '#7c9eff' : 'var(--border)';
+  btn.style.color = loggedIn ? '#7c9eff' : 'var(--muted)';
+  btn.textContent = loggedIn ? '🔗 ' + syncStatusText() : '🔗 Sync';
+}
+
+function openSyncModal() {
+  const body = document.getElementById('syncModalBody');
+  if (!window.SELFOS_SYNC) {
+    body.innerHTML = `<div style="font-size:0.65rem;color:var(--muted)">sync.js didn't load — check your connection and reload.</div>`;
+  } else if (SELFOS_SYNC.isLoggedIn()) {
+    body.innerHTML = `
+      <div style="font-size:0.65rem;color:var(--text);margin-bottom:14px">${syncStatusText()}</div>
+      <div style="display:flex;gap:8px">
+        <button onclick="manualSyncNow()" class="btn" style="font-size:0.65rem;background:#7c9eff;color:#000">Sync now</button>
+        <button onclick="syncLogout()" style="background:none;border:1px solid var(--border);color:var(--muted);font-family:var(--font-mono);font-size:0.65rem;padding:8px 14px;cursor:pointer;border-radius:2px">Sign out</button>
+      </div>`;
+  } else {
+    body.innerHTML = `
+      <div class="form-group" style="margin-bottom:12px">
+        <label>Email</label>
+        <input type="email" id="syncEmail" placeholder="you@example.com" onkeydown="if(event.key==='Enter')sendSyncLoginLink()">
+      </div>
+      <button onclick="sendSyncLoginLink()" class="btn" style="font-size:0.65rem;background:#7c9eff;color:#000">Send login link</button>
+      <div id="syncLoginMsg" style="font-size:0.6rem;color:var(--muted);margin-top:8px"></div>`;
+  }
+  document.getElementById('syncModal').classList.add('open');
+}
+function closeSyncModal() { document.getElementById('syncModal').classList.remove('open'); }
+
+async function sendSyncLoginLink() {
+  const email = document.getElementById('syncEmail').value.trim();
+  const msg = document.getElementById('syncLoginMsg');
+  if (!email) { msg.textContent = 'Enter an email address.'; return; }
+  msg.textContent = 'Sending…';
+  try {
+    await SELFOS_SYNC.requestLogin(email);
+    msg.textContent = `Check ${email} for a login link, then open it on this device.`;
+  } catch (err) {
+    msg.textContent = 'Could not send the link — try again.';
+    console.error('[sync] login request failed:', err);
+  }
+}
+
+async function manualSyncNow() {
+  const r = await SELFOS_SYNC.syncNow();
+  if (r.ok) { refreshAfterSync(); openSyncModal(); showToast('Synced'); }
+  else { showToast('Sync failed: ' + r.reason); }
+  updateSyncButton();
+}
+
+function syncLogout() { SELFOS_SYNC.logout(); updateSyncButton(); openSyncModal(); }
+
+// Re-render every section whose data a sync could have changed. Cheap — these all just re-read localStorage.
+function refreshAfterSync() {
+  try {
+    renderWeight(); renderWorkout(); renderAlcohol(); renderWork(); renderTweeter();
+    renderTasks(); renderWorkLog(); renderToday(); renderChores();
+  } catch (err) { console.error('[sync] refresh after sync failed:', err); }
+}
+
+async function runBackgroundSync() {
+  if (!window.SELFOS_SYNC) return;
+  updateSyncButton();
+  if (!SELFOS_SYNC.isLoggedIn()) return;
+  const r = await SELFOS_SYNC.syncNow();
+  if (r.ok) refreshAfterSync();
+  updateSyncButton();
 }
 
 function switchTab(name) {
@@ -3487,6 +3611,16 @@ function recoverMissingLibs() {
 }
 
 recoverMissingLibs();
+
+// Cross-device sync: pick up magic-link tokens if we just landed from an email click, then sync
+// in the background so first paint is never blocked on the network. Also re-sync periodically and
+// whenever the tab regains focus, so switching phone -> desktop picks up recent changes quickly.
+if (window.SELFOS_SYNC) {
+  SELFOS_SYNC.consumeAuthRedirect();
+  runBackgroundSync();
+  setInterval(runBackgroundSync, 5 * 60 * 1000);
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') runBackgroundSync(); });
+}
 </script>
 </body>
 </html>
